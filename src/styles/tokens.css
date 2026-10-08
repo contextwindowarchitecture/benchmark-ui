@@ -1,0 +1,90 @@
+/*
+ * Token extensions over the generated shadcn stylesheet (DESIGN.md 5; ui-plan.md 7.2). The
+ * generated tokens stay as generated in globals.css; this file adds the status pairs, maps the
+ * status vocabulary onto them, and gives the four adapters their fixed identities.
+ */
+
+:root {
+  /* Semantic pairs beside the generated destructive pair: success, warning, info. */
+  --success: oklch(0.52 0.14 150);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.6 0.14 70);
+  --warning-foreground: oklch(0.145 0 0);
+  --info: oklch(0.52 0.16 250);
+  --info-foreground: oklch(0.985 0 0);
+
+  /*
+   * The status vocabulary, mapped centrally. Outcomes: pass, fail, partial, error. Judgments: info,
+   * na, not run. Change verdicts: baseline, unchanged, changed, regressed. `info` is not `pass`,
+   * `partial` is not `fail`, and not run is muted, never red.
+   */
+  --status-pass: var(--success);
+  --status-fail: var(--destructive);
+  --status-partial: var(--warning);
+  --status-error: var(--destructive);
+  --status-running: var(--info);
+  --status-info: var(--info);
+  --status-na: var(--muted-foreground);
+  --status-not-run: var(--muted-foreground);
+  --status-unavailable: var(--muted-foreground);
+  --status-warning: var(--warning);
+  --status-baseline: var(--muted-foreground);
+  --status-unchanged: var(--success);
+  --status-changed: var(--warning);
+  --status-regressed: var(--destructive);
+
+  /*
+   * The four adapters, in their fixed order: Python, TypeScript, Go, Rust. Each takes one chart
+   * series token, so series colors are never status colors. The generated preset's chart tokens
+   * are greys; these replace the first four with distinct hues that hold in both themes.
+   */
+  --chart-1: oklch(0.5 0.17 290);
+  --chart-2: oklch(0.55 0.11 200);
+  --chart-3: oklch(0.55 0.18 340);
+  --chart-4: oklch(0.6 0.16 45);
+  --adapter-python: var(--chart-1);
+  --adapter-typescript: var(--chart-2);
+  --adapter-go: var(--chart-3);
+  --adapter-rust: var(--chart-4);
+}
+
+.dark {
+  --success: oklch(0.75 0.15 150);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.8 0.14 80);
+  --warning-foreground: oklch(0.145 0 0);
+  --info: oklch(0.72 0.14 250);
+  --info-foreground: oklch(0.145 0 0);
+
+  --chart-1: oklch(0.75 0.15 290);
+  --chart-2: oklch(0.78 0.11 200);
+  --chart-3: oklch(0.75 0.17 340);
+  --chart-4: oklch(0.78 0.15 50);
+}
+
+@theme inline {
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-adapter-python: var(--adapter-python);
+  --color-adapter-typescript: var(--adapter-typescript);
+  --color-adapter-go: var(--adapter-go);
+  --color-adapter-rust: var(--adapter-rust);
+
+  /* Motion tokens (DESIGN.md 3.2). */
+  --duration-fast: 120ms;
+  --duration-standard: 180ms;
+  --duration-emphasis: 280ms;
+}
+
+@layer base {
+  /* Tabular numerals wherever a number sits in a column (DESIGN.md 5). */
+  .tabular,
+  table td,
+  table th {
+    font-variant-numeric: tabular-nums;
+  }
+}
