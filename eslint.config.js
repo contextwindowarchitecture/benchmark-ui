@@ -47,5 +47,13 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
+  {
+    // Plain browser scripts served as files (the pre-paint theme script).
+    files: ["public/**/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: globals.browser,
+    },
+  },
   prettier,
 )
