@@ -19,7 +19,7 @@ import { regionOfDocument } from "@/data/region"
 import type { SuiteSummaryV1, SummaryV1 } from "@/data/schema/generated"
 import type { SourceError } from "@/data/source"
 import type { ParseResultOf } from "@/data/validate"
-import { sortedSuites, summaryAdapters } from "@/features/d1/model/run"
+import { adapterMetricTally, sortedSuites, summaryAdapters } from "@/features/d1/model/run"
 import { formatCount } from "@/lib/format"
 
 export type RunMatrixProps = {
@@ -81,6 +81,7 @@ function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
               key={suite.id}
               runId={runId}
               suite={suite}
+              summary={summary}
               adapters={adapters.map((a) => a.adapter)}
             />
           ))}
@@ -95,10 +96,12 @@ type SuiteEntry = SummaryV1["suites"][number]
 function MatrixRow({
   runId,
   suite,
+  summary,
   adapters,
 }: {
   runId: string
   suite: SuiteEntry
+  summary: SummaryV1
   adapters: string[]
 }) {
   const detail = useRunDocument(runId, suite.summary, "suite-summary")
@@ -125,31 +128,59 @@ function MatrixRow({
             </TableCell>
           )
         }
-        if (!hasTallies) {
-          return (
-            <TableCell
-              key={adapter}
-              className="align-top text-xs text-muted-foreground"
-              title={detail.isError ? detail.error.message : undefined}
-            >
-              {detail.isError || (detail.data && !detail.data.ok)
-                ? "summary unreadable"
-                : "no per-adapter tally"}
-            </TableCell>
-          )
-        }
-        const entry = perAdapter.get(adapter)
+        const entry = hasTallies ? perAdapter.get(adapter) : undefined
         return (
           <TableCell key={adapter} className="align-top">
             {entry ? (
               <Cell runId={runId} suite={suite.id} entry={entry} />
             ) : (
-              <StatusBadge status="not-run" />
+              <MetricsCell runId={runId} suite={suite.id} adapter={adapter} summary={summary} />
             )}
           </TableCell>
         )
       })}
     </TableRow>
+  )
+}
+
+/** A cell for a suite without per-adapter tallies: the adapter's metric judgments, counted. */
+function MetricsCell({
+  runId,
+  suite,
+  adapter,
+  summary,
+}: {
+  runId: string
+  suite: string
+  adapter: string
+  summary: SummaryV1
+}) {
+  const tally = adapterMetricTally(summary, suite, adapter)
+  if (tally.total === 0) {
+    return (
+      <span
+        className="text-xs text-muted-foreground"
+        title="This suite judges no metric per adapter"
+      >
+        cross-adapter only
+      </span>
+    )
+  }
+  const parts = (["fail", "pass", "info", "na"] as const)
+    .filter((status) => tally.counts[status] > 0)
+    .map(
+      (status) =>
+        `${formatCount(tally.counts[status])} ${status === "na" ? "not measured" : status}`,
+    )
+  return (
+    <Link
+      to={`/d1/runs/${runId}/suites/${suite}?adapter=${adapter}`}
+      className="flex flex-col gap-1 rounded-sm underline-offset-3 hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+      aria-label={`${suite} ${adapter}: ${tally.total} metrics, ${parts.join(", ")}`}
+    >
+      <StatusBadge status={tally.status} />
+      <span className="tabular text-xs text-muted-foreground">{parts.join(" · ")}</span>
+    </Link>
   )
 }
 

@@ -35,12 +35,18 @@ function Field({
   return (
     <>
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className={mono ? "font-mono text-xs break-all" : "break-words"}>{children}</dd>
+      <dd
+        className={
+          mono ? "min-w-0 font-mono text-xs break-all whitespace-pre-line" : "min-w-0 break-words"
+        }
+      >
+        {children}
+      </dd>
     </>
   )
 }
 
-const list = "grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]"
+const list = "grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[auto_minmax(0,1fr)]"
 
 export function RunProvenance({ runId }: { runId: string }) {
   const manifest = useRunDocument(runId, "manifest.json", "manifest")
@@ -78,7 +84,7 @@ function Provenance({ manifest }: { manifest: ManifestV1 }) {
         </Alert>
       ) : null}
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Harness and contract</CardTitle>
           </CardHeader>
@@ -138,7 +144,7 @@ function Provenance({ manifest }: { manifest: ManifestV1 }) {
             </dl>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Host and container</CardTitle>
           </CardHeader>

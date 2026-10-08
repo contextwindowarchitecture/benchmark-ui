@@ -9,6 +9,7 @@ import { parseDocumentAs } from "@/data/validate"
 import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
 
 import {
+  adapterMetricTally,
   driftSummary,
   fileRows,
   filterMetrics,
@@ -82,6 +83,22 @@ describe("metrics", () => {
     expect(filterMetrics(summary.metrics, { q: "kill" }).map((m) => m.id)).toContain(
       "s0.auditor.kill_rate",
     )
+  })
+})
+
+describe("adapterMetricTally", () => {
+  it("counts the producer's judgments per adapter and suite without re-judging", async () => {
+    const summary = (await doc(FIXTURE_RUNS.nightly, "summary.json", "summary")) as SummaryV1
+    expect(adapterMetricTally(summary, "S0", "python")).toEqual({
+      status: "not-run",
+      counts: { pass: 0, fail: 0, info: 0, na: 0 },
+      total: 0,
+    })
+    const s2 = adapterMetricTally(summary, "S2", "python")
+    expect(s2.status).toBe("pass")
+    expect(s2.total).toBeGreaterThan(0)
+    const failing = (await doc(FIXTURE_RUNS.failing, "summary.json", "summary")) as SummaryV1
+    expect(adapterMetricTally(failing, "S4", "python").status).toBe("fail")
   })
 })
 

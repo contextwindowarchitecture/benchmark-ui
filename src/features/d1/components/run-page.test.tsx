@@ -115,12 +115,20 @@ describe("run page", () => {
     expect(section("provenance").queryByText(/provenance warning/)).toBeNull()
   })
 
-  it("renders the S7 fixture's matrix without per-adapter tallies", async () => {
+  it("fills matrix cells from the adapter's metric judgments where a suite has no tallies", async () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.s7}`)
     const matrix = await loaded("matrix")
-    expect(await matrix.findByRole("link", { name: /^S7/ })).toBeInTheDocument()
-    expect(await matrix.findAllByText("no per-adapter tally")).toHaveLength(4)
+    expect(await matrix.findByRole("link", { name: /^S7 · / })).toBeInTheDocument()
+    const cell = await matrix.findByRole("link", { name: /^S7 python: \d+ metrics, / })
+    expect(cell).toHaveAttribute("href", `/d1/runs/${FIXTURE_RUNS.s7}/suites/S7?adapter=python`)
     expect(section("files").getByText("perf/summary.json")).toBeInTheDocument()
+  })
+
+  it("says when a suite judges only cross-adapter metrics", async () => {
+    renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}`)
+    const matrix = await loaded("matrix")
+    const s0 = (await matrix.findByRole("link", { name: /^S0 · / })).closest("tr") as HTMLElement
+    await waitFor(() => expect(within(s0).getAllByText("cross-adapter only")).toHaveLength(4))
   })
 
   it("shows the pruned state when the run's directory is gone", async () => {

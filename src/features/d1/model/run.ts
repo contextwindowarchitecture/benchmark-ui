@@ -241,6 +241,36 @@ export function summaryAdapters(
   })
 }
 
+export type AdapterMetricTally = {
+  /** The worst of the producer's judgments over the adapter's metrics in the suite. */
+  status: "pass" | "fail" | "info" | "not-run"
+  counts: Record<SummaryMetric["status"], number>
+  total: number
+}
+
+/**
+ * A matrix cell for a suite whose summary has no per-adapter tallies (every suite but S1): the
+ * producer's judgments of the adapter's metrics in that suite, counted. A fail among them is a
+ * fail, otherwise a pass among them is a pass, otherwise only info metrics; no metrics is not run.
+ * Nothing is re-judged: only the producer's statuses are counted.
+ */
+export function adapterMetricTally(
+  summary: SummaryV1,
+  suite: string,
+  adapter: string,
+): AdapterMetricTally {
+  const counts: Record<SummaryMetric["status"], number> = { pass: 0, fail: 0, info: 0, na: 0 }
+  let total = 0
+  for (const metric of summary.metrics) {
+    if (metric.suite !== suite || metric.adapter !== adapter) continue
+    counts[metric.status] += 1
+    total += 1
+  }
+  const status =
+    counts.fail > 0 ? "fail" : counts.pass > 0 ? "pass" : counts.info > 0 ? "info" : "not-run"
+  return { status, counts, total }
+}
+
 export function sortedSuites(summary: SummaryV1): SummaryV1["suites"] {
   return [...summary.suites].sort((a, b) => compareSuites(a.id, b.id))
 }
