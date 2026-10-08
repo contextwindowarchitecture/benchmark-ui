@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <title>CWA benchmark</title>
+    <script>
+      // Applies the stored theme before first paint, so there is no flash (DESIGN.md 11). The
+      // ThemeProvider in src/lib/theme.tsx owns the same key and class afterwards.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem("benchmark-ui.theme")
+          var dark =
+            stored === "dark" ||
+            ((stored === null || stored === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches)
+          document.documentElement.classList.toggle("dark", dark)
+          document.documentElement.style.colorScheme = dark ? "dark" : "light"
+        } catch (error) {
+          /* no storage: the system theme applies */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
