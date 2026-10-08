@@ -1,5 +1,6 @@
-# benchmark.contextwindowarchitecture.io. A rollout is `kustomize edit set image` here to the new git SHA, then
-# `oc apply -k deploy/overlays/prod` and `oc rollout status deployment/benchmark-ui`; a rollback is `oc rollout undo`.
+# benchmark.contextwindowarchitecture.io. A rollout sets `newTag` below to the new image's git SHA (by hand:
+# `kustomize edit set image` rewrites this file and drops its comments), then `oc apply -k deploy/overlays/prod` and
+# `oc rollout status deployment/benchmark-ui`; a rollback is `oc rollout undo`.
 #
 # The cluster is a single node with LVM Storage (TopoLVM), whose only storage class, lvms-nvme-vg, provisions
 # node-local ReadWriteOnce volumes: the base's ReadWriteMany claim cannot be provisioned there, so this overlay takes
@@ -16,7 +17,7 @@ resources:
 
 images:
   - name: quay.io/contextwindowarchitecture/benchmark-ui
-    newTag: latest   # set to the git SHA the image workflow tagged
+    newTag: 12d90898b4e7 # the 12-character git SHA of the commit the image was built from
 
 replicas:
   - name: benchmark-ui

@@ -46,14 +46,17 @@ curl -sk --resolve benchmark.contextwindowarchitecture.io:443:<router IP> https:
 
 ## Rolling out a new image
 
+Set `newTag` in `deploy/overlays/prod/kustomization.yaml` to the new image's tag, by hand rather than with
+`kustomize edit set image`, which rewrites the file and drops its comments. Then:
+
 ```sh
-cd deploy/overlays/prod && kustomize edit set image quay.io/contextwindowarchitecture/benchmark-ui=quay.io/contextwindowarchitecture/benchmark-ui:<sha>
 oc apply -k deploy/overlays/prod
 oc -n cwa-benchmark rollout status deployment/benchmark-ui
 oc -n cwa-benchmark rollout undo deployment/benchmark-ui     # if it must go back
 ```
 
-The tag is the commit's SHA the image workflow printed. Commit the overlay change: the tag in git is what runs.
+The tag is the 12-character SHA of the commit the image was built from, as the image workflow prints it. Commit the
+overlay change: the tag in git is what runs.
 
 ## Publishing results
 
