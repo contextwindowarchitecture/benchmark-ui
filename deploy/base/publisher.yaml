@@ -1,0 +1,47 @@
+# The publisher: a pod that mounts the results volume read-write, scaled to zero except while deploy/publish.sh
+# copies a run in (oc rsync with the tar strategy, so the image needs tar and nothing else). Nothing runs the harness
+# in the cluster; runs come from the benchmark's CI artifact or the maintainer's machine.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: results-publisher
+  labels:
+    app.kubernetes.io/name: results-publisher
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: results-publisher
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: results-publisher
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: publisher
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: results
+              mountPath: /data/results
+      volumes:
+        - name: results
+          persistentVolumeClaim:
+            claimName: benchmark-results

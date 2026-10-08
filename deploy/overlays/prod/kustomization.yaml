@@ -1,0 +1,34 @@
+# benchmark.contextwindowarchitecture.io. A rollout is `kustomize edit set image` here to the new git SHA, then
+# `oc apply -k deploy/overlays/prod` and `oc rollout status deployment/benchmark-ui`; a rollback is `oc rollout undo`.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cwa-benchmark
+
+resources:
+  - ../../base
+
+images:
+  - name: quay.io/contextwindowarchitecture/benchmark-ui
+    newTag: latest   # set to the git SHA the image workflow tagged
+
+replicas:
+  - name: benchmark-ui
+    count: 2
+
+patches:
+  - target:
+      kind: Route
+      name: benchmark-ui
+    patch: |
+      - op: add
+        path: /spec/host
+        value: benchmark.contextwindowarchitecture.io
+  # Uncomment and name the cluster's ReadWriteMany storage class if the default class is not RWX.
+  # - target:
+  #     kind: PersistentVolumeClaim
+  #     name: benchmark-results
+  #   patch: |
+  #     - op: add
+  #       path: /spec/storageClassName
+  #       value: ocs-storagecluster-cephfs

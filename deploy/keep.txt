@@ -1,0 +1,3 @@
+# Runs deploy/publish.sh never prunes, one id per line: the runs a write-up cites.
+20261008T133453Z-691b414
+20261008T073129Z-a1d69f8

@@ -1,0 +1,25 @@
+# The results site on OpenShift (benchmark-ui's plan, section 12): the UI Deployment, its Service and Route, the
+# results volume, the runtime config, the nginx configuration, and the publisher that writes runs into the volume.
+# An overlay sets the namespace, the host, the image tag, the replicas and the storage class.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/part-of: cwa-benchmark
+
+resources:
+  - pvc.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - route.yaml
+  - publisher.yaml
+
+configMapGenerator:
+  # The server configuration, from deploy/base/nginx; a change rolls the pods because the name carries a content hash.
+  - name: benchmark-ui-nginx
+    files:
+      - nginx/benchmark-ui.conf
+      - nginx/headers.inc

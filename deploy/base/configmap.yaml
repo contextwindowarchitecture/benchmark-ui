@@ -1,0 +1,9 @@
+# The runtime configuration the client reads at startup (DESIGN.md 6.4): where the results root is served. The same
+# build reads a different one locally, so nothing about an environment is baked into the image.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: benchmark-ui-config
+data:
+  config.json: |
+    {"resultsRoot": "/results"}

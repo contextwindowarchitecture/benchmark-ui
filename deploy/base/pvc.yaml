@@ -1,0 +1,14 @@
+# The results volume: whole run directories under results/d1/…, published by deploy/publish.sh (section 12.2).
+# ReadWriteMany, so two UI replicas on different nodes mount it read-only during a rolling update; set the storage
+# class in the overlay. If the cluster has no RWX class, run one replica with a Recreate strategy and record the
+# deviation in docs/design/project-profile.md.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: benchmark-results
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi

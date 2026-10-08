@@ -1,0 +1,88 @@
+# The UI: nginx serving the static build, the results volume read-only, and the runtime config. Rolling updates with
+# no unavailable replica; a rollout is a new image tag in the overlay (section 12.4). The pods run under the
+# security context OpenShift's restricted profile requires; the image accepts any UID with GID 0.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: benchmark-ui
+  labels:
+    app.kubernetes.io/name: benchmark-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: benchmark-ui
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: benchmark-ui
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: benchmark-ui
+      containers:
+        - name: ui
+          image: quay.io/contextwindowarchitecture/benchmark-ui:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: results
+              mountPath: /data/results
+              readOnly: true
+            - name: config
+              mountPath: /opt/app-root/src/config.json
+              subPath: config.json
+              readOnly: true
+            - name: nginx
+              mountPath: /opt/app-root/etc/nginx.default.d
+              readOnly: true
+      volumes:
+        - name: results
+          persistentVolumeClaim:
+            claimName: benchmark-results
+            readOnly: true
+        - name: config
+          configMap:
+            name: benchmark-ui-config
+        - name: nginx
+          configMap:
+            name: benchmark-ui-nginx

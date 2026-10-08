@@ -1,0 +1,17 @@
+# TLS ends at the router's edge and plain HTTP redirects. The overlay sets the host; the certificate for it comes
+# from cert-manager where the cluster has it, or is supplied on the Route by hand (section 12.4's prerequisites).
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: benchmark-ui
+  labels:
+    app.kubernetes.io/name: benchmark-ui
+spec:
+  to:
+    kind: Service
+    name: benchmark-ui
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
