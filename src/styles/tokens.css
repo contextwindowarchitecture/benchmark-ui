@@ -39,6 +39,18 @@
   --status-unchanged: var(--success);
   --status-changed: var(--warning);
   --status-regressed: var(--failure);
+  /* Row verdicts, golden drift and mutants (ui-plan.md 4.1). */
+  --status-passed: var(--success);
+  --status-failed: var(--failure);
+  --status-skipped: var(--muted-foreground);
+  --status-rejected: var(--success);
+  --status-triage: var(--warning);
+  --status-match: var(--success);
+  --status-spec-change: var(--info);
+  --status-regression: var(--failure);
+  --status-new: var(--info);
+  --status-killed: var(--success);
+  --status-survived: var(--warning);
 
   /*
    * The four adapters, in their fixed order: Python, TypeScript, Go, Rust. Each takes one chart
