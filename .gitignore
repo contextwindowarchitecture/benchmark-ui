@@ -7,3 +7,9 @@ node_modules/
 dist/
 .build/
 results/
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+.env.local
+.env.*.local

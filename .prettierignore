@@ -1,0 +1,9 @@
+dist/
+node_modules/
+vendor/
+pnpm-lock.yaml
+src/data/schema/generated/
+src/components/ui/
+docs/plans/
+coverage/
+*.md
