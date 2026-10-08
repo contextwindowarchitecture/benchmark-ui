@@ -48,10 +48,13 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Identity, tenant isolation, and permissions: none; no accounts, no private data.
 - Forms and schema validation: no forms. URL state is validated with Zod 4.6.5 (`src/lib/url-state.ts`): each
   parameter parses on its own and an invalid value falls back to its default. Documents and rows are validated with
-  the producer's JSON Schemas through Ajv 8.20.0 (draft 2020-12, `allowUnionTypes`) in `src/data/validate.ts`; the
-  gate is `$schema`, and a kind or major version this build does not know renders the unsupported-schema state. Types
-  are generated from the vendored schemas by `scripts/generate-types.mjs` (json-schema-to-typescript 16.0.0) into
-  `src/data/schema/generated/`, checked in.
+  validators generated at build time from the producer's JSON Schemas by Ajv 8.20.0's standalone code generation
+  (draft 2020-12, `allErrors`, `strict`, `allowUnionTypes`, ajv-formats for `date-time` and `uri`), so nothing is
+  compiled in the browser and the deployed Content Security Policy (`script-src 'self'`, no 'unsafe-eval') holds;
+  `src/data/validate.ts` only calls them. The gate is `$schema`, and a kind or major version this build does not
+  know renders the unsupported-schema state. `pnpm generate:types` runs `scripts/generate-types.mjs`
+  (json-schema-to-typescript 16.0.0, the types) and `scripts/generate-validators.mjs` (the validators) into
+  `src/data/schema/generated/`, checked in; CI fails if they are stale.
 - Chart types, maximum expected data volume, aggregation: none at UI-P0 (the run page's matrix and tables are
   semantic HTML); the plan's section 10 lists what later phases draw, volumes in its 4.3, aggregation in the worker.
 - Locale, currencies, timezone, and date-range semantics: the browser's locale for numbers (grouped thousands, one
@@ -59,9 +62,14 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   ISO form in `<time dateTime>`; no currencies; no date ranges (runs are picked by id). All through
   `src/lib/format.ts`; a rate never rounds up to 100%.
 - Theme preference and persistence: light, dark or system (default system), in local storage under
-  `benchmark-ui.theme`; an inline script in `index.html` applies the class on `<html>` before first paint, and
-  `src/lib/theme.tsx` owns it afterwards. (The deployed Content Security Policy must allow that inline script by
-  hash or nonce, or inline it through the build; phase UI-P1.)
+  `benchmark-ui.theme`; `public/theme.js`, loaded synchronously from `index.html`'s head as a file (the deployed
+  policy allows no inline script), applies the class on `<html>` before first paint, and `src/lib/theme.tsx` owns it
+  afterwards.
+- Content Security Policy: the production server's policy (`deploy/base/nginx/headers.inc` is the source of truth)
+  is copied into `dev/results-plugin.ts` and sent on every dev and preview response, so a violation shows in
+  `pnpm dev` and fails the Playwright smoke test; in dev alone the policy carries a nonce (`html.cspNonce`) for
+  Vite's own injected scripts (its client and the React refresh preamble), which the production build does not
+  have. The app ships no inline script and no runtime schema compilation.
 - Sidebar preference persistence and responsive breakpoint: the generated sidebar's own behaviour: the desktop
   open/collapsed preference in the `sidebar_state` cookie, honoured on load, expanded by default from 1024 px and
   collapsed to icons below; the mobile sheet below 768 px, never persisted. DESIGN.md 4.2's measurements apply.
@@ -84,8 +92,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   the benchmark's CI, with the benchmark checked out at the locked commit for the vendor check.
 - Approved animation assets and licensing: none yet; any Lottie asset is reviewed and stored under
   `public/animations/`.
-- Approved additional libraries: TanStack Query; Ajv with ajv-formats; json-schema-to-typescript; Zod; sirv (dev
-  server only); Playwright 1.63.0 with `@axe-core/playwright` 4.13.0 (tests only). Not yet added, for later phases: TanStack Table
+- Approved additional libraries: TanStack Query; Ajv with ajv-formats (the compiler at build time only; at runtime
+  the generated validators and ajv-formats' format table); json-schema-to-typescript; Zod; sirv (dev server only);
+  Playwright 1.63.0 with `@axe-core/playwright` 4.13.0 (tests only). Not yet added, for later phases: TanStack Table
   and Virtual, D3 modules, GSAP, `@lottiefiles/dotlottie-react`.
 - Exceptions and linked architecture decisions:
   - TypeScript 6.0 instead of the newest major, until typescript-eslint supports it (above).
