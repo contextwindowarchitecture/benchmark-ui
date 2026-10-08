@@ -1,0 +1,9 @@
+.codex
+.mcp.json
+.serena
+.taskmaster
+docs/plans
+node_modules/
+dist/
+.build/
+results/
