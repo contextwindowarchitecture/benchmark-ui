@@ -1,6 +1,7 @@
 # The publisher: a pod that mounts the results volume read-write, scaled to zero except while deploy/publish.sh
-# copies a run in (oc rsync with the tar strategy, so the image needs tar and nothing else). Nothing runs the harness
-# in the cluster; runs come from the benchmark's CI artifact or the maintainer's machine.
+# copies a run in (oc rsync with the tar strategy, so the image needs tar and nothing else; ubi9/ubi has GNU tar,
+# ubi9/ubi-minimal does not). Nothing runs the harness in the cluster; runs come from the benchmark's CI artifact or
+# the maintainer's machine.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: publisher
-          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          image: registry.access.redhat.com/ubi9/ubi:latest
           command: ["sleep", "infinity"]
           resources:
             requests:
