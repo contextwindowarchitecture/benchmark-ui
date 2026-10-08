@@ -4,7 +4,7 @@ import { z } from "zod"
 
 export const RUN_STATUS_VALUES = ["pass", "partial", "fail", "error", "running"] as const
 
-export const RUNS_SORT_KEYS = ["started", "status", "profile", "duration", "verdict"] as const
+export const RUNS_SORT_KEYS = ["started", "status", "profile", "duration"] as const
 
 export const runsListParams = {
   /** A CI profile name, or "none" for runs made outside any profile. */
