@@ -1,0 +1,192 @@
+import type { UseQueryResult } from "@tanstack/react-query"
+import { Link } from "react-router"
+
+import { AdapterMark } from "@/components/dashboard/adapter-mark"
+import { DataRegion } from "@/components/dashboard/data-region"
+import { StatusBadge } from "@/components/dashboard/status-badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { useRunDocument } from "@/data/queries"
+import { regionOfDocument } from "@/data/region"
+import type { SuiteSummaryV1, SummaryV1 } from "@/data/schema/generated"
+import type { SourceError } from "@/data/source"
+import type { ParseResultOf } from "@/data/validate"
+import { sortedSuites, summaryAdapters } from "@/features/d1/model/run"
+import { formatCount } from "@/lib/format"
+
+export type RunMatrixProps = {
+  runId: string
+  summary: UseQueryResult<ParseResultOf<"summary">, SourceError>
+}
+
+/** The suite × adapter matrix (ui-plan.md 8.3): status cells with tallies, each opening the suite. */
+export function RunMatrix({ runId, summary }: RunMatrixProps) {
+  const region = regionOfDocument(summary, `${runId}/summary.json`, "the summary")
+  return (
+    <DataRegion state={region} label="the summary" skeleton={<Skeleton className="h-64 w-full" />}>
+      {(document) => <Matrix runId={runId} summary={document} />}
+    </DataRegion>
+  )
+}
+
+function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
+  const adapters = summaryAdapters(summary)
+  const suites = sortedSuites(summary)
+  if (suites.length === 0) {
+    return (
+      <p
+        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+        data-state="empty"
+      >
+        This run has no suites.
+      </p>
+    )
+  }
+  return (
+    <div
+      className="overflow-x-auto rounded-lg border"
+      role="region"
+      aria-label="Suite by adapter matrix"
+      tabIndex={0}
+    >
+      <Table>
+        <TableCaption className="sr-only">
+          Suite status per adapter; each cell links to the suite page.
+        </TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">Suite</TableHead>
+            <TableHead scope="col">Status</TableHead>
+            {adapters.map((adapter) => (
+              <TableHead key={adapter.adapter} scope="col">
+                <span className="inline-flex items-center gap-2">
+                  <AdapterMark adapter={adapter.adapter} />
+                  {!adapter.available ? <StatusBadge status="unavailable" iconOnly /> : null}
+                </span>
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {suites.map((suite) => (
+            <MatrixRow
+              key={suite.id}
+              runId={runId}
+              suite={suite}
+              adapters={adapters.map((a) => a.adapter)}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+type SuiteEntry = SummaryV1["suites"][number]
+
+function MatrixRow({
+  runId,
+  suite,
+  adapters,
+}: {
+  runId: string
+  suite: SuiteEntry
+  adapters: string[]
+}) {
+  const detail = useRunDocument(runId, suite.summary, "suite-summary")
+  const to = `/d1/runs/${runId}/suites/${suite.id}`
+  const perAdapter = detail.data?.ok
+    ? new Map(detail.data.document.adapters.map((a) => [a.adapter, a]))
+    : null
+  const hasTallies = perAdapter !== null && perAdapter.size > 0
+  return (
+    <TableRow data-suite={suite.id}>
+      <TableCell scope="row" className="align-top">
+        <Link to={to} className="font-medium underline-offset-3 hover:underline">
+          <span className="font-mono">{suite.id}</span> · {suite.title}
+        </Link>
+      </TableCell>
+      <TableCell className="align-top">
+        <StatusBadge status={suite.status} />
+      </TableCell>
+      {adapters.map((adapter) => {
+        if (detail.isPending) {
+          return (
+            <TableCell key={adapter} className="align-top">
+              <Skeleton className="h-5 w-16" aria-label="loading" />
+            </TableCell>
+          )
+        }
+        if (!hasTallies) {
+          return (
+            <TableCell
+              key={adapter}
+              className="align-top text-xs text-muted-foreground"
+              title={detail.isError ? detail.error.message : undefined}
+            >
+              {detail.isError || (detail.data && !detail.data.ok)
+                ? "summary unreadable"
+                : "no per-adapter tally"}
+            </TableCell>
+          )
+        }
+        const entry = perAdapter.get(adapter)
+        return (
+          <TableCell key={adapter} className="align-top">
+            {entry ? (
+              <Cell runId={runId} suite={suite.id} entry={entry} />
+            ) : (
+              <StatusBadge status="not-run" />
+            )}
+          </TableCell>
+        )
+      })}
+    </TableRow>
+  )
+}
+
+function Cell({
+  runId,
+  suite,
+  entry,
+}: {
+  runId: string
+  suite: string
+  entry: SuiteSummaryV1["adapters"][number]
+}) {
+  const tallies: string[] = []
+  if (entry.cases)
+    tallies.push(`${formatCount(entry.cases.passed)} / ${formatCount(entry.cases.total)} cases`)
+  if (entry.rejections)
+    tallies.push(
+      `${formatCount(entry.rejections.rejected)} / ${formatCount(entry.rejections.total)} rejections`,
+    )
+  const outcomes = Object.entries(entry.outcomes)
+    .filter((pair): pair is [string, number] => typeof pair[1] === "number" && pair[1] > 0)
+    .map(([outcome, count]) => `${formatCount(count)} ${outcome}`)
+  const label = [entry.status, ...tallies, ...outcomes].join(", ")
+  return (
+    <Link
+      to={`/d1/runs/${runId}/suites/${suite}?adapter=${entry.adapter}`}
+      className="flex flex-col gap-1 rounded-sm underline-offset-3 hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+      aria-label={`${suite} ${entry.adapter}: ${label}`}
+    >
+      <StatusBadge status={entry.status} />
+      {tallies.length > 0 ? (
+        <span className="tabular text-xs text-muted-foreground">{tallies.join(" · ")}</span>
+      ) : null}
+      {outcomes.length > 0 ? (
+        <span className="tabular text-xs text-muted-foreground">{outcomes.join(" · ")}</span>
+      ) : null}
+      {entry.error ? <span className="text-xs text-destructive">{entry.error}</span> : null}
+    </Link>
+  )
+}

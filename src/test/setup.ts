@@ -35,4 +35,10 @@ if (typeof window !== "undefined") {
   if (!Element.prototype.hasPointerCapture) {
     Element.prototype.hasPointerCapture = () => false
   }
+  if (!navigator.clipboard) {
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: vi.fn(async () => undefined) },
+      configurable: true,
+    })
+  }
 }
