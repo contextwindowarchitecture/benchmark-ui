@@ -21,7 +21,7 @@
     "format:check": "prettier --check .",
     "vendor": "node scripts/vendor-benchmark.mjs",
     "vendor:check": "node scripts/vendor-benchmark.mjs --check",
-    "generate:types": "node scripts/generate-types.mjs"
+    "generate:types": "node scripts/generate-types.mjs && node scripts/generate-validators.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",

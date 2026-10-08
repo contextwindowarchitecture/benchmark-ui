@@ -1,13 +1,13 @@
 // The validating boundary (DESIGN.md 6.4; ui-plan.md 5.3). Every document names its schema; this
 // module gates on it. A kind this viewer knows at a major version it knows is validated with the
-// vendored JSON Schema and typed; anything else is an UnsupportedSchema result, never a guess.
-// Rows are validated one by one and a bad row is reported with its line number.
+// validator generated from the vendored JSON Schema and typed; anything else is an
+// UnsupportedSchema result, never a guess. Rows are validated one by one and a bad row is reported
+// with its line number.
 
-import Ajv2020, { type ErrorObject } from "ajv/dist/2020"
-import addFormats from "ajv-formats"
+import type { ErrorObject } from "ajv"
 
 import { schemaKinds, type DocumentByKind, type SchemaKind } from "./schema/generated"
-import { schemas } from "./schema/generated/schemas"
+import { validators } from "./schema/generated/validators-by-kind"
 import type { RawRow, RowError } from "./source"
 
 export const PRODUCER = "cwa-bench-d1"
@@ -68,19 +68,6 @@ export type ParseResult = ParsedDocument | UnsupportedSchema | InvalidDocument
 export type ParseResultOf<K extends SchemaKind> =
   ParsedDocument<K> | UnsupportedSchema | InvalidDocument | WrongKind
 
-let ajv: Ajv2020 | null = null
-
-function validator() {
-  if (ajv === null) {
-    ajv = new Ajv2020({ allErrors: true, strict: true, allowUnionTypes: true })
-    addFormats(ajv)
-    for (const kind of Object.keys(schemaKinds) as SchemaKind[]) {
-      ajv.addSchema(schemas[kind], schemaKinds[kind].id)
-    }
-  }
-  return ajv
-}
-
 function issues(errors: ErrorObject[] | null | undefined): ValidationIssue[] {
   return (errors ?? []).map((error) => ({
     path: error.instancePath === "" ? "/" : error.instancePath,
@@ -108,8 +95,9 @@ export function parseDocument(json: unknown): ParseResult {
     return { ok: false, reason: "unsupported-schema", schema: schema as string, ...ref }
   }
   const kind = ref.kind
-  const validate = validator().getSchema(schemaKinds[kind].id)
-  if (!validate) throw new Error(`no validator for ${kind}`)
+  // Standalone validators generated at build time (scripts/generate-validators.mjs): nothing is
+  // compiled in the browser, so the site runs under `script-src 'self'` with no 'unsafe-eval'.
+  const validate = validators[kind]
   if (!validate(json)) {
     return {
       ok: false,
