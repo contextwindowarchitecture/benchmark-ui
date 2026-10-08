@@ -57,11 +57,7 @@ export function AppSidebar() {
       <SidebarContent>
         {navigation.map((group) => (
           <SidebarGroup key={group.id}>
-            <SidebarGroupLabel
-              className={group.notStarted ? "text-muted-foreground/70" : undefined}
-            >
-              {group.label}
-            </SidebarGroupLabel>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
