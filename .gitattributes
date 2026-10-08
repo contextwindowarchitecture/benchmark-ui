@@ -1,0 +1,3 @@
+vendor/** linguist-vendored
+src/data/schema/generated/** linguist-generated
+pnpm-lock.yaml linguist-generated
