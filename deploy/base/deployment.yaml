@@ -77,9 +77,11 @@ spec:
               readOnly: true
       volumes:
         - name: results
+          # Read-only on the container's mount above, not on the claim: a block-backed CSI volume is formatted at its
+          # first mount, and the driver refuses to format one it was asked to mount read-only (LVM Storage: "cannot
+          # mount unformatted disk … in read-only mode"). nginx still cannot write to it.
           persistentVolumeClaim:
             claimName: benchmark-results
-            readOnly: true
         - name: config
           configMap:
             name: benchmark-ui-config

@@ -1,5 +1,11 @@
 # benchmark.contextwindowarchitecture.io. A rollout is `kustomize edit set image` here to the new git SHA, then
 # `oc apply -k deploy/overlays/prod` and `oc rollout status deployment/benchmark-ui`; a rollback is `oc rollout undo`.
+#
+# The cluster is a single node with LVM Storage (TopoLVM), whose only storage class, lvms-nvme-vg, provisions
+# node-local ReadWriteOnce volumes: the base's ReadWriteMany claim cannot be provisioned there, so this overlay takes
+# the plan's 12.2 fallback, recorded in docs/design/project-profile.md. One replica; the rolling update still has no
+# unavailable replica, because every pod lands on the volume's node and a ReadWriteOnce volume mounts in any number
+# of pods there.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -14,7 +20,7 @@ images:
 
 replicas:
   - name: benchmark-ui
-    count: 2
+    count: 1
 
 patches:
   - target:
@@ -24,11 +30,15 @@ patches:
       - op: add
         path: /spec/host
         value: benchmark.contextwindowarchitecture.io
-  # Uncomment and name the cluster's ReadWriteMany storage class if the default class is not RWX.
-  # - target:
-  #     kind: PersistentVolumeClaim
-  #     name: benchmark-results
-  #   patch: |
-  #     - op: add
-  #       path: /spec/storageClassName
-  #       value: ocs-storagecluster-cephfs
+  # The results volume on this cluster (above). On a cluster with a ReadWriteMany class, name that class here, leave
+  # the access mode to the base and raise the replicas.
+  - target:
+      kind: PersistentVolumeClaim
+      name: benchmark-results
+    patch: |
+      - op: replace
+        path: /spec/accessModes
+        value: [ReadWriteOnce]
+      - op: add
+        path: /spec/storageClassName
+        value: lvms-nvme-vg

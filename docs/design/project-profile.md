@@ -39,7 +39,7 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   `vite preview` a plugin (`dev/results-plugin.ts`) serves `/results/d1/` from `../benchmark/domain1/results/d1`
   when that checkout is beside this repository, else from the vendored fixtures, with `VITE_RESULTS_DIR` overriding
   both; JSON and JSONL get their media types, misses 404, no listing. Deployed, the same build serves `/results/`
-  from a volume published to by `deploy/publish.sh` (the plan's section 12, phase UI-P1, written separately).
+  from a volume published to by `deploy/publish.sh` (`deploy/`, the plan's section 12).
 - Row and file-size budgets (6.4): `src/data/budgets.ts`, from the plan's 5.4: 5,000 rows on the main thread,
   30,000 in the worker, 30 MB loaded whole, 1 MB for an inline blob view, 4 points for a fit. UI-P0 ships the
   streaming JSONL parser and the budget check (`rows()` refuses a file the run index says is above the budget, and
@@ -105,5 +105,12 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     re-judged) and says "cross-adapter only" where a suite judges no metric per adapter.
   - `vite` and `lucide-react` are pinned one patch behind the newest release at UI-P0, so the lockfile respects
     pnpm's minimum release age without an exclusion.
+  - The results volume is ReadWriteOnce, not ReadWriteMany (the plan's 12.2 and its fallback): the production
+    cluster is a single node whose only storage class is LVM Storage's node-local class, which cannot provision
+    RWX. `deploy/overlays/prod` patches the claim and runs one replica. The rolling update with no unavailable
+    replica stands, since every pod lands on the volume's node and a ReadWriteOnce volume mounts in any number of
+    pods there. The claim is read-only on the container's mount and read-write at the pod level, because the
+    driver formats the volume at its first mount and refuses to when that mount is read-only.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 is built; UI-P1 (deploy) follows.
+- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 and UI-P1 are built; the site waits on the
+  prerequisites outside the manifests (`deploy/README.md`).
