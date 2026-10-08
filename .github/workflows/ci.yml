@@ -1,0 +1,82 @@
+# Started by hand only, like the benchmark's CI: no push or schedule triggers.
+name: ci
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out benchmark-ui
+        uses: actions/checkout@v4
+        with:
+          path: benchmark-ui
+
+      - name: Read the locked benchmark commit
+        id: lock
+        run: echo "commit=$(node -p "require('./benchmark-ui/vendor/cwa-bench.lock.json').commit")" >> "$GITHUB_OUTPUT"
+
+      # The vendor check compares the copy with the benchmark at the locked commit, as the Python
+      # assembler's CI does for the specification.
+      - name: Check out the benchmark at the locked commit
+        uses: actions/checkout@v4
+        with:
+          repository: contextwindowarchitecture/benchmark
+          ref: ${{ steps.lock.outputs.commit }}
+          path: benchmark
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: benchmark-ui/package.json
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: benchmark-ui/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: benchmark-ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Vendor check
+        working-directory: benchmark-ui
+        run: pnpm vendor:check ../benchmark
+
+      - name: Generated types are current
+        working-directory: benchmark-ui
+        run: pnpm generate:types && git diff --exit-code -- src/data/schema/generated
+
+      - name: Format
+        working-directory: benchmark-ui
+        run: pnpm format:check
+
+      - name: Lint
+        working-directory: benchmark-ui
+        run: pnpm lint
+
+      - name: Typecheck
+        working-directory: benchmark-ui
+        run: pnpm typecheck
+
+      - name: Test
+        working-directory: benchmark-ui
+        run: pnpm test
+
+      - name: Build
+        working-directory: benchmark-ui
+        run: pnpm build
+
+      - name: Install Playwright's browser
+        working-directory: benchmark-ui
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Smoke test against the fixtures
+        working-directory: benchmark-ui
+        run: pnpm test:e2e
