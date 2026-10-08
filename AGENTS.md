@@ -13,11 +13,36 @@ checked out beside this repository as `../benchmark`.
 | --- | --- |
 | `DESIGN.md` | The front-end design baseline. Read it before any UI work; its definition of done (section 14) and agent workflow (section 13) apply to every change |
 | `docs/plans/ui-plan.md` | The working plan: readers, the as-built data contract, pages, the shedding viewer, deployment, phases, decisions. Git-ignored: read and update it, never commit it |
-| `vendor/cwa-bench/` | Not yet: the benchmark's schemas, fixture runs and write-up text, copied at the commit `vendor/cwa-bench.lock.json` pins |
-| `deploy/` | Not yet: the container image, the OpenShift manifests and the results publishing procedure |
+| `docs/design/project-profile.md` | The project profile DESIGN.md section 15 asks for: the versions, the preset, the budgets, the test commands and the exceptions |
+| `vendor/cwa-bench/` | The benchmark's schemas, fixture runs and write-up text, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
+| `src/data/schema/generated/` | Types generated from the vendored schemas by `scripts/generate-types.mjs`; regenerate, never edit |
+| `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`), `validate.ts` (the schema gate), `queries.ts` (TanStack Query) |
+| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell), `dashboard/` (page contract, states, badges) |
+| `src/features/d1/` | Domain 1: `model/` (pure selectors) and `components/` (the runs list, the run page) |
+| `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
+| `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
+| `deploy/` | Not yet: the container image, the OpenShift manifests and the results publishing procedure (phase UI-P1) |
 
-Status: design only. Nothing is built. The plan's phase UI-P0 (harness changes in the benchmark repository first,
-then the scaffold here) starts when the maintainer asks, not before.
+Status: phase UI-P0 is built (the scaffold, the data layer, the shell and routes, the runs list and the run page).
+Later phases' routes render a placeholder inside the shell. The plan's section 15 says which phase builds what.
+
+## Working on it
+
+```sh
+pnpm install
+pnpm dev                                        # ../benchmark/domain1/results/d1 when it exists, else the fixtures
+pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm vendor:check && pnpm format:check
+pnpm test:e2e                                   # needs `pnpm exec playwright install chromium` once
+pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with the copies, the lock and the types
+```
+
+- Node 24, pnpm 12, exact versions in `package.json`; adding a package needs a reason in the profile.
+- Every document the UI reads is gated on its `$schema` and validated with the vendored schema; a new kind or major
+  version is a vendoring change plus the UI that reads it, never a field read on faith.
+- Pages account for every state of DESIGN.md 6.3 and 6.4 (`DataRegion`): loading, failed, pruned, not in this run,
+  unsupported schema, invalid, empty.
+- Tests come with the change: Vitest over the vendored fixtures (`src/test/fixture-fetch.ts` serves them without a
+  server), and the Playwright smoke test for what only a browser shows.
 
 ## Boundaries
 
