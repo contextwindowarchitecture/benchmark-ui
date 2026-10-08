@@ -14,6 +14,10 @@ namespace: cwa-benchmark
 
 resources:
   - ../../base
+  # TLS for the host from Let's Encrypt through the cluster's cert-manager (the README's "DNS and TLS").
+  - issuer.yaml
+  - certificate.yaml
+  - router-secret-reader.yaml
 
 images:
   - name: quay.io/contextwindowarchitecture/benchmark-ui
@@ -31,6 +35,27 @@ patches:
       - op: add
         path: /spec/host
         value: benchmark.contextwindowarchitecture.io
+  # The Route reads the certificate from the secret cert-manager keeps (certificate.yaml) and carries none of its
+  # own: the nulls clear a certificate set on the Route by hand, which the API refuses beside the reference. The API
+  # also refuses a Route naming a secret that does not exist yet, so the first apply after DNS leaves the Route as
+  # it was until the Certificate is Ready, and the next apply takes it (the README's "DNS and TLS").
+  - target:
+      kind: Route
+      name: benchmark-ui
+    patch: |
+      - op: add
+        path: /spec/tls/externalCertificate
+        value:
+          name: benchmark-ui-tls
+      - op: add
+        path: /spec/tls/certificate
+        value: null
+      - op: add
+        path: /spec/tls/key
+        value: null
+      - op: add
+        path: /spec/tls/caCertificate
+        value: null
   # The results volume on this cluster (above). On a cluster with a ReadWriteMany class, name that class here, leave
   # the access mode to the base and raise the replicas.
   - target:
