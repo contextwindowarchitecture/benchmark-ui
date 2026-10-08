@@ -33,10 +33,12 @@ export default tseslint.config(
     },
   },
   {
-    // Generated shadcn primitives export variants beside their components; that is their design.
-    files: ["src/components/ui/**/*.tsx"],
+    // Generated shadcn files are kept as generated (AGENTS.md): primitives export their variants
+    // beside their components, and use-mobile sets state synchronously in its effect.
+    files: ["src/components/ui/**/*.tsx", "src/hooks/use-mobile.ts"],
     rules: {
       "react-refresh/only-export-components": "off",
+      "react-hooks/set-state-in-effect": "off",
     },
   },
   {
