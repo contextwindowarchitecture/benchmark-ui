@@ -68,7 +68,11 @@ export function PageSection({
   id?: string
 }) {
   return (
-    <section aria-labelledby={id ? `${id}-heading` : undefined} id={id} className="space-y-3">
+    <section
+      aria-labelledby={id ? `${id}-heading` : undefined}
+      id={id}
+      className="min-w-0 space-y-3"
+    >
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2

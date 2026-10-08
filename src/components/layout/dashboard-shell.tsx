@@ -30,9 +30,9 @@ export function DashboardShell() {
       <SkipLink />
       <SidebarProvider defaultOpen={sidebarDefaultOpen()}>
         <AppSidebar />
-        <SidebarInset id="main-content">
+        <SidebarInset id="main-content" className="min-w-0">
           <AppHeader crumbs={meta.crumbs} />
-          <div id="page" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+          <div id="page" tabIndex={-1} className="flex min-w-0 flex-1 flex-col outline-none">
             <Outlet />
           </div>
         </SidebarInset>
