@@ -13,3 +13,4 @@ test-results/
 playwright-report/
 .env.local
 .env.*.local
+playwright/.cache/
