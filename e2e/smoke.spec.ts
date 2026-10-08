@@ -6,6 +6,25 @@ import { expect, test, type Page } from "@playwright/test"
 
 const NIGHTLY = "20261008T133453Z-691b414"
 
+// The preview server sends the production Content Security Policy; a violation is a console error
+// in Chromium, and one anywhere on these pages fails the test.
+test.beforeEach(({ page }) => {
+  const violations: string[] = []
+  page.on("console", (message) => {
+    if (message.type() === "error" && /Content Security Policy/i.test(message.text())) {
+      violations.push(message.text())
+    }
+  })
+  page.on("pageerror", (error) => violations.push(error.message))
+  cspViolations.set(page, violations)
+})
+
+test.afterEach(({ page }) => {
+  expect(cspViolations.get(page) ?? [], "console errors on the page").toEqual([])
+})
+
+const cspViolations = new WeakMap<Page, string[]>()
+
 async function expectAccessible(page: Page) {
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
@@ -14,7 +33,8 @@ async function expectAccessible(page: Page) {
 }
 
 test("the home page, the runs list and a run page render from the fixtures", async ({ page }) => {
-  await page.goto("/")
+  const response = await page.goto("/")
+  expect(response?.headers()["content-security-policy"]).toContain("script-src 'self';")
   await expect(page).toHaveTitle("CWA benchmark")
   await expect(page.getByRole("link", { name: "Skip to content" })).toHaveCount(1)
   await expect(page.getByRole("main")).toHaveCount(1)

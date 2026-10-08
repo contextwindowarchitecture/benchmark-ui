@@ -13,6 +13,27 @@ import type { Plugin, PreviewServer, ViteDevServer } from "vite"
 
 export const RESULTS_MOUNT = "/results/d1"
 
+/**
+ * The Content Security Policy the production server sends. deploy/base/nginx/headers.inc is the
+ * source of truth; this copy is sent on every dev and preview response so a violation shows up in
+ * `pnpm dev` and in the Playwright run, not first in production.
+ */
+export const CONTENT_SECURITY_POLICY =
+  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; " +
+  "font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; " +
+  "base-uri 'self'; form-action 'self'"
+
+/**
+ * The policy for a dev server with a `html.cspNonce` (vite.config.ts): Vite's dev client and the
+ * React plugin's refresh preamble are inline scripts, which the production policy forbids, so in
+ * dev only they carry the nonce; the app's own code still has to satisfy the production policy.
+ */
+export function contentSecurityPolicy(nonce: string | undefined): string {
+  return nonce === undefined
+    ? CONTENT_SECURITY_POLICY
+    : CONTENT_SECURITY_POLICY.replace("script-src 'self';", `script-src 'self' 'nonce-${nonce}';`)
+}
+
 export type ResultsDir = {
   dir: string
   origin: "VITE_RESULTS_DIR" | "benchmark checkout" | "vendored fixtures"
@@ -36,7 +57,12 @@ function isDirectory(path: string): boolean {
   return existsSync(path) && statSync(path).isDirectory()
 }
 
-function mount(server: ViteDevServer | PreviewServer) {
+function mount(server: ViteDevServer | PreviewServer, nonce: string | undefined) {
+  const policy = contentSecurityPolicy(nonce)
+  server.middlewares.use((_req, res, next) => {
+    res.setHeader("Content-Security-Policy", policy)
+    next()
+  })
   const override = server.config.env["VITE_RESULTS_DIR"] ?? process.env["VITE_RESULTS_DIR"]
   const { dir, origin } = resolveResultsDir(server.config.root, override)
   server.config.logger.info(`  results: ${RESULTS_MOUNT}/ from ${dir} (${origin})`)
@@ -66,10 +92,11 @@ export function resultsPlugin(): Plugin {
   return {
     name: "benchmark-results",
     configureServer(server) {
-      mount(server)
+      mount(server, server.config.html?.cspNonce)
     },
     configurePreviewServer(server) {
-      mount(server)
+      // The production build has no inline script: the exact production policy applies.
+      mount(server, undefined)
     },
   }
 }

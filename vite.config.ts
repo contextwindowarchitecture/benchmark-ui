@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process"
+import { randomBytes } from "node:crypto"
 import { readFileSync } from "node:fs"
 import path from "node:path"
 import tailwindcss from "@tailwindcss/vite"
@@ -29,8 +30,13 @@ function benchmarkCommit(): string {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react(), tailwindcss(), resultsPlugin()],
+  // Dev only: Vite's client and the React refresh preamble are inline scripts, and the results
+  // plugin sends the production Content Security Policy on every response (dev/results-plugin.ts).
+  // With a nonce Vite stamps the tags it injects and the policy admits them; the build injects no
+  // inline script, so the production policy applies unchanged.
+  html: command === "serve" ? { cspNonce: randomBytes(16).toString("base64") } : {},
   resolve: {
     alias: {
       "@": path.resolve(root, "./src"),
@@ -40,4 +46,4 @@ export default defineConfig({
     __UI_COMMIT__: JSON.stringify(uiCommit()),
     __BENCHMARK_COMMIT__: JSON.stringify(benchmarkCommit()),
   },
-})
+}))
