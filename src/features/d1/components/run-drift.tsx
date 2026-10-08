@@ -3,6 +3,7 @@ import { Link } from "react-router"
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { DataRegion, type RegionState } from "@/components/dashboard/data-region"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -91,24 +92,26 @@ function Drift({ runId, ci }: { runId: string; ci: CiReportV1 }) {
             {drift.bumps.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nothing it was made from changed.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>What</TableHead>
-                    <TableHead>From</TableHead>
-                    <TableHead>To</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {drift.bumps.map((bump, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{bump.what}</TableCell>
-                      <TableCell className="font-mono text-xs">{String(bump.from)}</TableCell>
-                      <TableCell className="font-mono text-xs">{String(bump.to)}</TableCell>
+              <TableRegion label="Bumps table" className="rounded-none border-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>What</TableHead>
+                      <TableHead>From</TableHead>
+                      <TableHead>To</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {drift.bumps.map((bump, i) => (
+                      <TableRow key={i}>
+                        <TableCell>{bump.what}</TableCell>
+                        <TableCell className="font-mono text-xs">{String(bump.from)}</TableCell>
+                        <TableCell className="font-mono text-xs">{String(bump.to)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableRegion>
             )}
           </CardContent>
         </Card>
@@ -145,48 +148,50 @@ function Drift({ runId, ci }: { runId: string; ci: CiReportV1 }) {
             {drift.movedMetrics.length === 0 ? (
               <p className="text-sm text-muted-foreground">No metric moved.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Metric</TableHead>
-                    <TableHead className="text-right">Previous</TableHead>
-                    <TableHead className="text-right">Now</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {drift.movedMetrics.map((metric) => (
-                    <TableRow key={`${metric.id}:${metric.adapter ?? ""}`}>
-                      <TableCell>
-                        <div>{metric.label}</div>
-                        <div className="font-mono text-xs text-muted-foreground">
-                          {metric.id}
-                          {metric.adapter ? (
-                            <>
-                              {" · "}
-                              <AdapterMark adapter={metric.adapter} />
-                            </>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                      <TableCell className="tabular text-right">
-                        {formatMetricValue(metric.unit, metric.previous)}
-                        {metric.previous_status ? (
-                          <div>
-                            <StatusBadge status={metric.previous_status} />
-                          </div>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="tabular text-right">
-                        {formatMetricValue(metric.unit, metric.value)}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={metric.status} />
-                      </TableCell>
+              <TableRegion label="Metrics that moved table" className="rounded-none border-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Metric</TableHead>
+                      <TableHead className="text-right">Previous</TableHead>
+                      <TableHead className="text-right">Now</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {drift.movedMetrics.map((metric) => (
+                      <TableRow key={`${metric.id}:${metric.adapter ?? ""}`}>
+                        <TableCell>
+                          <div>{metric.label}</div>
+                          <div className="font-mono text-xs text-muted-foreground">
+                            {metric.id}
+                            {metric.adapter ? (
+                              <>
+                                {" · "}
+                                <AdapterMark adapter={metric.adapter} />
+                              </>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell className="tabular text-right">
+                          {formatMetricValue(metric.unit, metric.previous)}
+                          {metric.previous_status ? (
+                            <div>
+                              <StatusBadge status={metric.previous_status} />
+                            </div>
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="tabular text-right">
+                          {formatMetricValue(metric.unit, metric.value)}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={metric.status} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableRegion>
             )}
           </CardContent>
         </Card>

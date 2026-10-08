@@ -1,5 +1,6 @@
 import { Download } from "lucide-react"
 
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
@@ -33,12 +34,7 @@ export function RunFiles({ runId, index }: { runId: string; index: RunIndexV1 })
         </a>
         ).
       </p>
-      <div
-        className="overflow-x-auto rounded-lg border"
-        role="region"
-        aria-label="Files table"
-        tabIndex={0}
-      >
+      <TableRegion label="Files table">
         <Table>
           <TableCaption className="sr-only">
             Files of the run, with their schema and row counts.
@@ -100,7 +96,7 @@ export function RunFiles({ runId, index }: { runId: string; index: RunIndexV1 })
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableRegion>
     </div>
   )
 }

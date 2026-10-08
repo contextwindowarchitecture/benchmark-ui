@@ -61,15 +61,15 @@ export function isStatus(value: string): value is Status {
 /** Literal class strings per tone (DESIGN.md 5: no class names built from data). */
 export const TONE_CLASSES: Record<Tone, string> = {
   success: "border-success/40 bg-success/10 text-success",
-  destructive: "border-destructive/40 bg-destructive/10 text-destructive",
+  destructive: "border-failure/40 bg-failure/10 text-failure",
   warning: "border-warning/50 bg-warning/15 text-warning",
   info: "border-info/40 bg-info/10 text-info",
-  muted: "border-border bg-muted text-muted-foreground",
+  muted: "border-border bg-transparent text-muted-foreground",
 }
 
 export const TONE_TEXT_CLASSES: Record<Tone, string> = {
   success: "text-success",
-  destructive: "text-destructive",
+  destructive: "text-failure",
   warning: "text-warning",
   info: "text-info",
   muted: "text-muted-foreground",

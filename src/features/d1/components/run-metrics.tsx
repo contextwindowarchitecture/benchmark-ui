@@ -4,6 +4,7 @@ import { Fragment } from "react"
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { DataRegion } from "@/components/dashboard/data-region"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -155,12 +156,7 @@ function MetricsTable({ summary }: { summary: SummaryV1 }) {
           No metrics match these filters.
         </p>
       ) : (
-        <div
-          className="overflow-x-auto rounded-lg border"
-          role="region"
-          aria-label="Metrics table"
-          tabIndex={0}
-        >
+        <TableRegion label="Metrics table">
           <Table>
             <TableCaption className="sr-only">
               Metrics by suite, with the producer's judgment and target.
@@ -183,7 +179,7 @@ function MetricsTable({ summary }: { summary: SummaryV1 }) {
                 const title = group.suite ? suites.find((s) => s.id === group.suite)?.title : null
                 return (
                   <Fragment key={group.suite ?? "cross"}>
-                    <TableRow className="bg-muted/40 hover:bg-muted/40">
+                    <TableRow className="border-t-2 hover:bg-transparent">
                       <TableCell colSpan={5} className="font-medium" scope="rowgroup">
                         {group.suite ? (
                           <>
@@ -246,7 +242,7 @@ function MetricsTable({ summary }: { summary: SummaryV1 }) {
               })}
             </TableBody>
           </Table>
-        </div>
+        </TableRegion>
       )}
     </div>
   )

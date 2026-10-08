@@ -3,6 +3,7 @@ import { Link } from "react-router"
 
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
@@ -39,12 +40,7 @@ const COLUMNS: { key: RunsSortKey | null; label: string; className?: string }[] 
 
 export function RunsTable({ runs, sort, dir, onSort }: RunsTableProps) {
   return (
-    <div
-      className="overflow-x-auto rounded-lg border"
-      role="region"
-      aria-label="Runs table"
-      tabIndex={0}
-    >
+    <TableRegion label="Runs table">
       <Table>
         <TableCaption className="sr-only">
           Runs of Domain 1, sorted by {sort} {dir === "asc" ? "ascending" : "descending"}
@@ -89,7 +85,7 @@ export function RunsTable({ runs, sort, dir, onSort }: RunsTableProps) {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableRegion>
   )
 }
 

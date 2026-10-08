@@ -4,6 +4,7 @@ import { Link } from "react-router"
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { DataRegion } from "@/components/dashboard/data-region"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -51,12 +52,7 @@ function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
     )
   }
   return (
-    <div
-      className="overflow-x-auto rounded-lg border"
-      role="region"
-      aria-label="Suite by adapter matrix"
-      tabIndex={0}
-    >
+    <TableRegion label="Suite by adapter matrix">
       <Table>
         <TableCaption className="sr-only">
           Suite status per adapter; each cell links to the suite page.
@@ -87,7 +83,7 @@ function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableRegion>
   )
 }
 

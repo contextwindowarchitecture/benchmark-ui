@@ -5,6 +5,7 @@ import { Link } from "react-router"
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { DataRegion, type RegionState } from "@/components/dashboard/data-region"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -142,12 +143,7 @@ export function RunFindings({ runId, summary, findingsFile }: RunFindingsProps) 
 function FindingsTable({ runId, findings }: { runId: string; findings: FindingV1[] }) {
   const groups = groupFindings(findings)
   return (
-    <div
-      className="overflow-x-auto rounded-lg border"
-      role="region"
-      aria-label="Findings table"
-      tabIndex={0}
-    >
+    <TableRegion label="Findings table">
       <Table>
         <TableCaption className="sr-only">Findings by suite, errors first.</TableCaption>
         <TableHeader>
@@ -170,7 +166,7 @@ function FindingsTable({ runId, findings }: { runId: string; findings: FindingV1
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableRegion>
   )
 }
 
@@ -183,7 +179,7 @@ function GroupRows({
 }) {
   return (
     <>
-      <TableRow className="bg-muted/40 hover:bg-muted/40">
+      <TableRow className="border-t-2 hover:bg-transparent">
         <TableCell colSpan={8} className="font-medium" scope="rowgroup">
           <span className="font-mono">{group.suite}</span>
           <span className="ml-2 text-xs font-normal text-muted-foreground">

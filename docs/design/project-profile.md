@@ -23,10 +23,13 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   from the two rules they trip, Prettier ignores them. Components generated at UI-P0: sidebar, breadcrumb,
   dropdown-menu, select, sheet, tooltip, button, badge, card, table, alert, input, separator, skeleton.
 - Tailwind major version and theme source: Tailwind 4.3.3 through `@tailwindcss/vite`; the generated stylesheet is
-  `src/styles/globals.css` and `src/styles/tokens.css` extends it (DESIGN.md 5): success, warning and info pairs,
-  the status vocabulary mapped onto the semantic pairs (`--status-*`), the four adapter identities on `--chart-1`
-  to `--chart-4` (`--adapter-python`, `-typescript`, `-go`, `-rust`), and the motion tokens. The preset's grey chart
-  tokens are replaced by the adapter hues; status colors are never used for series.
+  `src/styles/globals.css` and `src/styles/tokens.css` extends it (DESIGN.md 5): success, warning, info and
+  failure pairs (failure is the status hue for fail, error and regressed; the generated destructive, tuned for
+  white text on a button, stays the buttons' and reads below 4.5:1 as small text on a tint), the status vocabulary
+  mapped onto the semantic pairs (`--status-*`), the four adapter identities on `--chart-1` to `--chart-4`
+  (`--adapter-python`, `-typescript`, `-go`, `-rust`), and the motion tokens. The preset's grey chart tokens are
+  replaced by the adapter hues; status colors are never used for series. Every status badge meets WCAG AA on its
+  tint in the light theme (axe checks it in the smoke test).
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and
   `gcTime` infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned,
@@ -66,7 +69,8 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   phone at 375 px for the home page, the runs list and the run page (the tables scroll horizontally in a labelled
   region; the page itself never overflows).
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
-  navigation and table regions, `aria-sort` on sortable headers, accessible names on every icon button, visible
+  navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
+  scrolling container cannot be focused, so the region takes the scrolling over), `aria-sort` on sortable headers, accessible names on every icon button, visible
   focus rings, focus moved to the page title on route change. The Playwright smoke test runs axe on the home page,
   the runs list and a run page against the fixtures. Keyboard runs by hand on the shell and the two pages.
 - Performance budgets and measurement method: not yet measured; the plan's section 13 sets the targets for later

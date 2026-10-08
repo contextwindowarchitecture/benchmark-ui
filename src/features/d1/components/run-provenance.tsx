@@ -5,6 +5,7 @@ import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { DataRegion } from "@/components/dashboard/data-region"
 import { Digest } from "@/components/dashboard/digest"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { TableRegion } from "@/components/dashboard/table-region"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -199,84 +200,88 @@ function Provenance({ manifest }: { manifest: ManifestV1 }) {
         <CardHeader>
           <CardTitle>Adapters</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Adapter</TableHead>
-                <TableHead>Implementation</TableHead>
-                <TableHead>Commit</TableHead>
-                <TableHead>Toolchain</TableHead>
-                <TableHead>Build</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {adapters.map((adapter) => {
-                const implementation = adapter.implementation ?? null
-                return (
-                  <TableRow key={adapter.id} data-adapter={adapter.id}>
-                    <TableCell className="align-top">
-                      <AdapterMark adapter={adapter.id} />
-                      {!adapter.available ? (
-                        <div className="mt-1">
-                          <StatusBadge status="unavailable" />
-                        </div>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="align-top text-xs">
-                      {implementation ? (
-                        <>
-                          <span className="font-mono">{String(implementation["name"] ?? "")}</span>{" "}
-                          {String(implementation["version"] ?? "")}
-                        </>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          {adapter.error ?? "not recorded"}
-                        </span>
-                      )}
-                      {adapter.repository ? (
-                        <div className="text-muted-foreground">{adapter.repository}</div>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="align-top">
-                      {adapter.commit ? (
-                        <span className="inline-flex items-center gap-2">
-                          <Digest value={adapter.commit} label={`${adapter.id} commit`} />
-                          {adapter.dirty ? <StatusBadge status="warning" label="dirty" /> : null}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="align-top text-xs">
-                      {adapter.toolchain ?? <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="align-top font-mono text-xs">
-                      {adapter.build && adapter.build.length > 0 ? (
-                        <ul className="space-y-1">
-                          {adapter.build.map((step, i) => (
-                            <li key={i} className="break-all">
-                              {step.argv.join(" ")}{" "}
-                              <span className="text-muted-foreground">
-                                (exit {step.exit_code}, {formatMs(step.seconds * 1000)})
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                      {adapter.timing?.command ? (
-                        <div className="mt-1 text-muted-foreground">
-                          timing: {adapter.timing.command.join(" ")}
-                        </div>
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+        <CardContent>
+          <TableRegion label="Adapters table" className="rounded-none border-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Adapter</TableHead>
+                  <TableHead>Implementation</TableHead>
+                  <TableHead>Commit</TableHead>
+                  <TableHead>Toolchain</TableHead>
+                  <TableHead>Build</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {adapters.map((adapter) => {
+                  const implementation = adapter.implementation ?? null
+                  return (
+                    <TableRow key={adapter.id} data-adapter={adapter.id}>
+                      <TableCell className="align-top">
+                        <AdapterMark adapter={adapter.id} />
+                        {!adapter.available ? (
+                          <div className="mt-1">
+                            <StatusBadge status="unavailable" />
+                          </div>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="align-top text-xs">
+                        {implementation ? (
+                          <>
+                            <span className="font-mono">
+                              {String(implementation["name"] ?? "")}
+                            </span>{" "}
+                            {String(implementation["version"] ?? "")}
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            {adapter.error ?? "not recorded"}
+                          </span>
+                        )}
+                        {adapter.repository ? (
+                          <div className="text-muted-foreground">{adapter.repository}</div>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="align-top">
+                        {adapter.commit ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Digest value={adapter.commit} label={`${adapter.id} commit`} />
+                            {adapter.dirty ? <StatusBadge status="warning" label="dirty" /> : null}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="align-top text-xs">
+                        {adapter.toolchain ?? <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell className="align-top font-mono text-xs">
+                        {adapter.build && adapter.build.length > 0 ? (
+                          <ul className="space-y-1">
+                            {adapter.build.map((step, i) => (
+                              <li key={i} className="break-all">
+                                {step.argv.join(" ")}{" "}
+                                <span className="text-muted-foreground">
+                                  (exit {step.exit_code}, {formatMs(step.seconds * 1000)})
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                        {adapter.timing?.command ? (
+                          <div className="mt-1 text-muted-foreground">
+                            timing: {adapter.timing.command.join(" ")}
+                          </div>
+                        ) : null}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </TableRegion>
         </CardContent>
       </Card>
     </div>

@@ -5,13 +5,20 @@
  */
 
 :root {
-  /* Semantic pairs beside the generated destructive pair: success, warning, info. */
-  --success: oklch(0.52 0.14 150);
+  /*
+   * Semantic pairs beside the generated destructive pair: success, warning, info, and failure.
+   * Each is dark enough in the light theme to read at 4.5:1 as small text on its own 10% tint
+   * (a status badge), which the generated destructive, tuned for white text on a solid button,
+   * is not; `failure` is the status hue, `destructive` stays the buttons'.
+   */
+  --success: oklch(0.45 0.13 150);
   --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.6 0.14 70);
-  --warning-foreground: oklch(0.145 0 0);
-  --info: oklch(0.52 0.16 250);
+  --warning: oklch(0.5 0.13 70);
+  --warning-foreground: oklch(0.985 0 0);
+  --info: oklch(0.48 0.16 250);
   --info-foreground: oklch(0.985 0 0);
+  --failure: oklch(0.5 0.2 27);
+  --failure-foreground: oklch(0.985 0 0);
 
   /*
    * The status vocabulary, mapped centrally. Outcomes: pass, fail, partial, error. Judgments: info,
@@ -19,9 +26,9 @@
    * `partial` is not `fail`, and not run is muted, never red.
    */
   --status-pass: var(--success);
-  --status-fail: var(--destructive);
+  --status-fail: var(--failure);
   --status-partial: var(--warning);
-  --status-error: var(--destructive);
+  --status-error: var(--failure);
   --status-running: var(--info);
   --status-info: var(--info);
   --status-na: var(--muted-foreground);
@@ -31,7 +38,7 @@
   --status-baseline: var(--muted-foreground);
   --status-unchanged: var(--success);
   --status-changed: var(--warning);
-  --status-regressed: var(--destructive);
+  --status-regressed: var(--failure);
 
   /*
    * The four adapters, in their fixed order: Python, TypeScript, Go, Rust. Each takes one chart
@@ -49,12 +56,14 @@
 }
 
 .dark {
-  --success: oklch(0.75 0.15 150);
+  --success: oklch(0.78 0.15 150);
   --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.8 0.14 80);
+  --warning: oklch(0.82 0.14 80);
   --warning-foreground: oklch(0.145 0 0);
-  --info: oklch(0.72 0.14 250);
+  --info: oklch(0.76 0.13 250);
   --info-foreground: oklch(0.145 0 0);
+  --failure: oklch(0.76 0.17 22);
+  --failure-foreground: oklch(0.145 0 0);
 
   --chart-1: oklch(0.75 0.15 290);
   --chart-2: oklch(0.78 0.11 200);
@@ -69,6 +78,8 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-failure: var(--failure);
+  --color-failure-foreground: var(--failure-foreground);
   --color-adapter-python: var(--adapter-python);
   --color-adapter-typescript: var(--adapter-typescript);
   --color-adapter-go: var(--adapter-go);
