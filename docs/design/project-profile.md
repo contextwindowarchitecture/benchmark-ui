@@ -112,5 +112,5 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     pods there. The claim is read-only on the container's mount and read-write at the pod level, because the
     driver formats the volume at its first mount and refuses to when that mount is read-only.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 and UI-P1 are built; the site waits on the
-  prerequisites outside the manifests (`deploy/README.md`).
+- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 and UI-P1 are built; the site serves at its host
+  with cert-manager's certificate (`deploy/README.md`).

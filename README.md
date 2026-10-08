@@ -1,16 +1,16 @@
 # benchmark-ui
 
-The results site of the CWA (Context Window Architecture) viability benchmark, to run at
-benchmark.contextwindowarchitecture.io. It reads the runs the benchmark harness writes
+The results site of the CWA (Context Window Architecture) viability benchmark, at
+https://benchmark.contextwindowarchitecture.io. It reads the runs the benchmark harness writes
 ([contextwindowarchitecture/benchmark](https://github.com/contextwindowarchitecture/benchmark)) and shows what each
 domain of the benchmark establishes about CWA: the claim, the evidence, how far to trust it, and every number behind
 it.
 
-**Status: phase UI-P0 built** (the scaffold, the data layer, the shell, the runs list and the run page). The
-narrative pages, the suite pages, coverage, findings, performance, the shedding viewer and compare are later phases
-and render a placeholder that names theirs. [DESIGN.md](DESIGN.md) is the front-end design baseline and
-[docs/design/project-profile.md](docs/design/project-profile.md) records what this project chose. The working plan
-is kept locally under `docs/plans/`, like the benchmark's own plans.
+**Status: phases UI-P0 and UI-P1 built** (the scaffold, the data layer, the shell, the runs list and the run page; the
+deployment, serving at the host). The narrative pages, the suite pages, coverage, findings, performance, the shedding
+viewer and compare are later phases and render a placeholder that names theirs. [DESIGN.md](DESIGN.md) is the
+front-end design baseline and [docs/design/project-profile.md](docs/design/project-profile.md) records what this
+project chose. The working plan is kept locally under `docs/plans/`, like the benchmark's own plans.
 
 The benchmark's schemas, fixture runs and write-ups are vendored under `vendor/cwa-bench/` at the commit
 `vendor/cwa-bench.lock.json` pins; results never are. The viewer's types are generated from those schemas and every

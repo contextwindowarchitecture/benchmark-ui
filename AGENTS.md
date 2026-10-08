@@ -21,10 +21,11 @@ checked out beside this repository as `../benchmark`.
 | `src/features/d1/` | Domain 1: `model/` (pure selectors) and `components/` (the runs list, the run page) |
 | `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
-| `deploy/` | Not yet: the container image, the OpenShift manifests and the results publishing procedure (phase UI-P1) |
+| `deploy/` | The container image, the nginx configuration, the Kustomize base and the production overlay (the cluster's storage, TLS through cert-manager), and `publish.sh`, which copies runs into the results volume; `deploy/README.md` is the procedure |
 
-Status: phase UI-P0 is built (the scaffold, the data layer, the shell and routes, the runs list and the run page).
-Later phases' routes render a placeholder inside the shell. The plan's section 15 says which phase builds what.
+Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page) and UI-P1
+(the deployment; the site serves at benchmark.contextwindowarchitecture.io) are built. Later phases' routes render a
+placeholder inside the shell. The plan's section 15 says which phase builds what.
 
 ## Working on it
 
