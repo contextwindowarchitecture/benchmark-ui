@@ -3,6 +3,7 @@
 // need no DOM. Rows are indexed once (rowFields) and queried many times.
 
 import { rowFields, type RowFields, type RowKind, type RowOf } from "@/features/d1/model/row-kinds"
+import { compareSuites } from "@/features/d1/model/runs"
 import { orderAdapters } from "@/lib/adapters"
 
 import type { ParsedRow } from "./validate"
@@ -14,6 +15,12 @@ export type RowFilter = {
   verdict?: string | undefined
   outcome?: string | undefined
   tag?: string | undefined
+  suite?: string | undefined
+  oracle?: string | undefined
+  /** The case id exactly (the explorer), or a digest for the blob index. */
+  caseId?: string | undefined
+  /** A finding id the row names (a finding's "rows that carry it" link). */
+  finding?: string | undefined
   /** Matched against the case id and the kind's search text, case-insensitively. */
   q?: string | undefined
 }
@@ -27,6 +34,8 @@ export type RowFacets = {
   verdicts: FacetEntry[]
   outcomes: FacetEntry[]
   tags: FacetEntry[]
+  suites: FacetEntry[]
+  oracles: FacetEntry[]
 }
 
 export type IndexedRow<K extends RowKind> = { line: number; document: RowOf<K>; fields: RowFields }
@@ -75,11 +84,15 @@ export function facetsOf(rows: readonly IndexedRow<RowKind>[]): RowFacets {
   const verdicts = new Map<string, number>()
   const outcomes = new Map<string, number>()
   const tags = new Map<string, number>()
+  const suites = new Map<string, number>()
+  const oracles = new Map<string, number>()
   for (const { fields } of rows) {
     tally(fields.adapters, adapters)
     tally([fields.verdict], verdicts)
     tally(fields.outcomes, outcomes)
     tally(fields.tags, tags)
+    if (fields.suite !== null) tally([fields.suite], suites)
+    if (fields.oracle !== null) tally([fields.oracle], oracles)
   }
   return {
     adapters: orderAdapters([...adapters.keys()]).map((value) => ({
@@ -89,6 +102,10 @@ export function facetsOf(rows: readonly IndexedRow<RowKind>[]): RowFacets {
     verdicts: byCount(verdicts),
     outcomes: byCount(outcomes),
     tags: byValue(tags),
+    suites: [...suites]
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => compareSuites(a.value, b.value)),
+    oracles: byCount(oracles),
   }
 }
 
@@ -97,6 +114,10 @@ export function matchesFilter(fields: RowFields, filter: RowFilter): boolean {
   if (filter.verdict && fields.verdict !== filter.verdict) return false
   if (filter.outcome && !fields.outcomes.includes(filter.outcome)) return false
   if (filter.tag && !fields.tags.includes(filter.tag)) return false
+  if (filter.suite && fields.suite !== filter.suite) return false
+  if (filter.oracle && fields.oracle !== filter.oracle) return false
+  if (filter.caseId !== undefined && fields.caseId !== filter.caseId) return false
+  if (filter.finding && !fields.findings.includes(filter.finding)) return false
   const q = filter.q?.trim().toLowerCase()
   if (q && !fields.searchText.toLowerCase().includes(q)) return false
   return true

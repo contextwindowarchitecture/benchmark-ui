@@ -28,8 +28,19 @@ export const suitePageParams = {
   verdict: z.string().min(1).max(32),
   outcome: z.string().min(1).max(32),
   tag: z.string().min(1).max(120),
+  /** A finding id: only the rows that carry it. */
+  finding: z.string().min(1).max(64),
+  /** The findings list's own facets: the suite and the oracle (the findings file spans suites). */
+  suite: z.string().regex(/^S[0-9]+$/),
+  oracle: z.string().min(1).max(32),
   q: z.string().max(200),
   page: z.coerce.number().int().min(1),
+}
+
+export const coveragePageParams = {
+  adapter: z.string().min(1).max(32),
+  /** A tag family, the part before the colon. */
+  family: z.string().min(1).max(64),
 }
 
 /** The path of the current page with another run in place of the current one, or the run page. */

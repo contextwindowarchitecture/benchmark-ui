@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { fixtureRows } from "@/features/d1/model/row-kinds.test"
 import { ADAPTER_IDS } from "@/lib/adapters"
 import { FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { fixtureRows } from "@/test/fixture-rows"
 
 import { facetsOf, indexRows, matchesFilter, queryRows } from "./row-store"
 

@@ -6,8 +6,8 @@ import { describe, expect, it } from "vitest"
 import { indexRows } from "@/data/row-store"
 import type { ContractV1, SuiteSummaryV1, SummaryV1 } from "@/data/schema/generated"
 import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
+import { fixtureRows } from "@/test/fixture-rows"
 
-import { fixtureRows } from "./row-kinds.test"
 import {
   cellGroup,
   conformanceCases,

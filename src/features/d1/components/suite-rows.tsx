@@ -39,22 +39,34 @@ const ALL = "all"
 
 export type SuiteRowsProps = {
   runId: string
+  /** The suite the rows belong to, or a label for a file that spans suites ("findings"). */
   suite: string
   kind: RowKind
-  /** The results file as the run index lists it. */
+  /** The file as the run index lists it. */
   file: RunIndexV1["files"][number]
+  /** Load at once rather than on request: the findings list is its page's content. */
+  autoOpen?: boolean
 }
 
 /**
  * The suite's rows (ui-plan.md 8.4): loaded on demand, filtered by adapter, verdict, outcome, case
  * and coverage tag from the URL, paged, each row linking to the answer explorer where blobs exist.
  */
-export function SuiteRows({ runId, suite, kind, file }: SuiteRowsProps) {
+export function SuiteRows({ runId, suite, kind, file, autoOpen = false }: SuiteRowsProps) {
   const source = useResultsSource()
   const [state, setState] = useUrlState(suitePageParams)
-  const filtering = Boolean(state.adapter || state.verdict || state.outcome || state.tag || state.q)
+  const filtering = Boolean(
+    state.adapter ||
+    state.verdict ||
+    state.outcome ||
+    state.tag ||
+    state.q ||
+    state.finding ||
+    state.suite ||
+    state.oracle,
+  )
   // A filter in the address (a matrix cell's link) opens the rows at once; otherwise on request.
-  const [opened, setOpened] = useState(filtering || state.page !== undefined)
+  const [opened, setOpened] = useState(autoOpen || filtering || state.page !== undefined)
   const handle = useRows(runId, file.path, kind, { expectedRows: file.rows, enabled: opened })
   const query = useMemo<RowQuery>(
     () => ({
@@ -63,11 +75,24 @@ export function SuiteRows({ runId, suite, kind, file }: SuiteRowsProps) {
         verdict: state.verdict,
         outcome: state.outcome,
         tag: state.tag,
+        finding: state.finding,
+        suite: state.suite,
+        oracle: state.oracle,
         q: state.q,
       },
       page: state.page ?? 1,
     }),
-    [state.adapter, state.verdict, state.outcome, state.tag, state.q, state.page],
+    [
+      state.adapter,
+      state.verdict,
+      state.outcome,
+      state.tag,
+      state.finding,
+      state.suite,
+      state.oracle,
+      state.q,
+      state.page,
+    ],
   )
   const { page, pending, error } = useRowPage(handle, query)
   const facets = page?.facets
@@ -75,7 +100,7 @@ export function SuiteRows({ runId, suite, kind, file }: SuiteRowsProps) {
     <a
       href={source.url(runId, file.path)}
       download
-      className="inline-flex items-center gap-1 text-xs underline underline-offset-3"
+      className="inline-flex min-h-6 items-center gap-1 text-xs underline underline-offset-3"
     >
       <Download aria-hidden="true" className="size-3.5" /> Download {file.path}
     </a>
@@ -156,6 +181,24 @@ export function SuiteRows({ runId, suite, kind, file }: SuiteRowsProps) {
           render={(value) => (kind === "determinism-row" ? outcomeLabel(value) : value)}
           onChange={(verdict) => set({ verdict })}
         />
+        {kind === "finding" ? (
+          <>
+            <FacetSelect
+              label="Suite"
+              value={state.suite}
+              entries={facets?.suites ?? []}
+              render={(value) => value}
+              onChange={(suite) => set({ suite })}
+            />
+            <FacetSelect
+              label="Oracle"
+              value={state.oracle}
+              entries={facets?.oracles ?? []}
+              render={(value) => value}
+              onChange={(oracle) => set({ oracle })}
+            />
+          </>
+        ) : null}
         {kind !== "determinism-row" && (facets?.outcomes.length ?? 0) > 0 ? (
           <FacetSelect
             label="Outcome"
@@ -193,6 +236,9 @@ export function SuiteRows({ runId, suite, kind, file }: SuiteRowsProps) {
                 verdict: undefined,
                 outcome: undefined,
                 tag: undefined,
+                finding: undefined,
+                suite: undefined,
+                oracle: undefined,
                 q: undefined,
                 page: undefined,
               })
@@ -200,6 +246,11 @@ export function SuiteRows({ runId, suite, kind, file }: SuiteRowsProps) {
           >
             Clear
           </Button>
+        ) : null}
+        {state.finding ? (
+          <span className="text-xs text-muted-foreground">
+            rows carrying finding <span className="font-mono">{state.finding}</span>
+          </span>
         ) : null}
         <p className="ml-auto text-sm text-muted-foreground" aria-live="polite">
           {page

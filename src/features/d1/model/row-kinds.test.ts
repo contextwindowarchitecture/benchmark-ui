@@ -1,32 +1,17 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
 
-import { parseRows } from "@/data/validate"
-import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
+import { FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { fixtureRows } from "@/test/fixture-rows"
 
-import { isRowKind, rowFields, VERDICT_LABELS, type RowKind, type RowOf } from "./row-kinds"
-
-export function fixtureRows<K extends RowKind>(run: string, path: string, kind: K): RowOf<K>[] {
-  const text = readFileSync(join(FIXTURES_DIR, run, path), "utf8")
-  const raw = text
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    .map((line, i) => ({ line: i + 1, json: JSON.parse(line) as unknown }))
-  const parsed = parseRows(kind, raw)
-  expect(parsed.errors).toEqual([])
-  expect(parsed.unsupported).toEqual([])
-  return parsed.rows.map((row) => row.document)
-}
+import { isRowKind, rowFields, VERDICT_LABELS } from "./row-kinds"
 
 const nightly = FIXTURE_RUNS.nightly
 
 describe("rowFields", () => {
-  it("knows the eight row kinds and no other", () => {
+  it("knows the ten row kinds and no other", () => {
     expect(isRowKind("result-row")).toBe(true)
-    expect(isRowKind("finding")).toBe(false)
-    expect(Object.keys(VERDICT_LABELS)).toHaveLength(8)
+    expect(isRowKind("manifest")).toBe(false)
+    expect(Object.keys(VERDICT_LABELS)).toHaveLength(10)
   })
 
   it("reads a conformance row: one adapter, its verdict, its outcome, its tags and its blobs", () => {

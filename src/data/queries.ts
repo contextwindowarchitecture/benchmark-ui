@@ -3,7 +3,7 @@
 // the runs index is the one document that changes and refetches on focus. Query keys carry the
 // results root, the run id and the path, so a changed root never serves another root's cache.
 
-import { QueryClient, useQuery, type UseQueryResult } from "@tanstack/react-query"
+import { QueryClient, useQueries, useQuery, type UseQueryResult } from "@tanstack/react-query"
 import { createContext, useContext } from "react"
 
 import type { DocumentByKind, SchemaKind } from "./schema/generated"
@@ -57,6 +57,21 @@ export function useRunsIndex(): UseQueryResult<ParseResultOf<"runs-index">, Sour
 
 const immutable = { staleTime: Infinity, gcTime: Infinity } as const
 
+/** The query for one document of a run, shared by useRunDocument and useRunDocuments. */
+export function runDocumentOptions<K extends SchemaKind>(
+  source: ResultsSource,
+  runId: string,
+  path: string,
+  kind: K,
+) {
+  return {
+    queryKey: queryKeys.document(source.root, runId, path),
+    queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<ParseResultOf<K>> =>
+      parseDocumentAs(await source.document(runId, path, signal), kind),
+    ...immutable,
+  }
+}
+
 /** A JSON document of a run, validated as `kind`; cached for the session (the run is immutable). */
 export function useRunDocument<K extends SchemaKind>(
   runId: string | undefined,
@@ -66,12 +81,24 @@ export function useRunDocument<K extends SchemaKind>(
 ): UseQueryResult<ParseResultOf<K>, SourceError> {
   const source = useResultsSource()
   return useQuery<ParseResultOf<K>, SourceError>({
-    queryKey: queryKeys.document(source.root, runId ?? "", path),
-    queryFn: async ({ signal }) =>
-      parseDocumentAs(await source.document(runId ?? "", path, signal), kind),
+    ...runDocumentOptions(source, runId ?? "", path, kind),
     enabled: runId !== undefined && (options.enabled ?? true),
-    ...immutable,
   })
+}
+
+/** Several documents of one kind at once (every suite summary of a run), each its own query. */
+export function useRunDocuments<K extends SchemaKind>(
+  runId: string | undefined,
+  paths: readonly string[],
+  kind: K,
+): UseQueryResult<ParseResultOf<K>, SourceError>[] {
+  const source = useResultsSource()
+  return useQueries({
+    queries: paths.map((path) => ({
+      ...runDocumentOptions(source, runId ?? "", path, kind),
+      enabled: runId !== undefined,
+    })),
+  }) as UseQueryResult<ParseResultOf<K>, SourceError>[]
 }
 
 export type RowsState<K extends SchemaKind> =
@@ -96,6 +123,24 @@ export function useRunRows<K extends SchemaKind>(
       if (!result.ok) return result
       return { ok: true, bytes: result.bytes, ...parseRows(kind, result.rows, result.errors) }
     },
+    enabled: runId !== undefined && (options.enabled ?? true),
+    ...immutable,
+  })
+}
+
+/**
+ * A JSON file of a run as it is, unvalidated: for files that follow another producer's schema,
+ * such as a minimized draft's case.json (the spec's own), shown raw and never read.
+ */
+export function useRunRaw(
+  runId: string | undefined,
+  path: string,
+  options: { enabled?: boolean } = {},
+): UseQueryResult<unknown, SourceError> {
+  const source = useResultsSource()
+  return useQuery<unknown, SourceError>({
+    queryKey: [...queryKeys.document(source.root, runId ?? "", path), "raw"],
+    queryFn: ({ signal }) => source.document(runId ?? "", path, signal),
     enabled: runId !== undefined && (options.enabled ?? true),
     ...immutable,
   })

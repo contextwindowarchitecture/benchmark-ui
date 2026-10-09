@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Link } from "react-router"
 
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { Outcome } from "@/components/dashboard/outcome"
@@ -452,6 +453,123 @@ export const COLUMNS: { [K in RowKind]: Column<K>[] } = {
       id: "finding",
       label: "Finding",
       cell: (row, context) => <Findings ids={row.fields.findings} context={context} />,
+    },
+  ],
+  finding: [
+    {
+      id: "severity",
+      label: "Severity",
+      cell: (row) => <StatusBadge status={row.document.severity} />,
+    },
+    {
+      id: "suite",
+      label: "Suite",
+      cell: (row) => <span className="font-mono text-xs">{row.document.suite}</span>,
+    },
+    {
+      id: "adapter",
+      label: "Adapter",
+      cell: (row) =>
+        row.fields.adapters.length === 0 ? (
+          <span className="text-xs text-muted-foreground">all</span>
+        ) : (
+          <span className="flex flex-wrap gap-2">
+            {row.fields.adapters.map((adapter) => (
+              <AdapterMark key={adapter} adapter={adapter} />
+            ))}
+          </span>
+        ),
+    },
+    {
+      id: "oracle",
+      label: "Oracle",
+      cell: (row) => (
+        <span className="text-xs">
+          {row.document.oracle}
+          {row.document.checks.length > 0 ? (
+            <span className="block font-mono text-muted-foreground">
+              {row.document.checks.join(", ")}
+            </span>
+          ) : null}
+        </span>
+      ),
+    },
+    {
+      id: "summary",
+      label: "Summary",
+      cell: (row, context) => (
+        <div className="max-w-md">
+          <Link
+            to={`/d1/runs/${context.runId}/findings/${row.document.finding_id}`}
+            className="underline-offset-3 hover:underline"
+          >
+            {row.document.summary}
+          </Link>
+          <div className="mt-0.5 font-mono text-xs text-muted-foreground">
+            {row.document.finding_id} · {row.document.case_id}
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "occurrences",
+      label: "Occurrences",
+      className: "text-right",
+      cell: (row) => (
+        <span className="tabular text-xs">{formatCount(row.document.occurrences)}</span>
+      ),
+    },
+    {
+      id: "minimized",
+      label: "Minimized",
+      cell: (row) =>
+        row.document.minimized ? (
+          <span className={row.document.minimized.reproduces ? "text-xs" : "text-xs text-warning"}>
+            {row.document.minimized.items_before} → {row.document.minimized.items_after} items
+            {row.document.minimized.reproduces ? "" : " (does not reproduce)"}
+          </span>
+        ) : (
+          <Dash />
+        ),
+    },
+    {
+      id: "upstream",
+      label: "Upstream",
+      cell: (row) =>
+        row.document.upstream ? (
+          <a
+            href={row.document.upstream.url}
+            className="inline-flex items-center gap-1 text-xs underline underline-offset-3"
+            rel="noreferrer"
+          >
+            {row.document.upstream.state}
+          </a>
+        ) : (
+          <Dash />
+        ),
+    },
+  ],
+  blob: [
+    {
+      id: "digest",
+      label: "Digest",
+      cell: (row) => <span className="font-mono text-xs break-all">{row.document.digest}</span>,
+    },
+    {
+      id: "path",
+      label: "Path",
+      cell: (row) => <span className="font-mono text-xs break-all">{row.document.path}</span>,
+    },
+    {
+      id: "media",
+      label: "Media type",
+      cell: (row) => <span className="text-xs">{row.document.media_type}</span>,
+    },
+    {
+      id: "bytes",
+      label: "Bytes",
+      className: "text-right",
+      cell: (row) => <span className="tabular text-xs">{formatCount(row.document.bytes)}</span>,
     },
   ],
   "self-check": [
