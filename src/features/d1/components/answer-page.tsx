@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { lazy, Suspense, useMemo } from "react"
 import { Link, useParams } from "react-router"
 
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
@@ -7,22 +7,12 @@ import { DataRegion, type RegionState } from "@/components/dashboard/data-region
 import { Digest } from "@/components/dashboard/digest"
 import { Outcome } from "@/components/dashboard/outcome"
 import { StatusBadge } from "@/components/dashboard/status-badge"
-import { TableRegion } from "@/components/dashboard/table-region"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { documentOf, useRunDocument } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
-import type { RunIndexV1, TimelineV1 } from "@/data/schema/generated"
+import type { RunIndexV1 } from "@/data/schema/generated"
 import { useBlob, useBlobIndex, type BlobIndexHandle } from "@/data/use-blobs"
 import { useRowPage, useRows } from "@/data/use-rows"
 import {
@@ -40,6 +30,12 @@ import { formatCount, formatMs } from "@/lib/format"
 
 import { BlobView } from "./blob-view"
 import { DiffView } from "./diff-view"
+import { TimelineLanesTable } from "./timeline-lanes-table"
+
+// The walk carries GSAP (DESIGN.md 2.2); it loads with the first timeline shown, not with the page.
+const PipelineWalk = lazy(() =>
+  import("./pipeline-walk").then((module) => ({ default: module.PipelineWalk })),
+)
 
 /**
  * One snapshot's answer from each adapter (ui-plan.md 8.9), from the suite's rows for the case:
@@ -519,77 +515,14 @@ function Timeline({ runId, path }: { runId: string; path: string }) {
       label="the timeline"
       skeleton={<Skeleton className="h-24 w-full" />}
     >
-      {(document) => <Lanes timeline={document} />}
+      {(document) => (
+        <div className="space-y-3" data-timeline="ready">
+          <TimelineLanesTable timeline={document} />
+          <Suspense fallback={<Skeleton className="h-64 w-full" aria-label="Loading the walk" />}>
+            <PipelineWalk timeline={document} runId={runId} path={path} withTable={false} />
+          </Suspense>
+        </div>
+      )}
     </DataRegion>
-  )
-}
-
-/** The eight stages as rows with the events in sequence (ui-plan.md 9.2's lanes, static here). */
-function Lanes({ timeline }: { timeline: TimelineV1 }) {
-  const byStage = new Map<string, TimelineV1["events"]>()
-  for (const lane of timeline.lanes) byStage.set(lane, [])
-  for (const event of [...timeline.events].sort((a, b) => a.seq - b.seq)) {
-    const list = byStage.get(event.stage) ?? []
-    list.push(event)
-    byStage.set(event.stage, list)
-  }
-  const inferred = timeline.events.filter((event) => event.order === "inferred").length
-  return (
-    <div className="space-y-1" data-timeline="ready">
-      <h3 className="text-sm font-medium">Timeline</h3>
-      <p className="text-xs text-muted-foreground">
-        <Outcome value={timeline.outcome} />
-        {timeline.refusal_reason ? ` ${timeline.refusal_reason}` : ""} ·{" "}
-        {formatCount(timeline.counters.candidates)} candidates,{" "}
-        {formatCount(timeline.counters.admitted)} admitted,{" "}
-        {formatCount(timeline.counters.included)} included,{" "}
-        {formatCount(timeline.counters.compressed)} compressed,{" "}
-        {formatCount(timeline.counters.omitted)} omitted
-        {inferred > 0 ? `; ${formatCount(inferred)} events in inferred order` : ""}.
-      </p>
-      <TableRegion label="Timeline lanes table" className="rounded-lg">
-        <Table>
-          <TableCaption className="sr-only">Events per pipeline stage, in sequence.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Stage</TableHead>
-              <TableHead>Events</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...byStage.entries()].map(([stage, events]) => (
-              <TableRow key={stage} data-lane={stage}>
-                <TableCell className="align-top font-mono text-xs">{stage}</TableCell>
-                <TableCell className="align-top text-xs">
-                  {events.length === 0 ? (
-                    <span className="text-muted-foreground">no events at this stage</span>
-                  ) : (
-                    <ol className="space-y-0.5">
-                      {events.map((event) => (
-                        <li
-                          key={event.seq}
-                          className={
-                            event.order === "inferred" ? "italic text-muted-foreground" : undefined
-                          }
-                          title={
-                            event.order === "inferred"
-                              ? "order inferred by the harness"
-                              : "order exact"
-                          }
-                        >
-                          <span className="tabular text-muted-foreground">{event.seq}</span>{" "}
-                          {event.type}
-                          {event.order === "inferred" ? " (inferred)" : ""}
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableRegion>
-    </div>
   )
 }

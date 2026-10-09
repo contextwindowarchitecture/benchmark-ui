@@ -20,6 +20,9 @@ export const LANES: readonly Lane[] = [
   "render",
 ]
 
+/** Events per second while the walk plays: a 42-event timeline plays in under four seconds. */
+export const WALK_RATE = 12
+
 export function isLane(value: string): value is Lane {
   return (LANES as readonly string[]).includes(value)
 }
