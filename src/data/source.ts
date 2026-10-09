@@ -140,9 +140,8 @@ function encodeRun(runId: string): string {
  * Parses a JSONL body line by line as it streams, so a bad line is reported with its number and
  * the rest of the file still parses. Stops at the budget: a file above it belongs to the worker.
  *
- * TODO(ui-plan.md 5.4): above MAIN_THREAD_ROW_BUDGET the parse must run in a Web Worker that also
- * pre-aggregates (S0, S2, S4, S5, S7 rows and perf samples). UI-P0 ships the streaming parser and
- * the budget check; the worker lands with the suite pages (UI-P2), the first to need those files.
+ * Above MAIN_THREAD_ROW_BUDGET the same parser runs inside the rows worker (rows-worker-core.ts),
+ * which keeps the rows and answers filtered pages and facet counts (ui-plan.md 5.4).
  */
 export async function parseJsonl(
   response: Response,

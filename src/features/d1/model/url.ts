@@ -22,6 +22,16 @@ export const runPageParams = {
   q: z.string().max(200),
 }
 
+export const suitePageParams = {
+  /** The rows table's filters (ui-plan.md 8.4): each a value the file's facets offer. */
+  adapter: z.string().min(1).max(32),
+  verdict: z.string().min(1).max(32),
+  outcome: z.string().min(1).max(32),
+  tag: z.string().min(1).max(120),
+  q: z.string().max(200),
+  page: z.coerce.number().int().min(1),
+}
+
 /** The path of the current page with another run in place of the current one, or the run page. */
 export function runScopedPath(
   pathname: string,

@@ -58,14 +58,34 @@ test("the home page, the runs list and a run page render from the fixtures", asy
     "href",
     `/results/d1/${NIGHTLY}/summary.json`,
   )
-  // The page never overflows horizontally (DESIGN.md 4.2).
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  // A suite page from a matrix cell, with its rows loaded on request.
+  await page.getByRole("link", { name: /^S1 python: pass, 65 \/ 65 cases/ }).click()
+  await expect(page).toHaveTitle(`S1 · ${NIGHTLY} · CWA benchmark`)
+  await expect(
+    page.getByRole("heading", { level: 1, name: "S1 · Conformance replay" }),
+  ).toBeFocused()
+  await expect(page.getByText("Differential agreement · 90 of 90 cases")).toBeVisible()
+  await expect(page.getByRole("region", { name: "Conformance cases table" })).toBeVisible()
+  // The address carried the adapter filter, so the rows opened at once.
+  await expect(page.getByRole("region", { name: "S1 rows table" })).toBeVisible()
+  await expect(page.getByRole("combobox", { name: "Filter rows by adapter" })).toContainText(
+    "Python",
+  )
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+})
+
+/** The page never overflows horizontally (DESIGN.md 4.2). */
+async function expectNoOverflow(page: Page) {
   const widths = await page.evaluate(() => [
     document.documentElement.scrollWidth,
     window.innerWidth,
   ])
   expect(widths[0]).toBeLessThanOrEqual(widths[1]!)
-  await expectAccessible(page)
-})
+}
 
 test("a run the server no longer holds is shown as pruned, not as a 404", async ({ page }) => {
   await page.route("**/results/d1/20261008T004213Z-e824f1b/index.json", (route) =>

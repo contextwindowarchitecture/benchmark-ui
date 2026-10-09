@@ -7,6 +7,7 @@ import { NotBuiltYet } from "@/components/dashboard/not-built-yet"
 import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { RunPage } from "@/features/d1/components/run-page"
 import { RunsPage } from "@/features/d1/components/runs-page"
+import { SuitePage } from "@/features/d1/components/suite-page"
 
 import { HomePage } from "./pages/home-page"
 import { NotFoundPage } from "./pages/not-found-page"
@@ -87,13 +88,7 @@ export const routes: RouteObject[] = [
                       { index: true, element: <RunPage />, handle: handle({ title: () => "Run" }) },
                       {
                         path: "suites/:suite",
-                        element: (
-                          <NotBuiltYet
-                            title="Suite"
-                            phase="UI-P2"
-                            note="Common header, metrics, suite-specific panels and the rows."
-                          />
-                        ),
+                        element: <SuitePage />,
                         handle: handle({
                           title: (p) => param(p, "suite"),
                           crumb: (p) => ({ label: param(p, "suite") }),
