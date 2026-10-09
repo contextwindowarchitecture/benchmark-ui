@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import userEvent from "@testing-library/user-event"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
@@ -63,5 +64,36 @@ describe("the shell", () => {
     expect(screen.getByText("not started")).toBeInTheDocument()
     renderApp("/nothing/here")
     expect(await screen.findByRole("heading", { name: "Page not found" })).toBeInTheDocument()
+  })
+
+  it("moves focus to the new page's title on navigation, but not when a filter changes the query", async () => {
+    const { router } = renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}`)
+    const box = await screen.findByRole("searchbox", { name: "Search metrics" })
+    await userEvent.type(box, "s1")
+    await waitFor(() => expect(router.state.location.search).toBe("?q=s1"))
+    expect(document.activeElement).toBe(box)
+
+    await router.navigate("/about")
+    await waitFor(() => expect(document.activeElement).toBe(document.getElementById("page-title")))
+  })
+
+  describe("with a fragment in the URL", () => {
+    const scrolled = vi.fn<(this: Element) => void>()
+    afterEach(() => {
+      scrolled.mockReset()
+      // jsdom has no scrolling; the stub stands in for the browser's.
+      delete (Element.prototype as Partial<Element>).scrollIntoView
+    })
+
+    it("lands on the element the fragment names, on the first render too", async () => {
+      Element.prototype.scrollIntoView = function (this: Element) {
+        scrolled.call(this)
+      }
+      renderApp("/about#viewer")
+      await screen.findByRole("heading", { level: 1, name: "About" })
+      await waitFor(() =>
+        expect(scrolled.mock.contexts).toContain(document.getElementById("viewer")),
+      )
+    })
   })
 })
