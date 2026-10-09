@@ -2,7 +2,7 @@
 // worker above it, as a download above the worker's budget. A page asks for a filtered page and
 // gets the rows of that page with the facets, never the whole file.
 
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
 import type { RowKind } from "@/features/d1/model/row-kinds"
@@ -212,10 +212,13 @@ export function useRowPage<K extends RowKind>(
       return store.query(query)
     },
     enabled: store !== null && !store.sync,
+    // The last page answered stays while the worker answers the next, so the filters and the
+    // table never blank between two queries.
+    placeholderData: keepPreviousData,
     staleTime: Infinity,
     gcTime: 5 * 60_000,
   })
   if (!store) return { page: undefined, pending: handle.status === "loading", error: null }
   if (store.sync) return { page: sync, pending: false, error: null }
-  return { page: remote.data, pending: remote.isPending, error: remote.error }
+  return { page: remote.data, pending: remote.isFetching, error: remote.error }
 }
