@@ -37,6 +37,20 @@ export const suitePageParams = {
   page: z.coerce.number().int().min(1),
 }
 
+const RUN_ID_PARAM = z.string().regex(/^\d{8}T\d{6}Z-[0-9a-f]{7}(?:-\d+)?$/)
+
+/** The composite's two runs (ui-plan.md 5.5, 6.2): each optional, the index resolving the rest. */
+export const overviewParams = {
+  nightly: RUN_ID_PARAM,
+  s7: RUN_ID_PARAM,
+}
+
+/** Compare's two runs (ui-plan.md 8.10). */
+export const compareParams = {
+  from: RUN_ID_PARAM,
+  to: RUN_ID_PARAM,
+}
+
 export const coveragePageParams = {
   adapter: z.string().min(1).max(32),
   /** A tag family, the part before the colon. */

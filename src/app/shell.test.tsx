@@ -55,8 +55,12 @@ describe("the shell", () => {
   it("renders not-started domains and a 404 for anything else", async () => {
     renderApp("/d3")
     expect(
-      await screen.findByRole("heading", { name: /Domain 3 .* \(not started\)/ }),
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Domain 3 · Agentic context engineering/,
+      }),
     ).toBeInTheDocument()
+    expect(screen.getByText("not started")).toBeInTheDocument()
     renderApp("/nothing/here")
     expect(await screen.findByRole("heading", { name: "Page not found" })).toBeInTheDocument()
   })

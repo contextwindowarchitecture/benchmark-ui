@@ -1,9 +1,11 @@
 // The routes of ui-plan.md 6.2, exactly. Later phases' routes render a placeholder inside the
 // shell rather than a 404, so every link in the plan resolves from day one.
 
+import { Suspense } from "react"
 import type { RouteObject } from "react-router"
 
 import { NotBuiltYet } from "@/components/dashboard/not-built-yet"
+import { PageFallback } from "@/components/dashboard/page-fallback"
 import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { RunPage } from "@/features/d1/components/run-page"
 import { AnswerPage } from "@/features/d1/components/answer-page"
@@ -13,7 +15,10 @@ import { FindingsPage } from "@/features/d1/components/findings-page"
 import { RunsPage } from "@/features/d1/components/runs-page"
 import { SuitePage } from "@/features/d1/components/suite-page"
 
+import { AboutPage } from "./pages/about-page"
+import { DomainPage } from "./pages/domain-page"
 import { HomePage } from "./pages/home-page"
+import { OverviewPage } from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
 import { RouteErrorPage } from "./pages/route-error-page"
 import type { RouteHandle } from "./route-meta"
@@ -44,13 +49,7 @@ export const routes: RouteObject[] = [
           { index: true, element: <HomePage />, handle: handle({ title: () => "CWA benchmark" }) },
           {
             path: "about",
-            element: (
-              <NotBuiltYet
-                title="About"
-                phase="UI-P5"
-                note="It will carry the viability document's framing and the write-ups."
-              />
-            ),
+            element: <AboutPage />,
             handle: handle({ title: () => "About", crumb: () => ({ label: "About" }) }),
           },
           {
@@ -63,11 +62,16 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: (
-                  <NotBuiltYet
-                    title="Domain 1 · Assembly"
-                    phase="UI-P5"
-                    note="The overview: the claim, the evidence, how far to trust it."
-                  />
+                  <Suspense
+                    fallback={
+                      <PageFallback
+                        title="Domain 1 · Assembly determinism, budgeting and traceability"
+                        width="wide"
+                      />
+                    }
+                  >
+                    <OverviewPage />
+                  </Suspense>
                 ),
                 handle: handle({ title: () => "Domain 1 overview" }),
               },
@@ -209,13 +213,7 @@ export const routes: RouteObject[] = [
           },
           ...Object.entries(DOMAINS).map(([id, title]): RouteObject => ({
             path: id,
-            element: (
-              <NotBuiltYet
-                title={`${title} (not started)`}
-                phase="UI-P5"
-                note="This domain has no results yet; its page will carry its claim and design."
-              />
-            ),
+            element: <DomainPage id={id} />,
             handle: handle({ title: () => title, crumb: () => ({ label: title }) }),
           })),
           { path: "*", element: <NotFoundPage />, handle: handle({ title: () => "Not found" }) },

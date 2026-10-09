@@ -52,7 +52,6 @@ export const navigation: NavGroup[] = [
         icon: BookOpen,
         href: () => "/about",
         patterns: ["/about"],
-        phase: "UI-P5",
       },
     ],
   },
@@ -66,7 +65,6 @@ export const navigation: NavGroup[] = [
         icon: Layers,
         href: () => "/d1",
         patterns: ["/d1"],
-        phase: "UI-P5",
       },
       {
         id: "d1-runs",
@@ -144,7 +142,6 @@ export const navigation: NavGroup[] = [
         icon: Layers,
         href: () => `/${id}`,
         patterns: [`/${id}`],
-        phase: "UI-P5",
       },
     ],
   })),

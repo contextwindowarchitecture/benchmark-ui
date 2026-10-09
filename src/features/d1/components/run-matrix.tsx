@@ -33,15 +33,36 @@ export function RunMatrix({ runId, summary }: RunMatrixProps) {
   const region = regionOfDocument(summary, `${runId}/summary.json`, "the summary")
   return (
     <DataRegion state={region} label="the summary" skeleton={<Skeleton className="h-64 w-full" />}>
-      {(document) => <Matrix runId={runId} summary={document} />}
+      {(document) => <MatrixTable sources={[{ runId, summary: document }]} />}
     </DataRegion>
   )
 }
 
-function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
-  const adapters = summaryAdapters(summary)
-  const suites = sortedSuites(summary)
-  if (suites.length === 0) {
+/** One run's rows of the matrix: all its suites, or the ones named; the run labeled when asked. */
+export type MatrixSource = {
+  runId: string
+  summary: SummaryV1
+  suites?: SuiteEntry[]
+  /** Name the run under each suite, for a matrix that mixes runs (the overview's composite). */
+  labelRun?: boolean
+}
+
+/**
+ * The matrix over one or more runs: the adapters across come from the first source, and each row
+ * reads its cells from its own run's suite summary.
+ */
+export function MatrixTable({
+  sources,
+  label = "Suite by adapter matrix",
+}: {
+  sources: MatrixSource[]
+  label?: string
+}) {
+  const first = sources[0]
+  const rows = sources.flatMap((source) =>
+    (source.suites ?? sortedSuites(source.summary)).map((suite) => ({ source, suite })),
+  )
+  if (!first || rows.length === 0) {
     return (
       <p
         className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
@@ -51,8 +72,9 @@ function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
       </p>
     )
   }
+  const adapters = summaryAdapters(first.summary)
   return (
-    <TableRegion label="Suite by adapter matrix">
+    <TableRegion label={label}>
       <Table>
         <TableCaption className="sr-only">
           Suite status per adapter; each cell links to the suite page.
@@ -72,13 +94,14 @@ function Matrix({ runId, summary }: { runId: string; summary: SummaryV1 }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {suites.map((suite) => (
+          {rows.map(({ source, suite }) => (
             <MatrixRow
-              key={suite.id}
-              runId={runId}
+              key={`${source.runId}:${suite.id}`}
+              runId={source.runId}
               suite={suite}
-              summary={summary}
+              summary={source.summary}
               adapters={adapters.map((a) => a.adapter)}
+              labelRun={source.labelRun ?? false}
             />
           ))}
         </TableBody>
@@ -94,11 +117,13 @@ function MatrixRow({
   suite,
   summary,
   adapters,
+  labelRun,
 }: {
   runId: string
   suite: SuiteEntry
   summary: SummaryV1
   adapters: string[]
+  labelRun: boolean
 }) {
   const detail = useRunDocument(runId, suite.summary, "suite-summary")
   const to = `/d1/runs/${runId}/suites/${suite.id}`
@@ -112,6 +137,11 @@ function MatrixRow({
         <Link to={to} className="font-medium underline-offset-3 hover:underline">
           <span className="font-mono">{suite.id}</span> · {suite.title}
         </Link>
+        {labelRun ? (
+          <div className="font-mono text-xs text-muted-foreground" data-run-label>
+            from run {runId}
+          </div>
+        ) : null}
       </TableCell>
       <TableCell className="align-top">
         <StatusBadge status={suite.status} />
