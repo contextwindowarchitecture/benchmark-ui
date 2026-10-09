@@ -153,8 +153,15 @@ export function SheddingCurve({
                   className="fill-failure/10"
                 />
                 <text
-                  x={Math.min(layout.refused.x0, layout.refused.x1) + 6}
+                  x={
+                    Math.abs(layout.refused.x1 - layout.refused.x0) >= 160
+                      ? Math.min(layout.refused.x0, layout.refused.x1) + 6
+                      : Math.min(layout.refused.x0, layout.refused.x1) - 6
+                  }
                   y={layout.margin.top + 14}
+                  textAnchor={
+                    Math.abs(layout.refused.x1 - layout.refused.x0) >= 160 ? "start" : "end"
+                  }
                   className="fill-failure text-[11px]"
                 >
                   refused{layout.refused.reason ? `: ${layout.refused.reason}` : ""}
@@ -222,9 +229,8 @@ export function SheddingCurve({
                   strokeDasharray="4 3"
                 />
                 <text
-                  x={layout.width - layout.margin.right}
+                  x={layout.margin.left + 4}
                   y={layout.protectedY - 4}
-                  textAnchor="end"
                   className="fill-warning text-[11px]"
                 >
                   protected {formatCount(summary.protected)}
@@ -243,7 +249,7 @@ export function SheddingCurve({
                 />
                 <text
                   x={layout.margin.left + 4}
-                  y={layout.floorY - 4}
+                  y={layout.floorY + 12}
                   className="fill-info text-[11px]"
                 >
                   floor {formatCount(summary.floor)}
