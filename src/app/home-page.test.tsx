@@ -37,6 +37,10 @@ describe("home page", () => {
       "/d5",
     )
     expect(screen.getByText(/No single check is trusted alone/)).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "The glossary of terms" })).toHaveAttribute(
+      "href",
+      "/glossary",
+    )
     expect(screen.getByRole("link", { name: "The Domain 1 write-up" })).toHaveAttribute(
       "href",
       expect.stringContaining("/blob/603fe20145eaf03f9193b75bd3bb000db78b0bd0/docs/domain1.md"),

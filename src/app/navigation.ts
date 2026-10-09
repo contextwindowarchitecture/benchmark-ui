@@ -3,6 +3,7 @@
 
 import {
   Activity,
+  BookA,
   BookOpen,
   Boxes,
   GitCompare,
@@ -52,6 +53,13 @@ export const navigation: NavGroup[] = [
         icon: BookOpen,
         href: () => "/about",
         patterns: ["/about"],
+      },
+      {
+        id: "glossary",
+        label: "Glossary",
+        icon: BookA,
+        href: () => "/glossary",
+        patterns: ["/glossary"],
       },
     ],
   },

@@ -8,6 +8,9 @@ import {
   CONTENT_SOURCE,
   DEFECTS,
   DOMAINS,
+  filterGlossary,
+  GLOSSARY,
+  glossaryEntry,
   LANES,
   PLANES,
   sourceUrl,
@@ -103,5 +106,46 @@ describe("the content files", () => {
       }
     }
     expect(TRUST.length).toBeGreaterThanOrEqual(6)
+  })
+
+  it("define each glossary term once, link only to terms that exist, and quote vendored files", async () => {
+    const ids = GLOSSARY.map((entry) => entry.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(new Set(GLOSSARY.map((entry) => entry.term.toLowerCase())).size).toBe(ids.length)
+    // The terms the glossary was asked for.
+    for (const id of ["oracle", "metamorphic-relation", "generative-fuzzing", "golden"]) {
+      expect(glossaryEntry(id)?.group).toBe("benchmark")
+    }
+    // An id is the term's anchor on the page, beside the shell's and the page's own ids.
+    for (const taken of ["page", "page-title", "main-content", "architecture", "benchmark"]) {
+      expect(ids).not.toContain(taken)
+    }
+    for (const entry of GLOSSARY) {
+      expect(entry.id).toMatch(/^[a-z][a-z0-9-]*$/)
+      expect(entry.text.endsWith("."), entry.id).toBe(true)
+      for (const id of entry.see ?? []) {
+        expect(glossaryEntry(id), `${entry.id} sees ${id}`).toBeDefined()
+        expect(id).not.toBe(entry.id)
+      }
+      await expect(
+        readFile(resolve(root, "vendor/cwa-bench", entry.citation.file), "utf8"),
+      ).resolves.toBeTruthy()
+    }
+  })
+
+  it("keep numbers out of the glossary's words: identifiers only", () => {
+    // Domain, requirement, auditor-check, relation and suite ids name things; any other digit is
+    // a value.
+    const identifiers = /\b(?:Domain |R-|A|MR|S)\d+\b/g
+    for (const entry of GLOSSARY) {
+      expect(entry.text.replace(identifiers, ""), entry.id).not.toMatch(/\d/)
+    }
+  })
+
+  it("filter the glossary by term, other names and words, ignoring case", () => {
+    expect(filterGlossary(GLOSSARY, "")).toBe(GLOSSARY)
+    expect(filterGlossary(GLOSSARY, "  GOLDENS ").map((entry) => entry.id)).toContain("golden")
+    expect(filterGlossary(GLOSSARY, "cwabench").map((entry) => entry.id)).toContain("harness")
+    expect(filterGlossary(GLOSSARY, "no such word")).toHaveLength(0)
   })
 })

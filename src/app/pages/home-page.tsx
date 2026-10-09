@@ -90,6 +90,11 @@ export function HomePage() {
                 About the benchmark and this viewer
               </Link>
             </li>
+            <li>
+              <Link to="/glossary" className="underline underline-offset-3">
+                The glossary of terms
+              </Link>
+            </li>
           </ul>
         </div>
       </PageSection>

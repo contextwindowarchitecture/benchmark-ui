@@ -18,6 +18,7 @@ import { SuitePage } from "@/features/d1/components/suite-page"
 
 import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
+import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
 import { OverviewPage } from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
@@ -52,6 +53,11 @@ export const routes: RouteObject[] = [
             path: "about",
             element: <AboutPage />,
             handle: handle({ title: () => "About", crumb: () => ({ label: "About" }) }),
+          },
+          {
+            path: "glossary",
+            element: <GlossaryPage />,
+            handle: handle({ title: () => "Glossary", crumb: () => ({ label: "Glossary" }) }),
           },
           {
             path: "d1",
