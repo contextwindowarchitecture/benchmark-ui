@@ -58,7 +58,7 @@ export function S11Summarizer({ runId, summary, index }: SuitePanelProps) {
                         key={path}
                         href={source.url(runId, path)}
                         download
-                        className="inline-flex items-center gap-1 underline underline-offset-3"
+                        className="inline-flex min-h-6 items-center gap-1 underline underline-offset-3"
                       >
                         <Download aria-hidden="true" className="size-3" /> {path}
                       </a>

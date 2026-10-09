@@ -146,7 +146,7 @@ export function SuiteHeader({
                   <a
                     href={source.url(runId, file.path)}
                     download
-                    className="inline-flex items-center gap-1 underline underline-offset-3"
+                    className="inline-flex min-h-6 items-center gap-1 underline underline-offset-3"
                   >
                     <Download aria-hidden="true" className="size-3.5" /> {file.label}
                   </a>

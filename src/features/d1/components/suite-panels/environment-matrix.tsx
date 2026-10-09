@@ -16,7 +16,7 @@ import { adapterLabel } from "@/lib/adapters"
 import { formatCount } from "@/lib/format"
 
 const HATCHED =
-  "bg-[repeating-linear-gradient(135deg,transparent_0_6px,var(--color-muted)_6px_8px)] text-muted-foreground"
+  "bg-[repeating-linear-gradient(135deg,transparent_0_6px,var(--color-muted)_6px_8px)]"
 
 function tone(cell: MatrixCell): string {
   const rates = [rateOf(cell.decision), rateOf(cell.payload), rateOf(cell.trace)].filter(
@@ -105,11 +105,11 @@ export function EnvironmentMatrix({
                     >
                       {applied ? (
                         <dl className="grid grid-cols-[auto_1fr] gap-x-2 tabular">
-                          <dt className="text-muted-foreground">D</dt>
+                          <dt className="font-light">D</dt>
                           <dd>{fraction(cell.decision)}</dd>
-                          <dt className="text-muted-foreground">P</dt>
+                          <dt className="font-light">P</dt>
                           <dd>{fraction(cell.payload)}</dd>
-                          <dt className="text-muted-foreground">T</dt>
+                          <dt className="font-light">T</dt>
                           <dd>{fraction(cell.trace)}</dd>
                         </dl>
                       ) : (
@@ -121,7 +121,7 @@ export function EnvironmentMatrix({
                         </div>
                       ) : null}
                       {applied && cell.not_applied > 0 ? (
-                        <div className="mt-1 text-muted-foreground">
+                        <div className="mt-1 font-light">
                           {formatCount(cell.not_applied)} not applied
                         </div>
                       ) : null}
