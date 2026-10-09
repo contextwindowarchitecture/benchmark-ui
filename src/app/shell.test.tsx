@@ -43,12 +43,12 @@ describe("the shell", () => {
   })
 
   it("renders a later phase's route as a placeholder in the shell, not a 404", async () => {
-    renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}/coverage`)
-    expect(await screen.findByRole("heading", { name: "Coverage" })).toBeInTheDocument()
-    expect(screen.getByText(/phase UI-P3/)).toBeInTheDocument()
+    renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}/perf`)
+    expect(await screen.findByRole("heading", { name: "Performance" })).toBeInTheDocument()
+    expect(screen.getByText(/phase UI-P4/)).toBeInTheDocument()
     expect(screen.queryByText("Page not found")).not.toBeInTheDocument()
     await waitFor(() =>
-      expect(document.title).toBe(`Coverage · ${FIXTURE_RUNS.nightly} · CWA benchmark`),
+      expect(document.title).toBe(`Performance · ${FIXTURE_RUNS.nightly} · CWA benchmark`),
     )
   })
 

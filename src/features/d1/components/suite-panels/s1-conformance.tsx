@@ -1,3 +1,5 @@
+import { Link } from "react-router"
+
 import { AdapterMark } from "@/components/dashboard/adapter-mark"
 import { PageSection } from "@/components/dashboard/dashboard-page"
 import { Outcome } from "@/components/dashboard/outcome"
@@ -164,12 +166,12 @@ function CaseTable({
             return (
               <TableRow key={`${entry.kind}:${entry.caseId}`} data-case={entry.caseId}>
                 <TableCell className="align-top">
-                  <a
-                    href={answerPath(runId, suite, entry.caseId)}
+                  <Link
+                    to={answerPath(runId, suite, entry.caseId)}
                     className="font-mono text-xs break-all underline-offset-3 hover:underline"
                   >
                     {entry.caseId}
-                  </a>
+                  </Link>
                   <div className="text-xs text-muted-foreground">{entry.corpus}</div>
                 </TableCell>
                 <TableCell className="align-top text-xs">{entry.kind}</TableCell>

@@ -6,6 +6,10 @@ import type { RouteObject } from "react-router"
 import { NotBuiltYet } from "@/components/dashboard/not-built-yet"
 import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { RunPage } from "@/features/d1/components/run-page"
+import { AnswerPage } from "@/features/d1/components/answer-page"
+import { CoveragePage } from "@/features/d1/components/coverage-page"
+import { FindingPage } from "@/features/d1/components/finding-page"
+import { FindingsPage } from "@/features/d1/components/findings-page"
 import { RunsPage } from "@/features/d1/components/runs-page"
 import { SuitePage } from "@/features/d1/components/suite-page"
 
@@ -96,13 +100,7 @@ export const routes: RouteObject[] = [
                       },
                       {
                         path: "coverage",
-                        element: (
-                          <NotBuiltYet
-                            title="Coverage"
-                            phase="UI-P3"
-                            note="Requirement × adapter, reason × slot, and tags."
-                          />
-                        ),
+                        element: <CoveragePage />,
                         handle: handle({
                           title: () => "Coverage",
                           crumb: () => ({ label: "Coverage" }),
@@ -120,24 +118,12 @@ export const routes: RouteObject[] = [
                         children: [
                           {
                             index: true,
-                            element: (
-                              <NotBuiltYet
-                                title="Findings"
-                                phase="UI-P3"
-                                note="The findings list with its filters."
-                              />
-                            ),
+                            element: <FindingsPage />,
                             handle: handle({ title: () => "Findings" }),
                           },
                           {
                             path: ":findingId",
-                            element: (
-                              <NotBuiltYet
-                                title="Finding"
-                                phase="UI-P3"
-                                note="Signature, occurrences, reproducer and the minimized draft."
-                              />
-                            ),
+                            element: <FindingPage />,
                             handle: handle({
                               title: (p) => `Finding ${param(p, "findingId")}`,
                               crumb: (p) => ({ label: param(p, "findingId") }),
@@ -198,13 +184,7 @@ export const routes: RouteObject[] = [
                       },
                       {
                         path: "answers/:suite/:caseId",
-                        element: (
-                          <NotBuiltYet
-                            title="Answer"
-                            phase="UI-P3"
-                            note="One answer per adapter: snapshot, trace, payload, audit, timeline."
-                          />
-                        ),
+                        element: <AnswerPage />,
                         handle: handle({
                           title: (p) => `${param(p, "suite")} ${param(p, "caseId")}`,
                           crumb: (p) => ({ label: `${param(p, "suite")} · ${param(p, "caseId")}` }),

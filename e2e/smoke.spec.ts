@@ -5,6 +5,7 @@ import { AxeBuilder } from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 
 const NIGHTLY = "20261008T133453Z-691b414"
+const FAILING = "20261008T004213Z-e824f1b"
 
 // The preview server sends the production Content Security Policy; a violation is a console error
 // in Chromium, and one anywhere on these pages fails the test.
@@ -74,6 +75,44 @@ test("the home page, the runs list and a run page render from the fixtures", asy
   await expect(page.getByRole("combobox", { name: "Filter rows by adapter" })).toContainText(
     "Python",
   )
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  // A case from the conformance table opens in the answer explorer.
+  await page
+    .getByRole("region", { name: "Conformance cases table" })
+    .getByRole("link", { name: "admission-reasons" })
+    .click()
+  await expect(page.getByRole("heading", { level: 1, name: "admission-reasons" })).toBeFocused()
+  await expect(page.getByText("21 passed, none failed.").first()).toBeVisible()
+  await expect(page.locator('[data-blob="ready"]').first()).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  // Coverage: the three matrices.
+  await page.goto(`/d1/runs/${NIGHTLY}/coverage`)
+  await expect(page.getByRole("heading", { level: 1, name: "Coverage" })).toBeVisible()
+  await expect(
+    page.getByRole("region", { name: "Reasons by slot matrix for Python" }),
+  ).toBeVisible()
+  await expect(page.getByText("418 tags, every one exercised.")).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+})
+
+test("the failing run's findings list and a finding render with the minimized draft", async ({
+  page,
+}) => {
+  await page.goto(`/d1/runs/${FAILING}/findings`)
+  await expect(page.getByText("19 rows")).toBeVisible()
+  await page
+    .getByRole("link", { name: /breaks MR4/ })
+    .first()
+    .click()
+  await expect(page.getByRole("heading", { level: 1, name: /^Finding / })).toBeFocused()
+  await expect(page.getByText("The rows that carry this finding")).toBeVisible()
+  await expect(page.locator('[data-blob="ready"]').first()).toBeVisible()
+  await expect(page.locator("[data-draft-file]").first()).toBeVisible()
   await expectNoOverflow(page)
   await expectAccessible(page)
 })
