@@ -40,9 +40,12 @@ test("the home page, the runs list and a run page render from the fixtures", asy
   await expect(page.getByRole("link", { name: "Skip to content" })).toHaveCount(1)
   await expect(page.getByRole("main")).toHaveCount(1)
   await expect(page.getByRole("link", { name: NIGHTLY }).first()).toBeVisible()
+  await expect(page.getByRole("figure", { name: /The model: four planes/ })).toBeVisible()
+  await expect(page.getByText("11 of 11 suites pass")).toBeVisible()
+  await expectNoOverflow(page)
   await expectAccessible(page)
 
-  await page.getByRole("link", { name: "All runs" }).click()
+  await page.getByRole("link", { name: "Runs", exact: true }).first().click()
   await expect(page).toHaveTitle("Runs · CWA benchmark")
   await expect(page.getByText("3 runs")).toBeVisible()
   await expect(page.locator("tbody tr")).toHaveCount(3)
@@ -136,4 +139,48 @@ test("a run the server no longer holds is shown as pruned, not as a 404", async 
   ).toBeVisible()
   await page.goto("/d1/runs/20261008T004213Z-e824f1b")
   await expect(page.getByText("Run 20261008T004213Z-e824f1b is not on the server")).toBeVisible()
+})
+
+test("the Domain 1 overview, About, a domain page and compare render", async ({ page }) => {
+  await page.goto("/d1")
+  await expect(page).toHaveTitle("Domain 1 overview · CWA benchmark")
+  await expect(page.getByText("16de4be").first()).toBeVisible()
+  await expect(page.locator('[data-metric="s7.agreement"]')).toBeVisible()
+  await expect(page.getByRole("img", { name: /Shedding curve of compressible-v0/ })).toBeVisible()
+  // The reveal ran once; the flag is in session storage, so a reload draws without animating.
+  await expect(page.locator('[data-reveal="done"]')).toBeVisible()
+  await expect(page.locator("[data-walk]")).toBeVisible()
+  await page.getByRole("button", { name: "Step back" }).click()
+  await expect(page.locator('[data-walk-step="40"]')).toBeVisible()
+  await expect(page.getByRole("region", { name: "Suite by adapter matrix" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Pressure exponents table" })).toBeVisible()
+  await expect(page.getByRole("figure", { name: /four judges of one answer/ })).toBeVisible()
+  await expect(page.getByText("33 findings in the S7 run")).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  await page.goto("/about")
+  await expect(page.getByRole("region", { name: "Schema kinds table" })).toBeVisible()
+  await expectAccessible(page)
+
+  await page.goto("/d5")
+  await expect(page.getByText("not started")).toBeVisible()
+  await expectAccessible(page)
+
+  await page.goto(`/d1/compare?from=${FAILING}&to=${NIGHTLY}`)
+  await expect(page.getByText("Computed by this viewer, not by the harness")).toBeVisible()
+  await expect(page.getByRole("region", { name: "Metrics that moved table" })).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+})
+
+test("the overview respects reduced motion: no playback, the final state shown", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  await page.goto("/d1")
+  await expect(page.locator("[data-walk]")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Play" })).toHaveCount(0)
+  await expect(page.locator('[data-walk-step="41"]')).toBeVisible()
+  await expect(page.getByRole("img", { name: /Shedding curve/ })).toBeVisible()
 })

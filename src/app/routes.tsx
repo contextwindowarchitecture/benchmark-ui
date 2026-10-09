@@ -9,6 +9,7 @@ import { PageFallback } from "@/components/dashboard/page-fallback"
 import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { RunPage } from "@/features/d1/components/run-page"
 import { AnswerPage } from "@/features/d1/components/answer-page"
+import { ComparePage } from "@/features/d1/components/compare-page"
 import { CoveragePage } from "@/features/d1/components/coverage-page"
 import { FindingPage } from "@/features/d1/components/finding-page"
 import { FindingsPage } from "@/features/d1/components/findings-page"
@@ -200,13 +201,7 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "compare",
-                element: (
-                  <NotBuiltYet
-                    title="Compare"
-                    phase="UI-P5"
-                    note="Two runs side by side, from the harness's own report where it has one."
-                  />
-                ),
+                element: <ComparePage />,
                 handle: handle({ title: () => "Compare", crumb: () => ({ label: "Compare" }) }),
               },
             ],

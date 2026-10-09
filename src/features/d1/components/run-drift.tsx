@@ -40,12 +40,13 @@ export function RunDrift({ runId, listed }: RunDriftProps) {
       label="the drift report"
       skeleton={<Skeleton className="h-40 w-full" />}
     >
-      {(document) => <Drift runId={runId} ci={document} />}
+      {(document) => <DriftReport runId={runId} ci={document} />}
     </DataRegion>
   )
 }
 
-function Drift({ runId, ci }: { runId: string; ci: CiReportV1 }) {
+/** The harness's own report, as the run page and the compare page both render it. */
+export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
   const drift = driftSummary(ci)
   const previous = drift.previous
   return (

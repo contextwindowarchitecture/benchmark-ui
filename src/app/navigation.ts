@@ -120,7 +120,6 @@ export const navigation: NavGroup[] = [
         icon: GitCompare,
         href: () => "/d1/compare",
         patterns: ["/d1/compare"],
-        phase: "UI-P5",
       },
     ],
   },
