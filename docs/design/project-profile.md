@@ -60,11 +60,19 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   know renders the unsupported-schema state. `pnpm generate:types` runs `scripts/generate-types.mjs`
   (json-schema-to-typescript 16.0.0, the types) and `scripts/generate-validators.mjs` (the validators) into
   `src/data/schema/generated/`, checked in; CI fails if they are stale.
-- Chart types, maximum expected data volume, aggregation: through UI-P3 the pages draw with semantic HTML only:
-  the environment matrix and the three coverage matrices as tables whose cells carry the rate in their color and
-  the fractions in their text and accessible name (DESIGN.md 7; `src/components/dashboard/rate-matrix.tsx`), the
-  mutation operators as a table with a bar per operator, metric cards. No chart library yet; the plan's section 10
-  lists what later phases draw, volumes in its 4.3, aggregation in the worker.
+- Chart types, maximum expected data volume, aggregation: the environment matrix and the three coverage matrices as
+  tables whose cells carry the rate in their color and the fractions in their text and accessible name (DESIGN.md 7;
+  `src/components/dashboard/rate-matrix.tsx`), the mutation operators as a table with a bar per operator, metric
+  cards. From UI-P5, the shedding curve (`src/components/charts/shedding-curve.tsx`: D3 scales and a step path,
+  React SVG, rules at the protected size, the floor and the threshold, the refused region named, a table of every
+  frame as its alternative; one adapter when the four agree, every adapter overlaid otherwise), drawn from a sweep
+  file loaded whole in a worker (`src/data/sweep-worker-core.ts`, under the 30 MB budget: 3.7 to 20 MB real, up to
+  737 frames per adapter) that answers one point per frame (the harness's `curve[]` when the file has one, else
+  derived from the frames); the four diagrams as React SVG from the contract's typed slots, the timeline schema's
+  lanes, the self-check's metrics and the S2 cells, each hidden from assistive technology beside a text equivalent;
+  the pipeline walk over a timeline's events (up to a few hundred); the median pressure exponent per adapter over
+  the perf summary's fits (864 in the real run), the median the viewer's and said so. The plan's section 10 lists
+  what UI-P4 still draws.
 - Locale, currencies, timezone, and date-range semantics: the browser's locale for numbers (grouped thousands, one
   decimal for ms, s and bytes, two for exponents); UTC for every time, written `2026-10-08 13:34:53 UTC`, with the
   ISO form in `<time dateTime>`; no currencies; no date ranges (runs are picked by id). All through
@@ -87,10 +95,19 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
   navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
   scrolling container cannot be focused, so the region takes the scrolling over), `aria-sort` on sortable headers, accessible names on every icon button, visible
-  focus rings, focus moved to the page title on route change. The Playwright smoke test runs axe on the home page,
-  the runs list and a run page against the fixtures. Keyboard runs by hand on the shell and the two pages.
-- Performance budgets and measurement method: not yet measured; the plan's section 13 sets the targets for later
-  phases (first render of the overview under 1 s, the viewer's first frame under 2 s). The run page opens from
+  focus rings, focus moved to the page title on route change. Diagrams are `aria-hidden` pictures beside a text
+  equivalent that carries every word; the shedding curve is an `img` named by its title and summary with a table
+  alternative; the pipeline walk is a range input with buttons and the current step as text, and under reduced
+  motion shows the final state with no playback. The Playwright smoke test runs axe on the home page, the runs
+  list, a run page, a suite page, the explorer, coverage, a finding, the Domain 1 overview, About, a domain page
+  and compare against the fixtures, and checks the overview under `prefers-reduced-motion`. Keyboard runs by hand
+  on the shell, the overview's walk and the pickers.
+- Performance budgets and measurement method: not yet measured against the plan's targets (first render of the
+  overview under 1 s, the viewer's first frame under 2 s); UI-P6 measures. The overview, the walk and the content
+  are their own chunks (73 kB, 80 kB with GSAP, 55 kB before gzip in the UI-P5 build) loaded on first visit, so the
+  dashboard pages carry neither D3 nor GSAP; the overview opens from the two runs' `index.json`, `summary.json`
+  and `manifest.json`, the nightly's `ci.json`, `coverage.json`, `contract.json` and S2 summary, the S7 run's
+  `perf/summary.json`, one sweep (in the worker) and one timeline. The run page opens from
   `index.json`, `manifest.json`, `summary.json`, the suite summaries, `findings.jsonl` and `ci.json` and loads no
   other row file.
 - Test commands and CI requirements: `pnpm lint`, `pnpm typecheck`, `pnpm test` (Vitest 5 with Testing Library,
@@ -130,6 +147,21 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     lists they are, never read by name; a minimized draft's files follow the spec's own schemas and are shown raw.
   - The contract's `planes[]` and `stages[]` are untyped: the coverage page orders slots by the contract's typed
     `slots[]` and the explorer names a timeline's lanes from the timeline's own `lanes[]`.
+  - The contract's `planes[]`, `authority[]` and `stages[]`, `slots[].defaults` and a timeline event's per-type
+    fields are untyped (the plan's harness ask 11): the model diagram draws the typed slots, grouped by the id's
+    plane prefix, with the planes' names and the stages' words from `src/content/d1/vocabulary.ts`, which quotes
+    the specification; the three tiers are left out of the diagram, and the pipeline walk names an event by its
+    sequence and type, not its item, until the harness types them.
+  - The overview's pressure exponents are medians this viewer takes over the harness's fits (`series: diagonal`,
+    `method: inprocess`, labels `ratio:1.0` and `ratio:0.1`, the pair that reproduces the write-up's table); the
+    table says so. Compare computes its sections for a pair the harness did not compare, under a banner, and never
+    golden drift. The reason codes exercised on the overview is a count over `coverage.json`, labelled a count.
+  - Reveal-once keeps its flag in session storage (a per-viewer convenience, as DESIGN.md 6.1 allows); no storage
+    means no reveal, never a replay.
+  - The real S7 run predates the harness's compact `curve[]` (ask 2), so its sweeps' curves are derived from the
+    frames in the worker; the harness's curve is preferred wherever a file carries one of the frames' length.
+  - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
+    well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P3 are built; the site serves at its
-  host with cert-manager's certificate (`deploy/README.md`).
+- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P3 and UI-P5 are built; the site serves
+  at its host with cert-manager's certificate (`deploy/README.md`).

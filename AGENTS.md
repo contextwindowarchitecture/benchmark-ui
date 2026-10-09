@@ -17,16 +17,20 @@ checked out beside this repository as `../benchmark`.
 | `vendor/cwa-bench/` | The benchmark's schemas, fixture runs and write-up text, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
 | `src/data/schema/generated/` | Types generated from the vendored schemas by `scripts/generate-types.mjs`; regenerate, never edit |
 | `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`), `validate.ts` (the schema gate), `queries.ts` (TanStack Query), `row-store.ts`, `rows.worker.ts` and `use-rows.ts` (rows filtered and paged, in the worker above the row budget), `use-blobs.ts` (blobs by digest through the index) |
-| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell), `dashboard/` (page contract, states, badges) |
-| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds) and `components/` (the runs list, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer) |
+| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell), `dashboard/` (page contract, states, badges), `charts/` (the shedding curve: D3 geometry, React SVG) |
+| `src/content/` | The reviewed words of the narrative pages (what CWA is, the claims, the limits, the defects, the planes' and stages' words), each file citing the benchmark commit the vendor lock pins; a test fails when the pin moves until the content is re-read |
+| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds, the composite, the curve, the comparison) and `components/` (the runs list, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer, `overview/` with the Domain 1 overview, `diagrams/`, the pipeline walk, compare) |
+| `src/lib/motion.ts` | The one place GSAP is registered; only lazily loaded modules (the overview, the walk) import it |
 | `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
 | `deploy/` | The container image, the nginx configuration, the Kustomize base and the production overlay (the cluster's storage, TLS through cert-manager), and `publish.sh`, which copies runs into the results volume; `deploy/README.md` is the procedure |
 
 Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page), UI-P1
 (the deployment; the site serves at benchmark.contextwindowarchitecture.io), UI-P2 (the suite pages, the rows
-worker) and UI-P3 (coverage, findings, the answer explorer) are built. Later phases' routes render a placeholder
-inside the shell. The plan's section 15 says which phase builds what.
+worker), UI-P3 (coverage, findings, the answer explorer) and UI-P5 (the narrative layer: home, About, the Domain 1
+overview, the domain pages, the diagrams, the pipeline walk, compare) are built. UI-P4 (performance, the shedding
+viewer) and UI-P6 (polish) remain; their routes render a placeholder inside the shell. The plan's section 15 says
+which phase builds what.
 
 ## Working on it
 
@@ -40,7 +44,11 @@ pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with 
 
 - Node 24, pnpm 12, exact versions in `package.json`; adding a package needs a reason in the profile.
 - Every document the UI reads is gated on its `$schema` and validated with the vendored schema; a new kind or major
-  version is a vendoring change plus the UI that reads it, never a field read on faith.
+  version is a vendoring change plus the UI that reads it, never a field read on faith. Where a block is untyped
+  (the contract's planes, authority and stages, slot defaults, a timeline event's item fields) the page shows what
+  is typed and takes its words from `src/content/`, until the harness types the block.
+- Prose is content, numbers are data: a narrative page never restates a number in words; the content files hold
+  words, cite their source commit, and are re-read when the pin moves.
 - Pages account for every state of DESIGN.md 6.3 and 6.4 (`DataRegion`): loading, failed, pruned, not in this run,
   unsupported schema, invalid, empty.
 - Tests come with the change: Vitest over the vendored fixtures (`src/test/fixture-fetch.ts` serves them without a

@@ -6,10 +6,11 @@ https://benchmark.contextwindowarchitecture.io. It reads the runs the benchmark 
 domain of the benchmark establishes about CWA: the claim, the evidence, how far to trust it, and every number behind
 it.
 
-**Status: phases UI-P0 to UI-P3 built** (the scaffold, the data layer, the shell, the runs list and the run page; the
-deployment, serving at the host; the suite pages with their rows; coverage, the findings and the answer explorer). The
-narrative pages, performance, the shedding viewer and compare are later phases and render a placeholder that names
-theirs. [DESIGN.md](DESIGN.md) is the front-end design baseline and
+**Status: phases UI-P0 to UI-P3 and UI-P5 built** (the scaffold, the data layer, the shell, the runs list and the run
+page; the deployment, serving at the host; the suite pages with their rows; coverage, the findings and the answer
+explorer; the narrative layer: the home page, About, the Domain 1 overview over the composite latest, the not-started
+domain pages, the four diagrams, the pipeline walk and compare). Performance and the shedding viewer (UI-P4) and the
+polish pass (UI-P6) are later phases; their routes render a placeholder that names theirs. [DESIGN.md](DESIGN.md) is the front-end design baseline and
 [docs/design/project-profile.md](docs/design/project-profile.md) records what this project chose. The working plan is
 kept locally under `docs/plans/`, like the benchmark's own plans.
 
