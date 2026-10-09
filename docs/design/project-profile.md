@@ -43,8 +43,10 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Row and file-size budgets (6.4): `src/data/budgets.ts`, from the plan's 5.4: 5,000 rows on the main thread,
   30,000 in the worker, 30 MB loaded whole, 1 MB for an inline blob view, 4 points for a fit. UI-P0 ships the
   streaming JSONL parser and the budget check (`rows()` refuses a file the run index says is above the budget, and
-  stops at the budget while streaming); the Web Worker that parses and pre-aggregates above it is a documented TODO
-  for UI-P2, the first phase to open such a file.
+  stops at the budget while streaming). Above the main-thread budget, `src/data/rows.worker.ts` fetches, parses and
+  validates the file and keeps its rows, answering filtered pages and facet counts (`src/data/row-store.ts`, the
+  same code on both sides), so the main thread never holds such a file; above the worker's budget the file is a
+  download. Pages are a hundred rows; the facets stand in for pre-aggregation until a view needs more.
 - Identity, tenant isolation, and permissions: none; no accounts, no private data.
 - Forms and schema validation: no forms. URL state is validated with Zod 4.6.5 (`src/lib/url-state.ts`): each
   parameter parses on its own and an invalid value falls back to its default. Documents and rows are validated with
@@ -55,8 +57,10 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   know renders the unsupported-schema state. `pnpm generate:types` runs `scripts/generate-types.mjs`
   (json-schema-to-typescript 16.0.0, the types) and `scripts/generate-validators.mjs` (the validators) into
   `src/data/schema/generated/`, checked in; CI fails if they are stale.
-- Chart types, maximum expected data volume, aggregation: none at UI-P0 (the run page's matrix and tables are
-  semantic HTML); the plan's section 10 lists what later phases draw, volumes in its 4.3, aggregation in the worker.
+- Chart types, maximum expected data volume, aggregation: at UI-P2 the suite pages draw with semantic HTML only:
+  the environment matrix as a table whose cells carry the rate in their color and the fractions in their text and
+  accessible name (DESIGN.md 7), the mutation operators as a table with a bar per operator, metric cards. No chart
+  library yet; the plan's section 10 lists what later phases draw, volumes in its 4.3, aggregation in the worker.
 - Locale, currencies, timezone, and date-range semantics: the browser's locale for numbers (grouped thousands, one
   decimal for ms, s and bytes, two for exponents); UTC for every time, written `2026-10-08 13:34:53 UTC`, with the
   ISO form in `<time dateTime>`; no currencies; no date ranges (runs are picked by id). All through
@@ -111,6 +115,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     replica stands, since every pod lands on the volume's node and a ReadWriteOnce volume mounts in any number of
     pods there. The claim is read-only on the container's mount and read-write at the pod level, because the
     driver formats the volume at its first mount and refuses to when that mount is read-only.
+  - The suite summaries' open blocks (`metamorphic`, `generated`, `summarizer`, the labeled details) and the
+    summarizer summary's `by_arm` are not read (DESIGN.md 6.4): the S4 tallies, S5's steering chart and S11's
+    curves wait for the harness to type them (the plan's section 14, items 8 to 10). The panels say so.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 and UI-P1 are built; the site serves at its host
-  with cert-manager's certificate (`deploy/README.md`).
+- Adoption/migration plan: greenfield; the plan's section 15. UI-P0, UI-P1 and UI-P2 are built; the site serves at
+  its host with cert-manager's certificate (`deploy/README.md`).

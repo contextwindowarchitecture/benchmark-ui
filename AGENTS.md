@@ -16,16 +16,17 @@ checked out beside this repository as `../benchmark`.
 | `docs/design/project-profile.md` | The project profile DESIGN.md section 15 asks for: the versions, the preset, the budgets, the test commands and the exceptions |
 | `vendor/cwa-bench/` | The benchmark's schemas, fixture runs and write-up text, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
 | `src/data/schema/generated/` | Types generated from the vendored schemas by `scripts/generate-types.mjs`; regenerate, never edit |
-| `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`), `validate.ts` (the schema gate), `queries.ts` (TanStack Query) |
+| `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`), `validate.ts` (the schema gate), `queries.ts` (TanStack Query), `row-store.ts`, `rows.worker.ts` and `use-rows.ts` (rows filtered and paged, in the worker above the row budget) |
 | `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell), `dashboard/` (page contract, states, badges) |
-| `src/features/d1/` | Domain 1: `model/` (pure selectors) and `components/` (the runs list, the run page) |
+| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds) and `components/` (the runs list, the run page, the suite page and its `suite-panels/`) |
 | `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
 | `deploy/` | The container image, the nginx configuration, the Kustomize base and the production overlay (the cluster's storage, TLS through cert-manager), and `publish.sh`, which copies runs into the results volume; `deploy/README.md` is the procedure |
 
-Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page) and UI-P1
-(the deployment; the site serves at benchmark.contextwindowarchitecture.io) are built. Later phases' routes render a
-placeholder inside the shell. The plan's section 15 says which phase builds what.
+Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page), UI-P1
+(the deployment; the site serves at benchmark.contextwindowarchitecture.io) and UI-P2 (the suite pages, the rows
+worker) are built. Later phases' routes render a placeholder inside the shell. The plan's section 15 says which
+phase builds what.
 
 ## Working on it
 
