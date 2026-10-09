@@ -153,7 +153,7 @@ function Comparison({ index, from, to }: { index: RunsIndexV1; from: string; to:
   const toEntry = runById(index, to)
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <div className="flex flex-wrap items-center gap-3 text-sm" data-pair>
         <RunChip index={index} runId={from} />
         <span aria-hidden="true">→</span>
@@ -168,7 +168,7 @@ function Comparison({ index, from, to }: { index: RunsIndexV1; from: string; to:
           ciListed && ci.isPending ? (
             <Skeleton className="h-64 w-full" aria-label="Loading the drift report" />
           ) : harness && report ? (
-            <div className="grid gap-4" data-source="harness">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4" data-source="harness">
               <Alert>
                 <AlertTitle>The harness's own report</AlertTitle>
                 <AlertDescription>
@@ -252,7 +252,7 @@ function Computed({
   harnessPrevious: string | null
 }) {
   return (
-    <div className="grid gap-4" data-source="computed">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4" data-source="computed">
       <Alert data-state="computed">
         <Calculator />
         <AlertTitle>Computed by this viewer, not by the harness</AlertTitle>
@@ -283,7 +283,7 @@ function Computed({
         <span aria-hidden="true">→</span>
         <StatusBadge status={comparison.status.to} />
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Bumps</CardTitle>

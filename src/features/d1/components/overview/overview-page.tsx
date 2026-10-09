@@ -270,7 +270,7 @@ function Overview({ composite }: { composite: Composite }) {
         title="The evidence"
         description="The headline metrics as the harness judged them, then the signature pictures. Each names its run."
       >
-        <div className="grid gap-8">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
           <HeadlineRegion
             nightly={
               nightlyId
@@ -441,7 +441,7 @@ function Overview({ composite }: { composite: Composite }) {
         title="How far to trust it"
         description="The checks the evidence itself passed, and what it does not show."
       >
-        <div className="grid gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
           {nightlyId && nightlyDoc ? (
             <OraclesDiagram
               metrics={nightlyDoc.metrics.filter((metric) => metric.suite === "S0")}
@@ -454,7 +454,7 @@ function Overview({ composite }: { composite: Composite }) {
               {() => null}
             </DataRegion>
           )}
-          <ul className="grid gap-3 md:grid-cols-2" data-trust>
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2" data-trust>
             {TRUST.map((note) => (
               <li key={note.id} className="rounded-lg border p-4 text-sm">
                 <h3 className="font-medium">{note.title}</h3>
@@ -488,8 +488,8 @@ function Overview({ composite }: { composite: Composite }) {
         title="The drill-down"
         description="Every number behind this page, and the defects the benchmark found on the way."
       >
-        <div className="grid gap-6">
-          <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
             {nightlyId && nightlyDoc && nightlyFiles ? (
               <FindingsSummary
                 runId={nightlyId}

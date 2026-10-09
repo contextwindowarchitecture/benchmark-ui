@@ -57,12 +57,12 @@ export function DefectsTable() {
                   {defect.findings.length === 0 ? (
                     <span className="text-muted-foreground">no finding in a published run</span>
                   ) : (
-                    <ul className="space-y-0.5">
+                    <ul className="space-y-1">
                       {defect.findings.map((pointer) => (
                         <li key={pointer.finding}>
                           <Link
                             to={`/d1/runs/${pointer.run}/findings/${pointer.finding}`}
-                            className="font-mono underline underline-offset-3"
+                            className="inline-flex min-h-6 items-center font-mono underline underline-offset-3"
                             title={`finding ${pointer.finding} in run ${pointer.run}`}
                           >
                             {pointer.finding}

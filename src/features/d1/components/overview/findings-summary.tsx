@@ -59,7 +59,7 @@ export function FindingsSummary({
       <p className="font-medium">
         {formatCount(totals.total)} {totals.total === 1 ? "finding" : "findings"} in the {label} run
       </p>
-      <p className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {rows.isPending && file ? (
           <Skeleton className="h-5 w-40" aria-label="Loading the findings' severities" />
         ) : severities ? (
@@ -75,7 +75,7 @@ export function FindingsSummary({
         ) : (
           <span className="text-muted-foreground">severities not loaded</span>
         )}
-      </p>
+      </div>
       <p className="text-muted-foreground">
         By suite: {bySuite.map(([suite, count]) => `${suite} ${formatCount(count)}`).join(", ")}.
       </p>

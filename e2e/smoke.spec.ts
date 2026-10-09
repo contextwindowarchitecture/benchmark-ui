@@ -164,7 +164,10 @@ test("the Domain 1 overview, About, a domain page and compare render", async ({ 
   await expectAccessible(page)
 
   await page.goto("/d5")
-  await expect(page.getByText("not started")).toBeVisible()
+  await expect(
+    page.getByRole("heading", { level: 1, name: /Domain 5 · Instruction hierarchy/ }),
+  ).toBeVisible()
+  await expect(page.getByRole("main").getByText("not started", { exact: true })).toBeVisible()
   await expectAccessible(page)
 
   await page.goto(`/d1/compare?from=${FAILING}&to=${NIGHTLY}`)
