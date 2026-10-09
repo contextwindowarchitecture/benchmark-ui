@@ -102,8 +102,12 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   `public/animations/`.
 - Approved additional libraries: TanStack Query; Ajv with ajv-formats (the compiler at build time only; at runtime
   the generated validators and ajv-formats' format table); json-schema-to-typescript; Zod; sirv (dev server only);
-  Playwright 1.63.0 with `@axe-core/playwright` 4.13.0 (tests only). Not yet added, for later phases: TanStack Table
-  and Virtual, D3 modules, GSAP, `@lottiefiles/dotlottie-react`.
+  Playwright 1.63.0 with `@axe-core/playwright` 4.13.0 (tests only). Added at UI-P5, as DESIGN.md 2.2 names them:
+  `d3-scale` 4.0.2, `d3-shape` 3.2.0 and `d3-array` 3.2.4 with their `@types` (scales, step lines and medians; React
+  renders every SVG node), and `gsap` 3.15.0 with `@gsap/react` 2.1.2 (the pipeline walk, the reveal-once and, at
+  UI-P4, the shedding viewer; registered once in `src/lib/motion.ts` and imported only by lazily loaded modules, so
+  the routes that do not animate never load it). Not yet added: TanStack Table and Virtual,
+  `@lottiefiles/dotlottie-react`.
 - Exceptions and linked architecture decisions:
   - TypeScript 6.0 instead of the newest major, until typescript-eslint supports it (above).
   - The desktop sidebar preference lives in the generated component's cookie, not in local storage as the plan's

@@ -65,6 +65,16 @@
   --adapter-typescript: var(--chart-2);
   --adapter-go: var(--chart-3);
   --adapter-rust: var(--chart-4);
+
+  /*
+   * The four planes (ui-plan.md 7.2): slots are colored by plane, the hue, and slot, the shade.
+   * Lower in chroma than the adapter hues, so a plane never reads as a series, and distinct from
+   * the status hues, which are reserved for status. Used by the model diagram and the item strip.
+   */
+  --plane-governance: oklch(0.52 0.1 25);
+  --plane-state: oklch(0.5 0.1 110);
+  --plane-evidence: oklch(0.5 0.1 230);
+  --plane-interaction: oklch(0.52 0.1 320);
 }
 
 .dark {
@@ -81,6 +91,11 @@
   --chart-2: oklch(0.78 0.11 200);
   --chart-3: oklch(0.75 0.17 340);
   --chart-4: oklch(0.78 0.15 50);
+
+  --plane-governance: oklch(0.78 0.09 25);
+  --plane-state: oklch(0.78 0.1 110);
+  --plane-evidence: oklch(0.76 0.09 230);
+  --plane-interaction: oklch(0.78 0.09 320);
 }
 
 @theme inline {
@@ -96,6 +111,10 @@
   --color-adapter-typescript: var(--adapter-typescript);
   --color-adapter-go: var(--adapter-go);
   --color-adapter-rust: var(--adapter-rust);
+  --color-plane-governance: var(--plane-governance);
+  --color-plane-state: var(--plane-state);
+  --color-plane-evidence: var(--plane-evidence);
+  --color-plane-interaction: var(--plane-interaction);
 
   /* Motion tokens (DESIGN.md 3.2). */
   --duration-fast: 120ms;
