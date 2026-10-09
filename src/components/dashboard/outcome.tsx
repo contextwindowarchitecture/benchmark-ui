@@ -12,9 +12,9 @@ export function Outcome({ value, className }: { value: string; className?: strin
     <span
       data-outcome={value}
       className={cn("font-mono text-xs", fault && "font-medium text-failure", className)}
-      aria-label={fault ? `${outcomeLabel(value)} (a fault)` : undefined}
     >
       {outcomeLabel(value)}
+      {fault ? <span className="sr-only"> (a fault)</span> : null}
     </span>
   )
 }

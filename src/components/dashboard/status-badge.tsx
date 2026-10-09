@@ -27,6 +27,8 @@ export function StatusBadge({ status, label, iconOnly = false, className }: Stat
       data-status={status}
       data-tone={tone}
       className={cn("gap-1 font-medium", TONE_CLASSES[tone], className)}
+      // An icon alone is an image with the status as its name; a plain span may not carry a label.
+      role={iconOnly ? "img" : undefined}
       aria-label={iconOnly ? text : undefined}
       title={iconOnly ? text : undefined}
     >
