@@ -23,7 +23,7 @@ jobs:
           ref: ${{ inputs.ref }}
       - id: meta
         run: echo "sha=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
-      - uses: redhat-actions/buildah-build@v2
+      - uses: redhat-actions/buildah-build@v3
         id: build
         with:
           image: benchmark-ui
@@ -31,7 +31,7 @@ jobs:
           containerfiles: deploy/Containerfile
           context: .
           oci: true
-      - uses: redhat-actions/push-to-registry@v2
+      - uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
