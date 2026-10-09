@@ -71,8 +71,8 @@ pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with 
   - Breaking changes (a URL or configuration change existing links or deployments depend on): `!` after the scope,
     plus a `BREAKING CHANGE:` footer.
 - Sign off every commit (`git commit -s`). The Developer Certificate of Origin is required, and a commit hook rejects
-  commits without it. The person committing owns the commit: no `Co-Authored-By` trailers. Mentioning AI assistance
-  in the body is fine.
+  commits without it. The person committing owns the commit: no `Co-Authored-By` trailers, and never a sentence
+  about AI assistance or any other attribution in the message. The body explains the change and nothing else.
 - Commits are GPG-signed by the global git config. Never bypass signing or hooks (`--no-gpg-sign`, `--no-verify`); if
   either fails, stop and ask.
 - Never commit `docs/plans/`, `node_modules/`, `dist/`, results or secrets. Check `git status` before committing.
