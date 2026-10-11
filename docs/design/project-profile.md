@@ -107,8 +107,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   region; the page itself never overflows). The model, environment and oracle diagrams lay themselves out in their
   frame's measured width: on a phone the model pairs its planes, the environment diagram bands its platforms and
   the oracles stack on a spine, rather than scrolling inside the frame. The Playwright smoke test opens the home
-  page, the Domain 1 overview, the S2 suite page and coverage at 375 px and fails if the page scrolls sideways or
-  anything outside a table region reaches past the screen's edge.
+  page, the Domain 1 overview, the S2 suite page, coverage, and Domain 2's overview, a run page and a suite page
+  with its rows loaded at 375 px, and fails if the page scrolls sideways or anything outside a table region
+  reaches past the screen's edge.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
   navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
   scrolling container cannot be focused, so the region takes the scrolling over), `aria-sort` on sortable headers, accessible names on every icon button, visible

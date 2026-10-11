@@ -215,6 +215,28 @@ test("the home page, the Domain 1 overview, S2 and coverage fit a phone", async 
   await expectFitsThePhone(page)
 })
 
+test("Domain 2's overview, a run page and a suite page with its rows fit a phone", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto("/d2")
+  await expect(
+    page.getByRole("img", { name: /^Correct answers per arm at 8,192 tokens/ }),
+  ).toBeVisible()
+  await expect(page.locator("[data-chart=tier-lines] [data-panel=cwa-ranked]")).toBeVisible()
+  await expectFitsThePhone(page)
+
+  await page.goto(`/d2/runs/${D2_NIGHTLY}`)
+  await expect(page.getByText("459 metrics")).toBeVisible()
+  await expectFitsThePhone(page)
+
+  await page.goto(`/d2/runs/${D2_NIGHTLY}/suites/S2`)
+  await expect(page.getByRole("region", { name: "Correct answers by arm and tier" })).toBeVisible()
+  await page.getByRole("button", { name: "Load the rows" }).click()
+  await expect(page.getByText("12 rows")).toBeVisible()
+  await expectFitsThePhone(page)
+})
+
 // At a phone's width (DESIGN.md 4.2) the page never scrolls sideways, and nothing outside a
 // labelled table region reaches past the screen's edge, not even inside a picture's frame.
 async function expectFitsThePhone(page: Page) {
