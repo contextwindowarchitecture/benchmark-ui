@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 describe("the shell", () => {
@@ -94,6 +94,15 @@ describe("the shell", () => {
       await waitFor(() =>
         expect(scrolled.mock.contexts).toContain(document.getElementById("viewer")),
       )
+    })
+
+    it("lands on a section that renders once its data has loaded", async () => {
+      Element.prototype.scrollIntoView = function (this: Element) {
+        scrolled.call(this)
+      }
+      renderApp(`/d2/runs/${D2_FIXTURE_RUNS.nightly}/suites/S5#cost`)
+      await waitFor(() => expect(document.getElementById("cost")).not.toBeNull())
+      await waitFor(() => expect(scrolled.mock.contexts).toContain(document.getElementById("cost")))
     })
   })
 })

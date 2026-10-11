@@ -15,6 +15,9 @@ export type RouteHandle = {
 
 export const SITE_TITLE = "CWA benchmark"
 
+/** How long a fragment's section may take to render before the page stops waiting to land on it. */
+const ANCHOR_WAIT_MS = 5000
+
 type AppMatch = UIMatch<unknown, RouteHandle | undefined>
 
 export function useAppMatches(): AppMatch[] {
@@ -70,8 +73,8 @@ export function useRouteFocus(documentTitle: string) {
       previous.search !== location.search
     )
       return
-    const anchor = location.hash ? document.getElementById(fragmentId(location.hash)) : null
-    if (anchor) {
+    const id = location.hash ? fragmentId(location.hash) : null
+    const landOn = (anchor: HTMLElement) => {
       const land = () => {
         if (anchor.isConnected && last.current?.key === location.key)
           anchor.scrollIntoView?.({ block: "start" })
@@ -80,12 +83,36 @@ export function useRouteFocus(documentTitle: string) {
       if (anchor.hasAttribute("tabindex")) anchor.focus({ preventScroll: true })
       // The web font swapping in reflows the text above the anchor; land again once it has.
       void document.fonts?.ready.then(land)
+    }
+    const anchor = id ? document.getElementById(id) : null
+    if (anchor) {
+      landOn(anchor)
       return
     }
+    // A fragment naming a section that renders once its data has loaded (a suite page's #cost
+    // opened from a link) is landed on when it appears, for a few seconds at most. The observer
+    // ends itself, not in a cleanup: Strict Mode's second run of this effect returns early above.
+    let stop: (() => void) | undefined
+    if (id && typeof MutationObserver === "function") {
+      const observer = new MutationObserver(() => {
+        if (last.current?.key !== location.key) return stop?.()
+        const found = document.getElementById(id)
+        if (!found) return
+        stop?.()
+        landOn(found)
+      })
+      observer.observe(document.body, { childList: true, subtree: true })
+      const timer = window.setTimeout(() => stop?.(), ANCHOR_WAIT_MS)
+      stop = () => {
+        observer.disconnect()
+        window.clearTimeout(timer)
+      }
+    }
     // Not on the first render: the browser's own focus is right for the first page.
-    if (location.key === "default") return
-    const target = document.getElementById("page-title") ?? document.getElementById("page")
-    target?.focus({ preventScroll: false })
+    if (location.key !== "default") {
+      const target = document.getElementById("page-title") ?? document.getElementById("page")
+      target?.focus({ preventScroll: false })
+    }
   }, [location])
 }
 
