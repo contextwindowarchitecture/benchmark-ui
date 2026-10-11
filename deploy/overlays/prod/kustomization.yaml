@@ -21,7 +21,7 @@ resources:
 
 images:
   - name: quay.io/contextwindowarchitecture/benchmark-ui
-    newTag: 5cb489689a89 # the 12-character git SHA of the commit the image was built from
+    newTag: 4e48f14ad3ab # the 12-character git SHA of the commit the image was built from
 
 replicas:
   - name: benchmark-ui
