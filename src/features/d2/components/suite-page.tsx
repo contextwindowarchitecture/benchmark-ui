@@ -378,7 +378,7 @@ function SuiteRowsSection({
       description="One row per judged thing, loaded on request."
       actions={
         files.length > 1 && file ? (
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex min-w-0 items-center gap-2 text-sm">
             <span className="text-muted-foreground">File</span>
             <Select
               value={file.path}
@@ -395,7 +395,11 @@ function SuiteRowsSection({
                 })
               }
             >
-              <SelectTrigger size="sm" className="w-64 font-mono text-xs" aria-label="Row file">
+              <SelectTrigger
+                size="sm"
+                className="w-64 max-w-full min-w-0 font-mono text-xs"
+                aria-label="Row file"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

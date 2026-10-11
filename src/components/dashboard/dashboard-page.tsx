@@ -83,7 +83,9 @@ export function PageSection({
           </h2>
           {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
         </div>
-        {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+        {actions ? (
+          <div className="flex max-w-full min-w-0 items-center gap-2">{actions}</div>
+        ) : null}
       </div>
       {children}
     </section>
