@@ -68,7 +68,7 @@ export function armPlotLayout(input: ArmPlotInput): ArmPlotLayout | null {
     top: 4,
     right: 72,
     bottom: 28,
-    left: Math.round(Math.min(168, Math.max(112, width * 0.32))),
+    left: Math.round(Math.min(168, Math.max(128, width * 0.32))),
   }
   const drawn = input.rows.flatMap((row) =>
     [row.value, row.low, row.high, row.backdrop].filter(finite),
