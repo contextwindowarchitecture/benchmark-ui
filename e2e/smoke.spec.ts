@@ -7,6 +7,8 @@ import { expect, test, type Page } from "@playwright/test"
 const NIGHTLY = "20261008T133453Z-691b414"
 const FAILING = "20261008T004213Z-e824f1b"
 const D2_NIGHTLY = "20261011T161204Z-9c870cd"
+const S7 = "20261008T073129Z-a1d69f8"
+const SWEEP = "1da5d58f5c90cbd75466c9f99c29167a46109c483d924b4f5cc56b75994ba1a3"
 
 // The preview server sends the production Content Security Policy; a violation is a console error
 // in Chromium, and one anywhere on these pages fails the test.
@@ -303,4 +305,90 @@ test("Domain 2's overview, runs, run page and a suite page render from its fixtu
   await expect(page.getByText("12 rows")).toBeVisible()
   await expectNoOverflow(page)
   await expectAccessible(page)
+})
+
+test("S7's sweeps, the shedding viewer playing, the grid and performance render", async ({
+  page,
+}) => {
+  await page.goto(`/d1/runs/${S7}/sweeps`)
+  await expect(page.getByRole("heading", { level: 1, name: "Shedding" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Sweeps table" }).locator("tbody tr")).toHaveCount(
+    8,
+  )
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  await page.getByRole("link", { name: "compressible-v0" }).click()
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Shedding · compressible-v0" }),
+  ).toBeFocused()
+  const viewer = page.locator("[data-viewer]")
+  await expect(viewer).toHaveAttribute("data-frame", "0")
+  await expect(page.getByRole("img", { name: /Items kept at each budget/ })).toBeVisible()
+  // Playing moves through the recorded frames at 12 a second, and the address follows.
+  await page.getByRole("button", { name: "Play" }).click()
+  await expect(viewer).not.toHaveAttribute("data-frame", "0")
+  await expect(viewer).toHaveAttribute("data-frame", "15", { timeout: 5_000 })
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible()
+  await expect(page).toHaveURL(/\?frame=15$/)
+  // The keyboard: arrows step on the slider, space plays and pauses.
+  const slider = page.getByRole("slider", { name: "Frame" })
+  await slider.focus()
+  await page.keyboard.press("Home")
+  await expect(viewer).toHaveAttribute("data-frame", "0")
+  await page.keyboard.press("ArrowRight")
+  await expect(viewer).toHaveAttribute("data-frame", "1")
+  await page.keyboard.press(" ")
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible()
+  await page.keyboard.press(" ")
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible()
+  await page.getByRole("button", { name: "Lanes" }).click()
+  await expect(page.locator('[data-state="no-timeline"]')).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  await page.goto(`/d1/runs/${S7}/suites/S7`)
+  await page.getByRole("button", { name: "Draw the grid" }).click()
+  await expect(page.getByRole("region", { name: "Scale grid" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Threshold searches table" })).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  await page.goto(`/d1/runs/${S7}/perf`)
+  await expect(page.getByRole("heading", { level: 2, name: "Scaling" })).toBeVisible()
+  await expect(page.locator("[data-fit-line]")).toHaveCount(4)
+  await expect(page.getByRole("region", { name: "Startup table" })).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+})
+
+test("the shedding viewer and performance fit a phone", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto(`/d1/runs/${S7}/sweeps/${SWEEP}`)
+  await expect(page.getByRole("img", { name: /Shedding curve of compressible-v0/ })).toBeVisible()
+  await expect(page.getByRole("img", { name: /Items kept at each budget/ })).toBeHidden()
+  await expectFitsThePhone(page)
+  await page.getByRole("button", { name: "Items" }).click()
+  await expect(page.getByRole("img", { name: /Items kept at each budget/ })).toBeVisible()
+  await expect(page.getByRole("img", { name: /Shedding curve of compressible-v0/ })).toBeHidden()
+  await expectFitsThePhone(page)
+
+  await page.goto(`/d1/runs/${S7}/sweeps`)
+  await expect(page.getByRole("region", { name: "Sweeps table" })).toBeVisible()
+  await expectFitsThePhone(page)
+
+  await page.goto(`/d1/runs/${S7}/perf`)
+  await expect(page.locator("[data-fit-line]")).toHaveCount(4)
+  await expectFitsThePhone(page)
+})
+
+test("the shedding viewer respects reduced motion: no playback, the last frame first", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  await page.goto(`/d1/runs/${S7}/sweeps/${SWEEP}`)
+  await expect(page.locator("[data-viewer]")).toHaveAttribute("data-frame", "15")
+  await expect(page.getByRole("button", { name: "Play" })).toHaveCount(0)
+  await page.getByRole("button", { name: "To the first frame" }).click()
+  await expect(page.locator("[data-viewer]")).toHaveAttribute("data-frame", "0")
 })
