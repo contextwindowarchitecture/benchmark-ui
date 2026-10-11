@@ -72,8 +72,14 @@ describe("the Domain 1 overview", () => {
     const ungated = evidence.node.querySelector('[data-headline-group="ungated"]') as HTMLElement
     expect(ungated.querySelectorAll("[data-metric]").length).toBeGreaterThanOrEqual(5)
     expect(within(ungated).getAllByText("info").length).toBeGreaterThan(0)
-    await waitFor(() => expect(evidence.getByText("35")).toBeInTheDocument())
-    expect(evidence.getByText("of 35")).toBeInTheDocument()
+    // Scoped to the coverage card: a frame of the curve's table can hold the same number.
+    const reasons = await waitFor(() => {
+      const node = evidence.node.querySelector('[data-metric="coverage.reasons"]')
+      expect(node).not.toBeNull()
+      return within(node as HTMLElement)
+    })
+    expect(reasons.getByText("35")).toBeInTheDocument()
+    expect(reasons.getByText("of 35")).toBeInTheDocument()
 
     // The signature curve from the S7 run's first sweep, the walk, the matrix, the exponents.
     expect(
