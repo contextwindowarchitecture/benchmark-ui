@@ -83,11 +83,11 @@ describe("Domain 2's overview", () => {
         name: "control-full, Facts not sent: no probe counted here",
       }),
     ).toBeInTheDocument()
-    // concat overflowed on 135 probes, which S2 files under "facts sent" although nothing was
-    // sent: the cell says so rather than claiming every probe had its facts sent.
+    // concat overflowed on 135 probes, which this run's S2 filed under "facts sent" although
+    // nothing was sent: the cell says so rather than claiming every probe had its facts sent.
     expect(
       within(attribution).getByRole("cell", {
-        name: /^concat, Facts sent: .*; 135 of the arm's answers reached no model$/,
+        name: /^concat, Facts sent: .*; 135 of these reached no model$/,
       }),
     ).toBeInTheDocument()
     expect(

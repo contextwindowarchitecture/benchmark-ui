@@ -544,16 +544,17 @@ export function AttributionPanel({
     )
   }
   const byArm = new Map(rows.map((row) => [row.arm, row]))
-  const unsentAnywhere = rows.some((row) => row.unsent > 0)
+  const unsentAnywhere = rows.some((row) => row.filedAsSent !== null)
   const cell = (arm: string, column: string) => {
     const row = byArm.get(arm)
     if (!row) return null
     const tally = column === "sent" ? row.given.present : row.given.absent
-    // Answers that reached no model, which S2 may file under "facts sent": flagged there.
-    const flag =
-      column === "sent" && row.unsent > 0
-        ? `${formatCount(row.unsent)} of the arm's answers reached no model`
-        : null
+    // Answers that reached no model yet sit under "facts sent", as runs before the harness's fix
+    // file them: flagged there.
+    const misfiled = column === "sent" ? row.filedAsSent : null
+    const flag = misfiled
+      ? `${misfiled.atLeast ? "at least " : ""}${formatCount(misfiled.count)} of these reached no model`
+      : null
     if (tally.n === 0) {
       return {
         node: <span className="text-muted-foreground">none</span>,
@@ -592,10 +593,10 @@ export function AttributionPanel({
       </p>
       {unsentAnywhere ? (
         <p className="text-xs text-muted-foreground" data-note="unsent">
-          † An overflow or a refusal reaches no model. S2 files such an answer by whether S1 found
-          the facts in the payload the arm would have sent, so it can be counted under facts sent
-          although nothing was sent; S1's share above, which counts only payloads that fit, is the
-          one to read for those arms. The harness is asked to file them as not sent.
+          † An overflow or a refusal reaches no model. This run's harness filed such an answer by
+          whether S1 found the facts in the payload the arm would have sent, so it can be counted
+          under facts sent although nothing was sent; S1's share above, which counts only payloads
+          that fit, is the one to read for those arms. The harness now files them as not sent.
         </p>
       ) : null}
       <SourceNote source={source} />

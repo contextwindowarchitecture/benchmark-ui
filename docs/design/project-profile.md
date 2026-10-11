@@ -159,11 +159,13 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     under-count by prompt size, S6's reply lengths and the model's calls. Two records inside them stay open by
     nature, the request's extra fields and the server's own listing of the model, and are shown as the key-value
     lists they are, never read by name.
-  - S2's and S3's `given` tallies file an overflow or a refusal by S1's record of the payload the arm would have
-    sent, so such an answer can sit under "facts sent" although nothing was sent (concat at 8,192 tokens in the
-    recorded run); S1 counts only payloads that fit. The attribution tables flag every arm with answers that
-    reached no model, say how many, and never infer from an empty "not sent" tally that every fact was sent,
-    until the harness files them as not sent (the plan's section 14, ask 15).
+  - Runs from a harness before `95ee813` file an overflow in S2's and S3's `given` by S1's record of the payload
+    the arm would have sent, so such an answer can sit under "facts sent" although nothing was sent (concat at
+    8,192 tokens in the recorded run); S1 counts only payloads that fit. From `95ee813` on, the harness files
+    every overflow and refusal as not sent (the plan's section 14, ask 15). The attribution tables flag an arm
+    whose answers that reached no model outnumber its "not sent" tally, say how many sit under "facts sent", and
+    never infer from an empty "not sent" tally that every fact was sent; a run from the fixed harness shows no
+    flag.
   - Most of the recorded run's row files are above the worker's 30,000-row budget (S2's grades 93,312 rows and
     79 MB, S1's turns 135 MB): a suite page offers them as downloads at once and its typed blocks stand in for
     them, until the harness splits them (ask 16). A run page lists a kind of more than 100 files (9,072

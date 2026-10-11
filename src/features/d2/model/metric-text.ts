@@ -44,3 +44,18 @@ export function intervalWords(
 export function unsentAnswers(verdicts: { overflow: number; refused?: number }): number {
   return verdicts.overflow + (verdicts.refused ?? 0)
 }
+
+/**
+ * The answers that reached no model yet sit under "facts sent", as far as the summary shows: the
+ * unsent answers beyond the "facts not sent" tally. A harness before `95ee813` filed an overflow by
+ * whether S1 found the facts in the payload the arm would have sent; from it on, every unsent
+ * answer is filed as not sent and this is null. `atLeast` when the tally of facts not sent holds
+ * some answers too, so the count is a floor.
+ */
+export function unsentFiledAsSent(
+  verdicts: { overflow: number; refused?: number },
+  given: { absent: { n: number } },
+): { count: number; atLeast: boolean } | null {
+  const count = unsentAnswers(verdicts) - given.absent.n
+  return count > 0 ? { count, atLeast: given.absent.n > 0 } : null
+}

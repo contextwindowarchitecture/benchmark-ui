@@ -51,6 +51,12 @@ describe("the overview's rows from the by_arm blocks", () => {
       tier: "8192",
       given: { present: { n: 240, correct: 235 }, absent: { n: 192, correct: 0 } },
     })
+    // concat's overflows sit under "facts sent" in this run; window sent every probe it answered.
+    expect(rows.find((row) => row.arm === "concat")?.filedAsSent).toEqual({
+      count: 135,
+      atLeast: false,
+    })
+    expect(rows.find((row) => row.arm === "window")?.filedAsSent).toBeNull()
     expect(rows.map((row) => row.arm)).toHaveLength(13)
     expect(attributionRows([], "8192")).toEqual([])
   })

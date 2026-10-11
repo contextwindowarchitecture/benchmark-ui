@@ -41,7 +41,7 @@ import {
   type ModelBlock,
   type Percentiles,
 } from "@/features/d2/model/blocks"
-import { intervalLevel, unsentAnswers } from "@/features/d2/model/metric-text"
+import { intervalLevel, unsentFiledAsSent } from "@/features/d2/model/metric-text"
 import { parseTier, tierLabel } from "@/features/d2/model/metrics"
 import { d2SuitePageParams } from "@/features/d2/model/url"
 import {
@@ -174,9 +174,12 @@ export function GivenTable({ entries, label }: { entries: readonly ArmBlock[]; l
     const { present, absent } = entry.given
     const sent = formatRate(share(present.n, present.correct), present.correct, present.n)
     const unsent = formatRate(share(absent.n, absent.correct), absent.correct, absent.n)
-    // Answers that reached no model, which S2 may file under "facts sent" (harness ask 15).
-    const noModel = unsentAnswers(entry.verdicts)
-    const flag = noModel > 0 ? `${formatCount(noModel)} of these reached no model` : null
+    // Answers that reached no model yet sit under "facts sent", as runs before the harness's fix
+    // file them.
+    const misfiled = unsentFiledAsSent(entry.verdicts, entry.given)
+    const flag = misfiled
+      ? `${misfiled.atLeast ? "at least " : ""}${formatCount(misfiled.count)} of these reached no model`
+      : null
     return {
       node: (
         <span className="inline-flex flex-col items-end gap-0.5">
@@ -194,7 +197,7 @@ export function GivenTable({ entries, label }: { entries: readonly ArmBlock[]; l
       text: `with the facts sent ${present.n === 0 ? "none" : sent}; not sent ${absent.n === 0 ? "none" : unsent}${flag ? `; ${flag}` : ""}`,
     }
   }
-  const flagged = entries.some((entry) => unsentAnswers(entry.verdicts) > 0)
+  const flagged = entries.some((entry) => unsentFiledAsSent(entry.verdicts, entry.given) !== null)
   return (
     <div className="space-y-2">
       <GroupedArmTable
@@ -207,7 +210,7 @@ export function GivenTable({ entries, label }: { entries: readonly ArmBlock[]; l
       <p className="text-xs text-muted-foreground">
         A probe whose answer needs no fact is in neither tally.
         {flagged
-          ? " † An overflow or a refusal reaches no model; the suite files such an answer by whether S1 found the facts in the payload the arm would have sent, so it can be counted under facts sent although nothing was sent. The harness is asked to file them as not sent."
+          ? " † An overflow or a refusal reaches no model. This run's harness filed such an answer by whether S1 found the facts in the payload the arm would have sent, so it can be counted under facts sent although nothing was sent; the harness now files them as not sent."
           : ""}
       </p>
     </div>
