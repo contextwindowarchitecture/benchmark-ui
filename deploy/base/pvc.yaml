@@ -1,4 +1,5 @@
-# The results volume: whole run directories under results/d1/…, published by deploy/publish.sh (section 12.2).
+# The results volume: whole run directories under results/<domain>/… (d1, d2), published by deploy/publish.sh
+# (section 12.2).
 # ReadWriteMany, so two UI replicas on different nodes mount it read-only during a rolling update; set the storage
 # class in the overlay. A cluster without an RWX class patches the claim to ReadWriteOnce and runs one replica, as
 # overlays/prod does, and records the deviation in docs/design/project-profile.md.

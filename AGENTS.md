@@ -14,12 +14,13 @@ checked out beside this repository as `../benchmark`.
 | `DESIGN.md` | The front-end design baseline. Read it before any UI work; its definition of done (section 14) and agent workflow (section 13) apply to every change |
 | `docs/plans/ui-plan.md` | The working plan: readers, the as-built data contract, pages, the shedding viewer, deployment, phases, decisions. Git-ignored: read and update it, never commit it |
 | `docs/design/project-profile.md` | The project profile DESIGN.md section 15 asks for: the versions, the preset, the budgets, the test commands and the exceptions |
-| `vendor/cwa-bench/` | The benchmark's schemas, fixture runs and write-up text, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
-| `src/data/schema/generated/` | Types generated from the vendored schemas by `scripts/generate-types.mjs`; regenerate, never edit |
-| `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`), `validate.ts` (the schema gate), `queries.ts` (TanStack Query), `row-store.ts`, `rows.worker.ts` and `use-rows.ts` (rows filtered and paged, in the worker above the row budget), `use-blobs.ts` (blobs by digest through the index) |
-| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell), `dashboard/` (page contract, states, badges), `charts/` (the shedding curve: D3 geometry, React SVG) |
-| `src/content/` | The reviewed words of the narrative pages (what CWA is, the claims, the limits, the defects, the planes' and stages' words, the glossary), each file citing the benchmark commit the vendor lock pins; a test fails when the pin moves until the content is re-read |
-| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds, the composite, the curve, the comparison) and `components/` (the runs list, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer, `overview/` with the Domain 1 overview, `diagrams/`, the pipeline walk, compare) |
+| `vendor/cwa-bench/` | Each domain's schemas, fixture runs and write-up, and the viability document, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
+| `src/data/schema/generated/` | Types and validators generated from the vendored schemas by `scripts/generate-types.mjs` and `generate-validators.mjs` (Domain 2's under `d2/`, loaded on first use); regenerate, never edit |
+| `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`, one per domain), `validate.ts` (the schema gate over both producers), `kinds.ts` (a kind in a domain), `queries.ts` (TanStack Query; the route's domain picks the source), `row-store.ts`, `row-kinds.ts`, `rows.worker.ts` and `use-rows.ts` (rows filtered and paged, in the worker above the row budget), `use-blobs.ts` (blobs by digest through the index) |
+| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell, which sets the results domain from the path), `dashboard/` (page contract, states, badges), `charts/` (the shedding curve, the arm plot and the corpus-size small multiples: D3 geometry, React SVG) |
+| `src/content/` | The reviewed words of the narrative pages (what CWA is, the claims, the limits, the defects, the planes' and stages' words, Domain 2's arms, families and suites in `d2/`, the glossary), each file citing the benchmark commit the vendor lock pins; a test fails when the pin moves until the content is re-read |
+| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds, the composite, the curve, the comparison) and `components/` (the runs list and the run frame both domains share, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer, `overview/` with the Domain 1 overview, `diagrams/`, the pipeline walk, compare) |
+| `src/features/d2/` | Domain 2: `model/` (metrics by arm and tier, the per-suite composite, the row kinds, the overview's selectors) and `components/` (the run page, the suite page with its arm × tier tables and rows, `overview/` with the Domain 2 overview) |
 | `src/lib/motion.ts` | The one place GSAP is registered; only lazily loaded modules (the overview, the walk) import it |
 | `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
@@ -27,16 +28,17 @@ checked out beside this repository as `../benchmark`.
 
 Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page), UI-P1
 (the deployment; the site serves at benchmark.contextwindowarchitecture.io), UI-P2 (the suite pages, the rows
-worker), UI-P3 (coverage, findings, the answer explorer) and UI-P5 (the narrative layer: home, About, the Domain 1
-overview, the domain pages, the diagrams, the pipeline walk, compare) are built. UI-P4 (performance, the shedding
-viewer) and UI-P6 (polish) remain; their routes render a placeholder inside the shell. The plan's section 15 says
-which phase builds what.
+worker), UI-P3 (coverage, findings, the answer explorer), UI-P5 (the narrative layer: home, About, the Domain 1
+overview, the domain pages, the diagrams, the pipeline walk, compare) and UI-D2 (Domain 2: its overview, runs, run
+and suite pages, over the same shell and data layer) are built. UI-P4 (performance, the shedding viewer) and UI-P6
+(polish) remain; their routes render a placeholder inside the shell. The plan's section 15 says which phase builds
+what.
 
 ## Working on it
 
 ```sh
 pnpm install
-pnpm dev                                        # ../benchmark/domain1/results/d1 when it exists, else the fixtures
+pnpm dev                                        # ../benchmark/domain<n>/results/d<n> if there, else the fixtures
 pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm vendor:check && pnpm format:check
 pnpm test:e2e                                   # needs `pnpm exec playwright install chromium` once
 pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with the copies, the lock and the types
@@ -56,9 +58,9 @@ pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with 
 
 ## Boundaries
 
-- Outside this repository, read only the benchmark checkout (`../benchmark`): its `domain1/schemas/`, its results
-  under `domain1/results/`, and its `docs/`. Never modify it from here; harness changes are made in that repository,
-  on request.
+- Outside this repository, read only the benchmark checkout (`../benchmark`): each domain's `schemas/`, `fixtures/`
+  and results (`domain1/results/`, `domain2/results/`), and its `docs/`. Never modify it from here; harness changes
+  are made in that repository, on request.
 - The benchmark is vendored by copy at a pinned commit with a SHA-256 lock (`DESIGN.md` 6.4; the plan's section
   3.1), the way the assemblers vendor the specification. Never edit a vendored file: re-vendor and move the pin in
   one commit, with the regenerated types and the UI changes that go with it.
@@ -74,7 +76,7 @@ pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with 
 - Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
   `<type>(<scope>): <summary>`, imperative mood, summary under about 72 characters, a body that explains why.
   - Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`.
-  - Scopes, as the change fits: `shell`, `data`, `d1`, `charts`, `viewer`, `vendor`, `deploy`, `ci`, `deps`,
+  - Scopes, as the change fits: `shell`, `data`, `d1`, `d2`, `charts`, `viewer`, `vendor`, `deploy`, `ci`, `deps`,
     `design`.
   - Breaking changes (a URL or configuration change existing links or deployments depend on): `!` after the scope,
     plus a `BREAKING CHANGE:` footer.

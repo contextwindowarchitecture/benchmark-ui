@@ -6,11 +6,12 @@ https://benchmark.contextwindowarchitecture.io. It reads the runs the benchmark 
 domain of the benchmark establishes about CWA: the claim, the evidence, how far to trust it, and every number behind
 it.
 
-**Status: phases UI-P0 to UI-P3 and UI-P5 built** (the scaffold, the data layer, the shell, the runs list and the run
-page; the deployment, serving at the host; the suite pages with their rows; coverage, the findings and the answer
-explorer; the narrative layer: the home page, About, the Domain 1 overview over the composite latest, the not-started
-domain pages, the four diagrams, the pipeline walk and compare). Performance and the shedding viewer (UI-P4) and the
-polish pass (UI-P6) are later phases; their routes render a placeholder that names theirs. [DESIGN.md](DESIGN.md) is the front-end design baseline and
+**Status: phases UI-P0 to UI-P3, UI-P5 and UI-D2 built** (the scaffold, the data layer, the shell, the runs list and
+the run page; the deployment, serving at the host; the suite pages with their rows; coverage, the findings and the
+answer explorer; the narrative layer: the home page, About, the Domain 1 overview over the composite latest, the
+not-started domain pages, the four diagrams, the pipeline walk and compare; Domain 2's overview, runs, run and suite
+pages). Performance and the shedding viewer (UI-P4) and the polish pass (UI-P6) are later phases; their routes render
+a placeholder that names theirs. [DESIGN.md](DESIGN.md) is the front-end design baseline and
 [docs/design/project-profile.md](docs/design/project-profile.md) records what this project chose. The working plan is
 kept locally under `docs/plans/`, like the benchmark's own plans.
 
@@ -22,7 +23,7 @@ document is validated against them before it is shown.
 
 ```sh
 pnpm install
-pnpm dev                 # serves ../benchmark/domain1/results/d1 when it exists, else the vendored fixtures
+pnpm dev                 # serves ../benchmark/domain<n>/results/d<n> when they exist, else the vendored fixtures
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
 pnpm vendor:check        # the vendored copy against the lock, and against ../benchmark at the locked commit
 pnpm test:e2e            # the Playwright smoke test over `vite preview` and the fixtures
@@ -30,4 +31,5 @@ pnpm vendor ../benchmark # re-vendor from a checkout and move the pin (one commi
 ```
 
 Node 24 and pnpm 12 (`packageManager` in `package.json`). `VITE_RESULTS_DIR` points the dev server at another
-results directory. The app reads its results root from `/config.json` at runtime (`public/config.json` locally).
+directory of Domain 1's runs, `VITE_D2_RESULTS_DIR` at another of Domain 2's. The app reads its results root from
+`/config.json` at runtime (`public/config.json` locally).

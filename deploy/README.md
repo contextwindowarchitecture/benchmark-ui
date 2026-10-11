@@ -22,7 +22,8 @@ podman run --rm -p 8080:8080 -v ../benchmark/domain1/results:/data/results:ro,Z 
 ```
 
 The same image, the same configuration, with the results directory bind-mounted where the cluster mounts the volume.
-`http://localhost:8080/results/d1/index.json` must answer, and the site must render from it.
+`http://localhost:8080/results/d1/index.json` must answer, and the site must render from it. The mount holds one
+directory per domain (`d1`, `d2`); to see Domain 2 locally, mount a directory that holds both.
 
 ## First deployment
 
@@ -91,3 +92,17 @@ never lists a run that is not yet there. A fresh volume is formatted at its firs
 before the UI's first rollout has completed. `KEEP=20 deploy/publish.sh …` prunes run directories beyond the newest
 twenty, except those in `keep.txt`. The site shows a pruned run as "pruned", since the index still lists it. Nothing
 runs the harness in the cluster.
+
+Each domain is published on its own, with its own results root and index; the site reads `results/d1/` and
+`results/d2/`. Domain 2's reported runs are made on the GPU host, so copy the run directories and `index.json` from
+its `domain2/results/d2/` to a local directory first, then publish every run its index lists that the site should
+show (an index names runs the volume may not hold, and those show as pruned):
+
+```sh
+deploy/publish.sh <local copy of domain2/results> d2 <run-id> <run-id>
+```
+
+The Domain 2 overview reads each suite from the newest finished run outside a CI profile that has it, and a CI
+profile's run only for a suite no such run has. So the recorded run, and the S4 and S6 runs the write-up names beside
+it, must be on the volume for the overview to show the write-up's results; otherwise it shows the newest nightly's,
+and says so. Add the runs the write-up cites to `keep.txt`.

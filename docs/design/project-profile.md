@@ -32,15 +32,18 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   replaced by the adapter hues; status colors are never used for series. Every status badge meets WCAG AA on its
   tint in the light theme (axe checks it in the smoke test).
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
-  (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and
-  `gcTime` infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned,
-  not in this run), never retried. Query keys carry the results root, the run id and the path.
+  (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
+  infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this
+  run), never retried. Query keys carry the results root, the domain, the run id and the path. There is one source per
+  domain (`<root>/<domain>/…`); the shell sets the results domain from the path (`/d2…` is Domain 2's, everything else
+  Domain 1's), so every hook, the workers and the run picker read the page's domain.
 - Data source and publishing: the client reads `/config.json` (`{ "resultsRoot": "/results" }`) at startup
   (`src/data/config.ts`); a missing or malformed document is a visible error, never a default. In `vite dev` and
-  `vite preview` a plugin (`dev/results-plugin.ts`) serves `/results/d1/` from `../benchmark/domain1/results/d1`
-  when that checkout is beside this repository, else from the vendored fixtures, with `VITE_RESULTS_DIR` overriding
-  both; JSON and JSONL get their media types, misses 404, no listing. Deployed, the same build serves `/results/`
-  from a volume published to by `deploy/publish.sh` (`deploy/`, the plan's section 12).
+  `vite preview` a plugin (`dev/results-plugin.ts`) serves `/results/d1/` and `/results/d2/` from the benchmark
+  checkout's `domain1/results/d1` and `domain2/results/d2` when they are beside this repository, else from the
+  vendored fixtures, with `VITE_RESULTS_DIR` and `VITE_D2_RESULTS_DIR` overriding them; JSON and JSONL get their
+  media types, misses 404, no listing. Deployed, the same build serves `/results/` from a volume published to by
+  `deploy/publish.sh` (`deploy/`, the plan's section 12).
 - Row and file-size budgets (6.4): `src/data/budgets.ts`, from the plan's 5.4: 5,000 rows on the main thread,
   30,000 in the worker, 30 MB loaded whole, 1 MB for an inline blob view, 4 points for a fit. UI-P0 ships the
   streaming JSONL parser and the budget check (`rows()` refuses a file the run index says is above the budget, and
@@ -57,23 +60,32 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   validators generated at build time from the producer's JSON Schemas by Ajv 8.20.0's standalone code generation
   (draft 2020-12, `allErrors`, `strict`, `allowUnionTypes`, ajv-formats for `date-time` and `uri`), so nothing is
   compiled in the browser and the deployed Content Security Policy (`script-src 'self'`, no 'unsafe-eval') holds;
-  `src/data/validate.ts` only calls them. The gate is `$schema`, and a kind or major version this build does not
-  know renders the unsupported-schema state. `pnpm generate:types` runs `scripts/generate-types.mjs`
-  (json-schema-to-typescript 16.0.0, the types) and `scripts/generate-validators.mjs` (the validators) into
-  `src/data/schema/generated/`, checked in; CI fails if they are stale.
+  `src/data/validate.ts` only calls them. Each domain's validators are a module of their own: Domain 1's in the main
+  chunk, Domain 2's (about 800 kB) imported on first use by the query functions and the rows worker, so Domain 1's
+  pages never load them; the workers are ES modules so they can. Domain 1's kinds keep their names (`summary`), Domain
+  2's are keyed behind the domain (`d2/summary`, `D2SummaryV1`). The gate is `$schema`, and a kind or major version
+  this build does not know renders the unsupported-schema state. `pnpm generate:types` runs
+  `scripts/generate-types.mjs` (json-schema-to-typescript 16.0.0, the types) and `scripts/generate-validators.mjs`
+  (the validators) into `src/data/schema/generated/`, checked in; CI fails if they are stale.
 - Chart types, maximum expected data volume, aggregation: the environment matrix and the three coverage matrices as
   tables whose cells carry the rate in their color and the fractions in their text and accessible name (DESIGN.md 7;
   `src/components/dashboard/rate-matrix.tsx`), the mutation operators as a table with a bar per operator, metric
-  cards. From UI-P5, the shedding curve (`src/components/charts/shedding-curve.tsx`: D3 scales and a step path,
-  React SVG, rules at the protected size, the floor and the threshold, the refused region named, a table of every
-  frame as its alternative; one adapter when the four agree, every adapter overlaid otherwise), drawn from a sweep
-  file loaded whole in a worker (`src/data/sweep-worker-core.ts`, under the 30 MB budget: 3.7 to 20 MB real, up to
-  737 frames per adapter) that answers one point per frame (the harness's `curve[]` when the file has one, else
-  derived from the frames); the four diagrams as React SVG from the contract's typed slots, the timeline schema's
-  lanes, the self-check's metrics and the S2 cells, each hidden from assistive technology beside a text equivalent;
-  the pipeline walk over a timeline's events (up to a few hundred); the median pressure exponent per adapter over
-  the perf summary's fits (864 in the real run), the median the viewer's and said so. The plan's section 10 lists
-  what UI-P4 still draws.
+  cards. From UI-P5, the shedding curve (`src/components/charts/shedding-curve.tsx`: D3 scales and a step path, React
+  SVG, rules at the protected size, the floor and the threshold, the refused region named, a table of every frame as
+  its alternative; one adapter when the four agree, every adapter overlaid otherwise), drawn from a sweep file loaded
+  whole in a worker (`src/data/sweep-worker-core.ts`, under the 30 MB budget: 3.7 to 20 MB real, up to 737 frames per
+  adapter) that answers one point per frame (the harness's `curve[]` when the file has one, else derived from the
+  frames); the four diagrams as React SVG from the contract's typed slots, the timeline schema's lanes, the
+  self-check's metrics and the S2 cells, each hidden from assistive technology beside a text equivalent; the pipeline
+  walk over a timeline's events (up to a few hundred); the median pressure exponent per adapter over the perf
+  summary's fits (864 in the real run), the median the viewer's and said so. The plan's section 10 lists what UI-P4
+  still draws. From UI-D2, Domain 2's arm plot (`src/components/charts/arm-plot.tsx`: one row per arm, grouped as
+  upper bounds, conventional baselines and CWA arms, a dot with its interval or a bar from zero, a lighter bar behind
+  for a second value of the same unit, a dashed reference rule, the value as text beside each row) and the small
+  multiples over corpus size (`tier-lines.tsx`: one panel per arm, a log scale of the corpus as a multiple of the
+  budget, the reference arm faint in every panel); each with a summary and a table of every value. Arms are categories
+  with no hue of their own: their group's mark (an outline, grey, the accent) carries them, with the id as text. The
+  arm × tier tables on Domain 2's suite pages hold every per-arm metric with its fraction and interval.
 - Locale, currencies, timezone, and date-range semantics: the browser's locale for numbers (grouped thousands, one
   decimal for ms, s and bytes, two for exponents); UTC for every time, written `2026-10-08 13:34:53 UTC`, with the
   ISO form in `<time dateTime>`; no currencies; no date ranges (runs are picked by id). All through
@@ -100,9 +112,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   equivalent that carries every word; the shedding curve is an `img` named by its title and summary with a table
   alternative; the pipeline walk is a range input with buttons and the current step as text, and under reduced
   motion shows the final state with no playback. The Playwright smoke test runs axe on the home page, the runs
-  list, a run page, a suite page, the explorer, coverage, a finding, the Domain 1 overview, About, a domain page
-  and compare against the fixtures, and checks the overview under `prefers-reduced-motion`. Keyboard runs by hand
-  on the shell, the overview's walk and the pickers.
+  list, a run page, a suite page, the explorer, coverage, a finding, the Domain 1 overview, About, a domain page,
+  compare, and Domain 2's overview, runs list, run page and a suite page against the fixtures, and checks the
+  overview under `prefers-reduced-motion`. Keyboard runs by hand on the shell, the overview's walk and the pickers.
 - Performance budgets and measurement method: not yet measured against the plan's targets (first render of the
   overview under 1 s, the viewer's first frame under 2 s); UI-P6 measures. The overview, the walk and the content
   are their own chunks (73 kB, 80 kB with GSAP, 55 kB before gzip in the UI-P5 build) loaded on first visit, so the
@@ -141,6 +153,16 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     replica stands, since every pod lands on the volume's node and a ReadWriteOnce volume mounts in any number of
     pods there. The claim is read-only on the container's mount and read-write at the pod level, because the
     driver formats the volume at its first mount and refuses to when that mount is read-only.
+  - Domain 2's suite summaries' open blocks (`model`, `by_arm`, `cost`) are not read either (the plan's section 14,
+    ask 13): the paired differences from the reference arm, accuracy with the needed fact sent and not, the
+    breakdowns by family, turn count and IP rule, S5's under-count by prompt size and S6's reply length wait for the
+    harness to type them. The overview and the suite pages say so; every number they show is a typed metric.
+  - Domain 2's `lq-corpus` schema requires a question's `answer.expected` without declaring it, which JSON Schema
+    allows and Ajv's `strictRequired` refuses; that one strict check is off for Domain 2's validators only
+    (`scripts/schema-domains.mjs`), and the harness is asked to declare it (ask 14).
+  - Domain 2's overview reads each suite from the newest finished run outside a CI profile that has it, else the
+    newest that has it, with `?run=` pinning one run's suites: the viewer's composite, since the write-up combines
+    runs and the harness names no reported run. The page names the run and the scripts' size of every panel.
   - The suite summaries' open blocks (`metamorphic`, `generated`, `summarizer`, the labeled details) and the
     summarizer summary's `by_arm` are not read (DESIGN.md 6.4): the S4 tallies, S5's steering chart and S11's
     curves wait for the harness to type them (the plan's section 14, items 8 to 10). The panels say so.
@@ -164,5 +186,5 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
     well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P3 and UI-P5 are built; the site serves
-  at its host with cert-manager's certificate (`deploy/README.md`).
+- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P3, UI-P5 and UI-D2 are built; the site
+  serves at its host with cert-manager's certificate (`deploy/README.md`).
