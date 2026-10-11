@@ -141,9 +141,9 @@ export function PipelineWalk({ timeline, runId, path, withTable = true }: Pipeli
         {view.inferred > 0 ? (
           <span>{formatCount(view.inferred)} events in inferred order, drawn dashed</span>
         ) : null}
-        <span>
-          <span className="font-mono">{path}</span> of run{" "}
-          <span className="font-mono">{runId}</span>
+        <span className="min-w-0">
+          <span className="font-mono break-all">{path}</span> of run{" "}
+          <span className="font-mono break-all">{runId}</span>
         </span>
       </div>
       <div ref={ref} className="w-full" aria-hidden="true">
