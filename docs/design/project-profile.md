@@ -179,7 +179,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     `answer` (ask 14), so no per-domain Ajv option remains in `scripts/schema-domains.mjs`.
   - Domain 2's overview reads each suite from the newest finished run outside a CI profile that has it, else the
     newest that has it, with `?run=` pinning one run's suites: the viewer's composite, since the write-up combines
-    runs and the harness names no reported run. The page names the run and the scripts' size of every panel.
+    runs and the harness names no reported run. A run whose summary is not there (pruned, 6.4) is read past to the
+    next run that has the suite, and the page says which run stands in for which; a summary that fails for any
+    other reason is not. The page names the run and the scripts' size of every panel.
   - The suite summaries' open blocks (`metamorphic`, `generated`, `summarizer`, the labeled details) and the
     summarizer summary's `by_arm` are not read (DESIGN.md 6.4): the S4 tallies, S5's steering chart and S11's
     curves wait for the harness to type them (the plan's section 14, items 8 to 10). The panels say so.
