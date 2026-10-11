@@ -13,9 +13,10 @@ export type AdapterIdentity = {
   symbol: AdapterSymbol
   /** The CSS custom property holding the series color. */
   colorVar: string
-  /** Literal Tailwind classes for text, fill and background in that color. */
+  /** Literal Tailwind classes for text, fill, stroke and background in that color. */
   textClass: string
   fillClass: string
+  strokeClass: string
   bgClass: string
 }
 
@@ -27,6 +28,7 @@ export const ADAPTERS: Record<AdapterId, AdapterIdentity> = {
     colorVar: "--adapter-python",
     textClass: "text-adapter-python",
     fillClass: "fill-adapter-python",
+    strokeClass: "stroke-adapter-python",
     bgClass: "bg-adapter-python",
   },
   typescript: {
@@ -36,6 +38,7 @@ export const ADAPTERS: Record<AdapterId, AdapterIdentity> = {
     colorVar: "--adapter-typescript",
     textClass: "text-adapter-typescript",
     fillClass: "fill-adapter-typescript",
+    strokeClass: "stroke-adapter-typescript",
     bgClass: "bg-adapter-typescript",
   },
   go: {
@@ -45,6 +48,7 @@ export const ADAPTERS: Record<AdapterId, AdapterIdentity> = {
     colorVar: "--adapter-go",
     textClass: "text-adapter-go",
     fillClass: "fill-adapter-go",
+    strokeClass: "stroke-adapter-go",
     bgClass: "bg-adapter-go",
   },
   rust: {
@@ -54,6 +58,7 @@ export const ADAPTERS: Record<AdapterId, AdapterIdentity> = {
     colorVar: "--adapter-rust",
     textClass: "text-adapter-rust",
     fillClass: "fill-adapter-rust",
+    strokeClass: "stroke-adapter-rust",
     bgClass: "bg-adapter-rust",
   },
 }

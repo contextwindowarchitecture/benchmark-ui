@@ -44,7 +44,12 @@ export type SheddingCurveProps = {
 
 function strokeClass(adapter: string, alone: boolean): string {
   if (alone) return "stroke-primary"
-  return isAdapterId(adapter) ? `stroke-${ADAPTERS[adapter].textClass.slice(5)}` : "stroke-primary"
+  return isAdapterId(adapter) ? ADAPTERS[adapter].strokeClass : "stroke-primary"
+}
+
+function fillClass(adapter: string, alone: boolean): string {
+  if (alone) return "fill-primary"
+  return isAdapterId(adapter) ? ADAPTERS[adapter].fillClass : "fill-primary"
 }
 
 export function SheddingCurve({
@@ -291,10 +296,7 @@ export function SheddingCurve({
                     cx={s.point.x}
                     cy={s.point.y}
                     r={3.5}
-                    className={strokeClass(s.adapter, layout.series.length === 1).replace(
-                      "stroke-",
-                      "fill-",
-                    )}
+                    className={fillClass(s.adapter, layout.series.length === 1)}
                   />
                 ) : null}
                 {s.coarse.map((cx, j) => (
