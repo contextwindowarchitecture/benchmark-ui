@@ -1,12 +1,13 @@
 // Pure selectors for Domain 2's overview (the UI-D2 plan; ui-plan.md 7.1): the evidence each panel
-// draws, from the typed metrics of the runs the composite reads each suite from. Nothing is
-// computed that the harness did not measure: a panel takes the producer's values, intervals and
-// judgments, and leaves out what an open block holds.
+// draws, from the typed metrics of the runs the composite reads each suite from and, since
+// harness ask 13, from the suite summaries' typed by_arm blocks. Nothing is computed that the
+// harness did not measure: a panel takes the producer's values, intervals and judgments.
 
 import { armGroup, compareArms, type ArmGroup } from "@/content/d2/vocabulary"
 import type { ArmRow } from "@/components/charts/arm-plot-geometry"
 import type { TierSeries } from "@/components/charts/tier-lines-geometry"
 
+import { byArmAndTier, type ArmBlock, type Paired } from "./blocks"
 import { armPoints, compareTiers, crossArm, metricsOf, parseTier, type D2Metric } from "./metrics"
 
 /** The arms the write-up compares the others with. */
@@ -146,5 +147,54 @@ export function checks(sources: readonly CheckSource[]): { runId: string; metric
     const source = sources.find((candidate) => candidate.suite === suite)
     const metric = source ? crossArm(source.metrics, id) : undefined
     return source && metric ? [{ runId: source.runId, metric }] : []
+  })
+}
+
+export type PairedRow = ArmRow & { group: ArmGroup; tier: string; paired: Paired }
+
+/**
+ * Each arm's paired difference from the reference arm at a tier, for a chart: the harness's
+ * mean per-observation difference with its interval, in the write-up's arm order. The reference
+ * arm and the upper bounds, which are not paired, are left out; the chart's rule at zero is the
+ * reference.
+ */
+export function pairedRows(
+  entries: readonly { arm: string; tier: string; paired: Paired | null }[],
+  tier: string,
+): PairedRow[] {
+  return entries
+    .filter((entry) => entry.tier === tier && entry.paired !== null)
+    .sort((a, b) => compareArms(a.arm, b.arm))
+    .map((entry) => {
+      const paired = entry.paired as Paired
+      return {
+        id: entry.arm,
+        group: armGroup(entry.arm),
+        tier: entry.tier,
+        value: paired.difference,
+        low: paired.interval.low,
+        high: paired.interval.high,
+        paired,
+      }
+    })
+}
+
+export type AttributionRow = {
+  arm: string
+  group: ArmGroup
+  /** The tier the row is from: the chosen one, or no budget for an upper bound. */
+  tier: string
+  given: ArmBlock["given"]
+}
+
+/**
+ * Correct answers with the needed facts sent and without, per arm at a tier; an upper bound,
+ * which has no budget, at its own. Arms in the write-up's order.
+ */
+export function attributionRows(entries: readonly ArmBlock[], tier: string): AttributionRow[] {
+  const layout = byArmAndTier(entries)
+  return layout.arms.flatMap((arm) => {
+    const entry = layout.at(arm.id, tier) ?? layout.at(arm.id, "control")
+    return entry ? [{ arm: arm.id, group: arm.group, tier: entry.tier, given: entry.given }] : []
   })
 }

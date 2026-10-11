@@ -16,20 +16,39 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ARM_GROUPS, type ArmGroup } from "@/content/d2/vocabulary"
-import { metricText } from "@/features/d2/model/metric-text"
+import {
+  byArmAndTier,
+  pairedReference,
+  share,
+  type ArmBlock,
+  type LoopArm,
+  type LqArm,
+} from "@/features/d2/model/blocks"
+import { intervalLevel, metricText } from "@/features/d2/model/metric-text"
 import { tierLabel, type D2Metric } from "@/features/d2/model/metrics"
 import {
   aptitudeRows,
+  attributionRows,
   longContextSeries,
   loopRows,
+  pairedRows,
   REFERENCE_ARMS,
   valueRows,
   type ArmRowWithMetrics,
 } from "@/features/d2/model/overview"
-import { formatCount, formatPercent, formatPoints, formatPointsDifference } from "@/lib/format"
+import {
+  formatCount,
+  formatPercent,
+  formatPoints,
+  formatPointsDifference,
+  formatPointsDifferenceInterval,
+  formatRate,
+} from "@/lib/format"
 
 import { ArmLabel } from "../arm-label"
+import { GroupedArmTable, ShareCell } from "../grouped-arm-table"
 import { MetricValue } from "../metric-value"
+import { PairedTable } from "../paired-table"
 
 const TONES: Record<ArmGroup, ArmTone> = {
   control: "outline",
@@ -307,15 +326,22 @@ export function LongContextPanel({
   )
 }
 
-/** S6: accuracy with the model's own replies as history, against the scripted result. */
+/**
+ * S6: accuracy with the model's own replies as history, against the scripted result and, when
+ * the suite's typed block is given, paired with the reference arm.
+ */
 export function LoopPanel({
   metrics,
   source,
+  blocks = [],
 }: {
   metrics: readonly D2Metric[]
   source: PanelSource
+  blocks?: readonly LoopArm[]
 }) {
   const rows = loopRows(metrics)
+  const paired = new Map(blocks.map((block) => [block.arm, block.paired]))
+  const reference = pairedReference(blocks)
   if (rows.length === 0) {
     return (
       <p
@@ -343,35 +369,216 @@ export function LoopPanel({
               <TableHead scope="col" className="text-right">
                 Against the scripted result
               </TableHead>
+              {blocks.length > 0 ? (
+                <TableHead scope="col" className="text-right">
+                  Less {reference ?? "the reference"}
+                </TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.arm} data-arm={row.arm}>
-                <TableCell>
-                  <ArmLabel arm={row.arm} />
-                </TableCell>
-                <TableCell className="tabular text-right">
-                  <MetricValue metric={row.aptitude} />
-                </TableCell>
-                <TableCell className="tabular text-right">
-                  {row.against && row.against.value !== null ? (
-                    <span title={row.against.description || undefined}>
-                      {formatPointsDifference(row.against.value)}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">not measured</span>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+            {rows.map((row) => {
+              const difference = paired.get(row.arm)
+              const pairedText = difference
+                ? `${formatPointsDifference(difference.difference)}, ${intervalLevel(difference.interval.level)} interval ${formatPointsDifferenceInterval(difference.interval.low, difference.interval.high)}, over ${formatCount(difference.n)} pairs`
+                : row.arm === reference
+                  ? "the reference"
+                  : "not paired"
+              return (
+                <TableRow key={row.arm} data-arm={row.arm}>
+                  <TableCell>
+                    <ArmLabel arm={row.arm} />
+                  </TableCell>
+                  <TableCell className="tabular text-right">
+                    <MetricValue metric={row.aptitude} />
+                  </TableCell>
+                  <TableCell className="tabular text-right">
+                    {row.against && row.against.value !== null ? (
+                      <span title={row.against.description || undefined}>
+                        {formatPointsDifference(row.against.value)}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">not measured</span>
+                    )}
+                  </TableCell>
+                  {blocks.length > 0 ? (
+                    <TableCell
+                      className="tabular text-right"
+                      aria-label={`${row.arm}, less ${reference ?? "the reference"}: ${pairedText}`}
+                      title={pairedText}
+                    >
+                      {difference ? (
+                        <span className="inline-flex flex-col items-end">
+                          <span>{formatPointsDifference(difference.difference)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatPointsDifferenceInterval(
+                              difference.interval.low,
+                              difference.interval.high,
+                            )}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {row.arm === reference ? "reference" : "not paired"}
+                        </span>
+                      )}
+                    </TableCell>
+                  ) : null}
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </TableRegion>
       <p className="text-xs text-muted-foreground">
-        The difference is the harness's own, in percentage points: the loop's accuracy less the
-        scripted run's on the same probes.
+        The differences are the harness's own, in percentage points: the loop's accuracy less the
+        scripted run's on the same probes
+        {blocks.length > 0
+          ? ", and less the reference arm's in the loop on the same probes and chains, with its interval"
+          : ""}
+        .
       </p>
+      <SourceNote source={source} />
+    </div>
+  )
+}
+
+/**
+ * The write-up's comparison: each arm less the reference arm on the same probes and samples at
+ * the budget, with the harness's interval, as a dot with a whisker on a scale with zero marked
+ * as the reference. From S2's typed by_arm block.
+ */
+export function PairedPanel({
+  entries,
+  budget,
+  source,
+}: {
+  entries: readonly ArmBlock[]
+  budget: string
+  source: PanelSource
+}) {
+  const rows = pairedRows(entries, budget)
+  const reference = pairedReference(entries) ?? REFERENCE_ARMS.conversations
+  const label = tierLabel(budget)
+  const title = `Paired difference from ${reference} at ${label}`
+  if (rows.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground" data-state="empty">
+        No arm is paired with {reference} at {label} in this run.
+      </p>
+    )
+  }
+  return (
+    <div className="space-y-2">
+      <ArmPlot
+        title={title}
+        summary={`Each arm's share of correct answers less ${reference}'s on the same probes and samples at ${label}, in percentage points, with its 95% cluster-bootstrap interval over conversations; the dashed rule at zero is ${reference} itself. The upper bounds have no budget and are not paired.`}
+        rows={rows}
+        groups={GROUPS}
+        domain="auto"
+        mark="dot"
+        format={formatPointsDifference}
+        formatTick={(value) => `${Math.round(value * 100)} pp`}
+        reference={{ value: 0, label: reference }}
+        legend={{ mark: `difference from ${reference} (S2), percentage points` }}
+        table={
+          <PairedTable
+            entries={entries}
+            tiers={[budget]}
+            label={title}
+            caption={`Each arm less ${reference} on the same probes and samples at ${label}, in percentage points with its interval.`}
+          />
+        }
+      />
+      <SourceNote source={source} />
+    </div>
+  )
+}
+
+/**
+ * The write-up's attribution, from S2's typed block: correct answers among the probes whose
+ * needed facts the payload carried, and among those whose facts it did not, per arm at the
+ * budget; the upper bounds at no budget.
+ */
+export function AttributionPanel({
+  entries,
+  budget,
+  source,
+}: {
+  entries: readonly ArmBlock[]
+  budget: string
+  source: PanelSource
+}) {
+  const rows = attributionRows(entries, budget)
+  const label = tierLabel(budget)
+  const title = `Correct answers by whether the facts were sent at ${label}`
+  const byArm = new Map(rows.map((row) => [row.arm, row]))
+  const cell = (arm: string, column: string) => {
+    const row = byArm.get(arm)
+    if (!row) return null
+    const tally = column === "sent" ? row.given.present : row.given.absent
+    if (tally.n === 0) {
+      return {
+        node: <span className="text-muted-foreground">none</span>,
+        text: column === "sent" ? "no probe had its facts sent" : "every probe had its facts sent",
+      }
+    }
+    const percent = share(tally.n, tally.correct)
+    return {
+      node: (
+        <ShareCell
+          percent={percent === null ? null : formatPercent(percent)}
+          fraction={`${formatCount(tally.correct)} / ${formatCount(tally.n)}`}
+        />
+      ),
+      text: formatRate(percent, tally.correct, tally.n),
+    }
+  }
+  return (
+    <div className="space-y-2">
+      <GroupedArmTable
+        label={title}
+        caption={`Correct answers among the probes whose needed facts were in the payload at ${label}, and among those whose facts were not; the upper bounds at no budget.`}
+        arms={rows.map((row) => ({ id: row.arm, group: row.group }))}
+        columns={[
+          { key: "sent", label: "Facts sent" },
+          { key: "unsent", label: "Facts not sent" },
+        ]}
+        cell={cell}
+      />
+      <p className="text-xs text-muted-foreground">
+        A wrong answer with the facts sent is the model's; one without them is the payload's. The
+        upper bounds are read at no budget.
+      </p>
+      <SourceNote source={source} />
+    </div>
+  )
+}
+
+/** S4's arms paired with the reference over documents at every corpus size, from its block. */
+export function LongContextPairedPanel({
+  entries,
+  source,
+}: {
+  entries: readonly LqArm[]
+  source: PanelSource
+}) {
+  const reference = pairedReference(entries) ?? REFERENCE_ARMS.documents
+  const tiers = byArmAndTier(entries).tiers
+  if (tiers.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground" data-state="empty">
+        No arm is paired with {reference} in this run.
+      </p>
+    )
+  }
+  return (
+    <div className="space-y-2">
+      <PairedTable
+        entries={entries}
+        label={`Paired difference from ${reference} by corpus size`}
+        caption={`Each arm less ${reference} on the same questions and samples at each corpus size, in percentage points with its interval.`}
+      />
       <SourceNote source={source} />
     </div>
   )

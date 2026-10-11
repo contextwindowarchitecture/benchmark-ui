@@ -57,7 +57,50 @@ describe("Domain 2's overview", () => {
     ).toBeInTheDocument()
     const loop = evidence.getByRole("region", { name: "The model in the loop" })
     expect(within(loop).getAllByRole("row").length).toBeGreaterThan(1)
-    expect(evidence.getByText("What this page does not show yet")).toBeInTheDocument()
+
+    // From the suite summaries' typed by_arm blocks (harness ask 13).
+    expect(
+      await evidence.findByRole("img", {
+        name: /^Paired difference from truncate-pinned at 8,192 tokens/,
+      }),
+    ).toBeInTheDocument()
+    const paired = evidence.getByRole("region", {
+      name: "Paired difference from truncate-pinned at 8,192 tokens",
+    })
+    expect(
+      within(paired).getByRole("cell", {
+        name: "cwa-state, 8,192 tokens: +15.3 pp, 95% interval +5.1 to +28.0 pp, over 432 pairs",
+      }),
+    ).toBeInTheDocument()
+    const attribution = evidence.getByRole("region", {
+      name: "Correct answers by whether the facts were sent at 8,192 tokens",
+    })
+    expect(
+      within(attribution).getByRole("cell", { name: "window, Facts not sent: 0% (0 / 192)" }),
+    ).toBeInTheDocument()
+    expect(
+      within(attribution).getByRole("cell", {
+        name: "control-full, Facts not sent: every probe had its facts sent",
+      }),
+    ).toBeInTheDocument()
+    const documents = await evidence.findByRole("region", {
+      name: "Paired difference from rag by corpus size",
+    })
+    expect(
+      within(documents).getByRole("cell", {
+        name: "cwa-ranked, 0.25 × the budget: +5.6 pp, 95% interval 0.0 to +11.1 pp, over 36 pairs",
+      }),
+    ).toBeInTheDocument()
+    expect(
+      await within(loop).findByRole("cell", {
+        name: "window, less truncate-pinned: −24.0 pp, 95% interval −33.3 to −3.7 pp, over 96 pairs",
+      }),
+    ).toBeInTheDocument()
+    expect(evidence.queryByText("What this page does not show yet")).toBeNull()
+    expect(evidence.getByRole("link", { name: "S2's breakdowns" })).toHaveAttribute(
+      "href",
+      `/d2/runs/${run}/suites/S2#breakdowns`,
+    )
 
     const trust = await section("trust")
     const agreement = trust
