@@ -1,3 +1,7 @@
 # Runs deploy/publish.sh never prunes, one id per line: the runs a write-up cites.
 20261008T133453Z-691b414
 20261008T073129Z-a1d69f8
+# Domain 2's write-up (docs/domain2.md): the recorded run, the S6 pilot it reports beside it, and the nightly its index names as latest.
+20261011T144936Z-9c870cd
+20261011T082134Z-5c9695c
+20261011T161204Z-9c870cd
