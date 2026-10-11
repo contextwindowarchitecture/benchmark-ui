@@ -170,7 +170,7 @@ function Coverage({
         id="requirements"
         description="Rows judged under each requirement that passed, by scope; the contract's summary on hover and the suites that exercise it."
       >
-        <div className="grid gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
           {groups.map((group) => (
             <div key={group.scope ?? "none"} className="space-y-2">
               <h3 className="text-base font-semibold capitalize">
