@@ -78,8 +78,18 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   frames); the four diagrams as React SVG from the contract's typed slots, the timeline schema's lanes, the
   self-check's metrics and the S2 cells, each hidden from assistive technology beside a text equivalent; the pipeline
   walk over a timeline's events (up to a few hundred); the median pressure exponent per adapter over the perf
-  summary's fits (864 in the real run), the median the viewer's and said so. The plan's section 10 lists what UI-P4
-  still draws. From UI-D2, Domain 2's arm plot (`src/components/charts/arm-plot.tsx`: one row per arm, grouped as
+  summary's fits (864 in the real run), the median the viewer's and said so. From UI-P4, the shedding viewer: the
+  curve with a cursor at the frame, the item strip (`src/components/charts/item-strip.tsx`: one row per item, up to
+  a few hundred, grouped by tier on the curve's budget axis, each row's segments the frames' own states merged where
+  they agree, a compressed stretch hatched, the slot's plane as the hue, the items the frame did not keep dimmed,
+  scrolling in place past 520 px), the lanes of a frame's timeline, and the counters as text; the worker answers each
+  frame's item states as one byte per item per frame (under 125 kB for the real run's largest sweep, 737 frames ×
+  42 items × 4 adapters). The scaling fits as small multiples (`scaling-plots.tsx`: one log-log panel per shape on
+  shared axes, a series per adapter in its color and symbol, each fit's points the cells its typed series names and
+  its line the harness's slope through their log mean, a fit under four points drawn as points; the exponents, r²
+  and points as text beside each panel). S7's grid as a table whose cells carry the share of budgets on which every
+  adapter agreed in their color and text, with timeouts and skips marked apart (1,317 rows in the real run, loaded
+  on request); startup, throughput and time to refusal as tables with a bar per row. From UI-D2, Domain 2's arm plot (`src/components/charts/arm-plot.tsx`: one row per arm, grouped as
   upper bounds, conventional baselines and CWA arms, a dot with its interval or a bar from zero, a lighter bar behind
   for a second value of the same unit, a dashed reference rule, the value as text beside each row) and the small
   multiples over corpus size (`tier-lines.tsx`: one panel per arm, a log scale of the corpus as a multiple of the
@@ -106,24 +116,35 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   phone at 375 px for the home page, the runs list and the run page (the tables scroll horizontally in a labelled
   region; the page itself never overflows). The model, environment and oracle diagrams lay themselves out in their
   frame's measured width: on a phone the model pairs its planes, the environment diagram bands its platforms and
-  the oracles stack on a spine, rather than scrolling inside the frame. The Playwright smoke test opens the home
-  page, the Domain 1 overview, the S2 suite page, coverage, and Domain 2's overview, a run page and a suite page
-  with its rows loaded at 375 px, and fails if the page scrolls sideways or anything outside a table region
+  the oracles stack on a spine, rather than scrolling inside the frame. The shedding viewer shows one panel at a
+  time below 1024 px (the URL's `view` picks it), the curve beside the items or the lanes above. The Playwright smoke
+  test opens the home page, the Domain 1 overview, the S2 suite page, coverage, the shedding viewer in two views, the
+  sweeps list, performance, and Domain 2's overview, a run page and a suite page with its rows loaded at 375 px, and fails if the page scrolls sideways or anything outside a table region
   reaches past the screen's edge.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
   navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
   scrolling container cannot be focused, so the region takes the scrolling over), `aria-sort` on sortable headers, accessible names on every icon button, visible
-  focus rings, focus moved to the page title on route change. Diagrams are `aria-hidden` pictures beside a text
+  focus rings, focus moved to the page title on route change (a lazily loaded page's title takes it over from its
+  fallback's). Diagrams are `aria-hidden` pictures beside a text
   equivalent that carries every word; the shedding curve is an `img` named by its title and summary with a table
   alternative; the pipeline walk is a range input with buttons and the current step as text, and under reduced
-  motion shows the final state with no playback. The Playwright smoke test runs axe on the home page, the runs
-  list, a run page, a suite page, the explorer, coverage, a finding, the Domain 1 overview, About, a domain page,
-  compare, and Domain 2's overview, runs list, run page and a suite page against the fixtures, and checks the
-  overview under `prefers-reduced-motion`. Keyboard runs by hand on the shell, the overview's walk and the pickers.
+  motion shows the final state with no playback. The shedding viewer is the same: a range input over the frames
+  (arrows step, space plays and pauses), step and jump buttons, the frame's counters as text and its value text on
+  the slider, no play button under reduced motion and the last frame first. The item strip and each scaling panel
+  are `img`s named by a sentence that carries their values, with a table of every item or fit. The Playwright smoke
+  test runs axe on the home page, the runs list, a run page, a suite page, the explorer, coverage, a finding, the
+  Domain 1 overview, About, a domain page, compare, the sweeps list, the viewer, S7's suite page with its grid,
+  performance, and Domain 2's overview, runs list, run page and a suite page against the fixtures; it plays a sweep
+  to its last frame and steps it from the keyboard, and checks the overview and the viewer under
+  `prefers-reduced-motion`. Keyboard runs by hand on the shell, the overview's walk and the pickers.
 - Performance budgets and measurement method: not yet measured against the plan's targets (first render of the
   overview under 1 s, the viewer's first frame under 2 s); UI-P6 measures. The overview, the walk and the content
   are their own chunks (73 kB, 80 kB with GSAP, 55 kB before gzip in the UI-P5 build) loaded on first visit, so the
-  dashboard pages carry neither D3 nor GSAP; the overview opens from the two runs' `index.json`, `summary.json`
+  dashboard pages carry neither D3 nor GSAP; so are the shedding viewer (22 kB) and performance (24 kB) in the UI-P4
+  build, the viewer sharing the walk's GSAP chunk. The viewer opens from the run's `index.json` and one sweep (in
+  the worker), then the frames' item states and the shown adapter's five timelines; the sweeps list and the S7
+  panel from S7's summary, the grid from its rows on request; performance from `perf/summary.json` alone. The
+  overview opens from the two runs' `index.json`, `summary.json`
   and `manifest.json`, the nightly's `ci.json`, `coverage.json`, `contract.json` and S2 summary, the S7 run's
   `perf/summary.json`, one sweep (in the worker) and one timeline. The run page opens from
   `index.json`, `manifest.json`, `summary.json`, the suite summaries, `findings.jsonl` and `ci.json` and loads no
@@ -182,6 +203,13 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     runs and the harness names no reported run. A run whose summary is not there (pruned, 6.4) is read past to the
     next run that has the suite, and the page says which run stands in for which; a summary that fails for any
     other reason is not. The page names the run and the scripts' size of every panel.
+  - S7's `scale` block and the perf summary's `policy` and `series` are typed since the pin at `73c4757` (the
+    plan's section 14, ask 18) and read: the sweeps list, the threshold searches, the timeouts and the cells the
+    generator cannot build come from the summary without opening a sweep file, and a fit's points are the cells
+    its series names. Settings keep any key the `[s7]` section adds as an open remainder, never read by name.
+  - The scaling plots' lines are the harness's exponents drawn through the points' mean in log space, where a
+    least-squares line passes; the viewer computes no fit, and a test checks that the points it picks give back
+    the harness's exponent.
   - The suite summaries' open blocks (`metamorphic`, `generated`, `summarizer`, the labeled details) and the
     summarizer summary's `by_arm` are not read (DESIGN.md 6.4): the S4 tallies, S5's steering chart and S11's
     curves wait for the harness to type them (the plan's section 14, items 8 to 10). The panels say so.
@@ -205,5 +233,5 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
     well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P3, UI-P5 and UI-D2 are built; the site
+- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P5 and UI-D2 are built, UI-P6 remains; the site
   serves at its host with cert-manager's certificate (`deploy/README.md`).

@@ -17,22 +17,22 @@ checked out beside this repository as `../benchmark`.
 | `vendor/cwa-bench/` | Each domain's schemas, fixture runs and write-up, and the viability document, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
 | `src/data/schema/generated/` | Types and validators generated from the vendored schemas by `scripts/generate-types.mjs` and `generate-validators.mjs` (Domain 2's under `d2/`, loaded on first use); regenerate, never edit |
 | `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`, one per domain), `validate.ts` (the schema gate over both producers), `kinds.ts` (a kind in a domain), `queries.ts` (TanStack Query; the route's domain picks the source), `row-store.ts`, `row-kinds.ts`, `rows.worker.ts` and `use-rows.ts` (rows filtered and paged, in the worker above the row budget), `use-blobs.ts` (blobs by digest through the index) |
-| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell, which sets the results domain from the path), `dashboard/` (page contract, states, badges), `charts/` (the shedding curve, the arm plot and the corpus-size small multiples: D3 geometry, React SVG) |
+| `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell, which sets the results domain from the path), `dashboard/` (page contract, states, badges), `charts/` (the shedding curve, the item strip, the scaling plots, the arm plot and the corpus-size small multiples: D3 geometry, React SVG) |
 | `src/content/` | The reviewed words of the narrative pages (what CWA is, the claims, the limits, the defects, the planes' and stages' words, Domain 2's arms, families and suites in `d2/`, the glossary), each file citing the benchmark commit the vendor lock pins; a test fails when the pin moves until the content is re-read |
-| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds, the composite, the curve, the comparison) and `components/` (the runs list and the run frame both domains share, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer, `overview/` with the Domain 1 overview, `diagrams/`, the pipeline walk, compare) |
+| `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds, the composite, the curve, a sweep's frames, S7's scale block, the performance fits, the comparison) and `components/` (the runs list and the run frame both domains share, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer, `sweeps/` with the sweeps list and the shedding viewer, `perf/`, `overview/` with the Domain 1 overview, `diagrams/`, the pipeline walk, compare) |
 | `src/features/d2/` | Domain 2: `model/` (metrics by arm and tier, the per-suite composite, the row kinds, the overview's selectors) and `components/` (the run page, the suite page with its arm × tier tables and rows, `overview/` with the Domain 2 overview) |
-| `src/lib/motion.ts` | The one place GSAP is registered; only lazily loaded modules (the overview, the walk) import it |
+| `src/lib/motion.ts` | The one place GSAP is registered; only lazily loaded modules (the overview, the walk, the shedding viewer) import it |
 | `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
 | `deploy/` | The container image, the nginx configuration, the Kustomize base and the production overlay (the cluster's storage, TLS through cert-manager), and `publish.sh`, which copies runs into the results volume; `deploy/README.md` is the procedure |
 
 Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page), UI-P1
 (the deployment; the site serves at benchmark.contextwindowarchitecture.io), UI-P2 (the suite pages, the rows
-worker), UI-P3 (coverage, findings, the answer explorer), UI-P5 (the narrative layer: home, About, the Domain 1
-overview, the domain pages, the diagrams, the pipeline walk, compare) and UI-D2 (Domain 2: its overview, runs, run
-and suite pages, over the same shell and data layer) are built. UI-P4 (performance, the shedding viewer) and UI-P6
-(polish) remain; their routes render a placeholder inside the shell. The plan's section 15 says which phase builds
-what.
+worker), UI-P3 (coverage, findings, the answer explorer), UI-P4 (S7: the scale grid, the sweeps list, the shedding
+viewer and the performance page), UI-P5 (the narrative layer: home, About, the Domain 1 overview, the domain pages,
+the diagrams, the pipeline walk, compare) and UI-D2 (Domain 2: its overview, runs, run and suite pages, over the same
+shell and data layer) are built. UI-P6 (polish: the budgets measured, the accessibility and visual passes) remains.
+The plan's section 15 says which phase builds what.
 
 ## Working on it
 
