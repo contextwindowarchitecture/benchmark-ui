@@ -1,5 +1,7 @@
 import { cn } from "cn"
-import type { ReactNode } from "react"
+import { useEffect, useRef, type ReactNode } from "react"
+
+import { takeTitleFocus } from "./title-focus"
 
 /** DESIGN.md 4.4's page contract: one title, a description, actions, filters and a status region. */
 export type DashboardPageProps = {
@@ -21,6 +23,12 @@ export function DashboardPage({
   width = "standard",
   children,
 }: DashboardPageProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    if (!takeTitleFocus()) return
+    const active = document.activeElement
+    if (!active || active === document.body) titleRef.current?.focus({ preventScroll: true })
+  }, [])
   return (
     <div
       data-width={width}
@@ -32,6 +40,7 @@ export function DashboardPage({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
           <h1
+            ref={titleRef}
             id="page-title"
             tabIndex={-1}
             className="text-2xl font-semibold tracking-tight outline-none"

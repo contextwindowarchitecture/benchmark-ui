@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -49,6 +49,16 @@ describe("the shell", () => {
     expect(screen.queryByText("Page not found")).not.toBeInTheDocument()
     await waitFor(() =>
       expect(document.title).toBe(`Performance · ${FIXTURE_RUNS.nightly} · CWA benchmark`),
+    )
+  })
+
+  it("keeps the route focus on the title when a lazy page replaces its fallback", async () => {
+    const { router } = renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}`)
+    await screen.findByRole("heading", { level: 1, name: FIXTURE_RUNS.nightly })
+    await act(() => router.navigate(`/d1/runs/${FIXTURE_RUNS.s7}/perf`))
+    await screen.findByRole("region", { name: "Startup table" })
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { level: 1, name: "Performance" }),
     )
   })
 
