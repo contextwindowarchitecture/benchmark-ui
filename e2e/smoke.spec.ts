@@ -178,6 +178,39 @@ test("the Domain 1 overview, About, a domain page and compare render", async ({ 
   await expectAccessible(page)
 })
 
+test("the Domain 1 overview, the S2 suite page and coverage fit a phone", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto("/d1")
+  await expect(page.locator("[data-walk]")).toBeVisible()
+  await expect(page.getByRole("figure", { name: /what S2 changes/ })).toBeVisible()
+  await expect(page.getByRole("figure", { name: /four judges of one answer/ })).toBeVisible()
+  await expect(page.locator('#oracles-diagram svg[data-layout="stack"]')).toBeVisible()
+  await expectFitsThePhone(page)
+
+  await page.goto(`/d1/runs/${NIGHTLY}/suites/S2`)
+  await expect(
+    page.locator("#panel").getByRole("region", { name: "Environment matrix" }),
+  ).toBeVisible()
+  await expectFitsThePhone(page)
+
+  await page.goto(`/d1/runs/${NIGHTLY}/coverage`)
+  await expect(page.getByRole("region", { name: "Tags matrix" })).toBeVisible()
+  await expectFitsThePhone(page)
+})
+
+// At a phone's width (DESIGN.md 4.2) the page never scrolls sideways, and nothing outside a
+// labelled table region reaches past the screen's edge, not even inside a picture's frame.
+async function expectFitsThePhone(page: Page) {
+  await expectNoOverflow(page)
+  const past = await page.evaluate(() => {
+    const edge = document.documentElement.clientWidth
+    return [...document.querySelectorAll("main *")]
+      .filter((el) => el.getBoundingClientRect().right > edge + 0.5 && !el.closest("[role=region]"))
+      .map((el) => `${el.tagName.toLowerCase()} ${el.getAttribute("class") ?? ""}`.trim())
+  })
+  expect(past, "elements past the screen's edge").toEqual([])
+}
+
 test("the overview respects reduced motion: no playback, the final state shown", async ({
   page,
 }) => {

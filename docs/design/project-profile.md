@@ -104,7 +104,11 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   collapsed to icons below; the mobile sheet below 768 px, never persisted. DESIGN.md 4.2's measurements apply.
 - Supported browsers and representative devices: current Chrome, Firefox and Safari; a laptop at 1280 px and a
   phone at 375 px for the home page, the runs list and the run page (the tables scroll horizontally in a labelled
-  region; the page itself never overflows).
+  region; the page itself never overflows). The environment and oracle diagrams lay themselves out in their frame's
+  measured width: on a phone the environment diagram bands its platforms and the oracles stack on a spine, rather
+  than scrolling inside the frame; the home page's model diagram still scrolls inside its frame there.
+  The Playwright smoke test opens the Domain 1 overview, the S2 suite page and coverage at 375 px and fails if the
+  page scrolls sideways or anything outside a table region reaches past the screen's edge.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
   navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
   scrolling container cannot be focused, so the region takes the scrolling over), `aria-sort` on sortable headers, accessible names on every icon button, visible
