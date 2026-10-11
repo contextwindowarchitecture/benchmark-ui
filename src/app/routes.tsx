@@ -15,6 +15,7 @@ import { FindingPage } from "@/features/d1/components/finding-page"
 import { FindingsPage } from "@/features/d1/components/findings-page"
 import { RunsPage } from "@/features/d1/components/runs-page"
 import { SuitePage } from "@/features/d1/components/suite-page"
+import { SweepsPage } from "@/features/d1/components/sweeps/sweeps-page"
 import { D2RunPage } from "@/features/d2/components/run-page"
 import { D2SuitePage } from "@/features/d2/components/suite-page"
 
@@ -169,13 +170,7 @@ export const routes: RouteObject[] = [
                         children: [
                           {
                             index: true,
-                            element: (
-                              <NotBuiltYet
-                                title="Shedding"
-                                phase="UI-P4"
-                                note="The sweep cells of this run."
-                              />
-                            ),
+                            element: <SweepsPage />,
                             handle: handle({ title: () => "Shedding" }),
                           },
                           {
