@@ -27,7 +27,19 @@ test.afterEach(({ page }) => {
 
 const cspViolations = new WeakMap<Page, string[]>()
 
+// axe judges contrast from the colours it reads at that moment, so a control still fading in
+// (the runs list's Refresh button re-enabling after its refetch) would be judged half drawn. It
+// runs once every finite animation and transition has finished; spinners and skeletons loop.
 async function expectAccessible(page: Page) {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          animation.playState !== "running" ||
+          animation.effect?.getTiming().iterations === Infinity,
+      ),
+  )
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
     .analyze()
@@ -51,6 +63,7 @@ test("the home page, the runs list and a run page render from the fixtures", asy
   await expect(page.getByText("3 runs")).toBeVisible()
   await expect(page.locator("tbody tr")).toHaveCount(3)
   await expect(page.locator(`tr[data-run="${NIGHTLY}"]`).getByText("changed")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Refresh" })).toBeEnabled()
   await expectAccessible(page)
 
   await page.locator(`tr[data-run="${NIGHTLY}"]`).getByRole("link", { name: NIGHTLY }).click()
@@ -242,6 +255,7 @@ test("Domain 2's overview, runs, run page and a suite page render from its fixtu
   await page.getByRole("link", { name: "Runs", exact: true }).nth(1).click()
   await expect(page).toHaveURL(/\/d2\/runs$/)
   await expect(page.locator(`tr[data-run="${D2_NIGHTLY}"]`).getByText("changed")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Refresh" })).toBeEnabled()
   await expectAccessible(page)
 
   await page.locator(`tr[data-run="${D2_NIGHTLY}"]`).getByRole("link", { name: D2_NIGHTLY }).click()
