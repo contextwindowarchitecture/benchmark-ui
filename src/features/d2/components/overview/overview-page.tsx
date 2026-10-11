@@ -104,14 +104,22 @@ function RunPin({
 }) {
   const runs = index.runs.filter(isFinished)
   return (
-    <div className="flex flex-wrap items-center gap-3" role="group" aria-label="Runs read">
-      <label className="flex items-center gap-2 text-sm">
+    <div
+      className="flex max-w-full min-w-0 flex-wrap items-center gap-3"
+      role="group"
+      aria-label="Runs read"
+    >
+      <label className="flex max-w-full min-w-0 items-center gap-2 text-sm">
         <span className="text-muted-foreground">Read</span>
         <Select
           value={pinned && runs.some((run) => run.run_id === pinned) ? pinned : BY_SUITE}
           onValueChange={(value) => onChange(value === BY_SUITE ? undefined : value)}
         >
-          <SelectTrigger size="sm" aria-label="Run to read" className="w-80 font-mono text-xs">
+          <SelectTrigger
+            size="sm"
+            aria-label="Run to read"
+            className="w-80 max-w-full min-w-0 font-mono text-xs"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
