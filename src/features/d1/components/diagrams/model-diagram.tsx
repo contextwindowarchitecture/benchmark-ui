@@ -6,7 +6,7 @@ import { planeGroups, slotName } from "@/features/d1/model/contract"
 import { useMeasure } from "@/hooks/use-measure"
 
 import { DiagramFrame } from "./diagram-frame"
-import { COLUMN, HEADER, modelLayout, SLOT, SLOT_GAP } from "./model-geometry"
+import { COLUMN, modelLayout, SLOT, SLOT_GAP, SUBTITLE, subtitleLines } from "./model-geometry"
 
 const PLANE_FILL: Record<PlaneId, string> = {
   governance: "fill-plane-governance",
@@ -39,8 +39,12 @@ export function ModelDiagram({ contract, runId }: { contract: ContractV1; runId:
   const groups = planeGroups(contract)
   const [active, setActive] = useState<string | null>(null)
   const { ref, width: available } = useMeasure<HTMLDivElement>()
+  const subtitles = groups.map((group) => subtitleLines(group.answers))
   const { width, height, banded, columns } = modelLayout(
-    groups.map((group) => group.slots.length),
+    groups.map((group, index) => ({
+      slots: group.slots.length,
+      lines: subtitles[index]!.length,
+    })),
     available,
   )
   const activeSlot = contract.slots.find((slot) => slot.id === active)
@@ -67,7 +71,7 @@ export function ModelDiagram({ contract, runId }: { contract: ContractV1; runId:
             }
           >
             {groups.map((group, index) => {
-              const { x, y, height: columnHeight } = columns[index]!
+              const { x, y, height: columnHeight, header } = columns[index]!
               const plane = isPlaneId(group.id) ? group.id : null
               return (
                 <g key={group.id} transform={`translate(${x},${y})`} data-plane={group.id}>
@@ -91,11 +95,15 @@ export function ModelDiagram({ contract, runId }: { contract: ContractV1; runId:
                   >
                     {group.name}
                   </text>
-                  <text x={12} y={40} className="fill-muted-foreground text-[11px]">
-                    {group.answers}
+                  <text className="fill-muted-foreground text-[11px]" data-subtitle>
+                    {subtitles[index]!.map((line, number) => (
+                      <tspan key={number} x={SUBTITLE.x} y={SUBTITLE.y + number * SUBTITLE.line}>
+                        {line}
+                      </tspan>
+                    ))}
                   </text>
                   {group.slots.map((slot, row) => {
-                    const y = HEADER + row * (SLOT + SLOT_GAP)
+                    const y = header + row * (SLOT + SLOT_GAP)
                     const isActive = active === slot.id
                     return (
                       <g

@@ -12,7 +12,7 @@ import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
 import { EnvironmentDiagram } from "./environment-diagram"
 import { environmentLayout } from "./environment-geometry"
 import { ModelDiagram } from "./model-diagram"
-import { modelLayout } from "./model-geometry"
+import { modelLayout, subtitleLines } from "./model-geometry"
 import { OraclesDiagram } from "./oracles-diagram"
 import { ANSWER, BOX_HEIGHT, oraclesLayout } from "./oracles-geometry"
 import { PipelineDiagram } from "./pipeline-diagram"
@@ -124,33 +124,61 @@ describe("the diagrams on a narrow screen", () => {
     expect(wider.width * 0.85).toBeLessThanOrEqual(330)
   })
 
+  it("break only the subtitle too long for its plane, where its lines come out even", async () => {
+    const contract = await document("contract.json", "contract")
+    expect(planeGroups(contract).map((group) => subtitleLines(group.answers))).toEqual([
+      ["Who may direct the model"],
+      ["What is true right now"],
+      ["What the model may ground on"],
+      ["What has happened,", "and what is asked"],
+    ])
+    expect(subtitleLines("")).toEqual([""])
+  })
+
   it("keep the four planes side by side on a laptop and pair them on a phone", async () => {
     const contract = await document("contract.json", "contract")
-    const slots = planeGroups(contract).map((group) => group.slots.length)
-    expect(slots).toEqual([4, 2, 2, 3])
-    const unmeasured = modelLayout(slots, 0)
-    expect(unmeasured).toMatchObject({ width: 758, height: 252, banded: false })
-    expect(unmeasured.columns.map((column) => column.y)).toEqual([1, 1, 1, 1])
+    const planes = planeGroups(contract).map((group) => ({
+      slots: group.slots.length,
+      lines: subtitleLines(group.answers).length,
+    }))
+    expect(planes.map((plane) => plane.slots)).toEqual([4, 2, 2, 3])
+    // One band: every plane makes room for Interaction's second line, so the slots line up.
+    const unmeasured = modelLayout(planes, 0)
+    expect(unmeasured).toMatchObject({ width: 758, height: 265, banded: false })
+    expect(unmeasured.columns.map((column) => [column.y, column.header])).toEqual([
+      [1, 65],
+      [1, 65],
+      [1, 65],
+      [1, 65],
+    ])
     // A 1280 px laptop's frame (547 px) still holds all four, shrunk.
-    expect(modelLayout(slots, 547)).toEqual(unmeasured)
+    expect(modelLayout(planes, 547)).toEqual(unmeasured)
     // Room for three goes two and two rather than three and one.
-    const three = modelLayout(slots, 450)
+    const three = modelLayout(planes, 450)
     expect(three.columns.map((column) => column.x)).toEqual([1, 193, 1, 193])
-    // A 375 px phone's frame pairs them, each band as tall as its fullest plane.
-    const phone = modelLayout(slots, 311)
+    // A 375 px phone's frame pairs them, each band as tall as its fullest plane and only
+    // Interaction's band making room for a second line.
+    const phone = modelLayout(planes, 311)
     expect(phone).toMatchObject({ width: 374, banded: true })
     expect(phone.width * 0.7).toBeLessThanOrEqual(311)
-    expect(phone.columns.map((column) => [column.x, column.y, column.height])).toEqual([
-      [1, 1, 250],
-      [193, 1, 250],
-      [1, 265, 202],
-      [193, 265, 202],
+    expect(
+      phone.columns.map((column) => [column.x, column.y, column.height, column.header]),
+    ).toEqual([
+      [1, 1, 250, 52],
+      [193, 1, 250, 52],
+      [1, 265, 215, 65],
+      [193, 265, 215, 65],
     ])
-    expect(phone.height).toBe(468)
+    expect(phone.height).toBe(481)
     // A 320 px phone's frame takes them one under another, at full size.
-    const narrow = modelLayout(slots, 256)
+    const narrow = modelLayout(planes, 256)
     expect(narrow.width).toBeLessThanOrEqual(256)
-    expect(narrow.columns.map((column) => column.x)).toEqual([1, 1, 1, 1])
+    expect(narrow.columns.map((column) => [column.x, column.header])).toEqual([
+      [1, 52],
+      [1, 52],
+      [1, 52],
+      [1, 65],
+    ])
   })
 
   it("draw the planes in bands when the frame measures a phone's width", async () => {
@@ -161,11 +189,21 @@ describe("the diagrams on a narrow screen", () => {
     try {
       render(<ModelDiagram contract={contract} runId={FIXTURE_RUNS.nightly} />)
       const figure = screen.getByRole("figure", { name: /The model: four planes/ })
-      expect(figure.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 374 468")
+      expect(figure.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 374 481")
       expect(figure.querySelector('[data-plane="evidence"]')?.getAttribute("transform")).toBe(
         "translate(1,265)",
       )
       expect(figure.querySelectorAll("[data-slot]")).toHaveLength(11)
+      // Interaction's subtitle takes two lines and its first slot starts below the second.
+      const interaction = figure.querySelector('[data-plane="interaction"]')!
+      const lines = [...interaction.querySelectorAll("[data-subtitle] tspan")]
+      expect(lines.map((line) => [line.textContent, line.getAttribute("y")])).toEqual([
+        ["What has happened,", "40"],
+        ["and what is asked", "53"],
+      ])
+      expect(interaction.querySelector("[data-slot]")?.getAttribute("transform")).toBe(
+        "translate(10,65)",
+      )
     } finally {
       measure.mockRestore()
     }
