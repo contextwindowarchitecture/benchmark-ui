@@ -20,3 +20,9 @@ export const ViewerPage = lazy(() =>
     default: module.ViewerPage,
   })),
 )
+
+export const PerfPage = lazy(() =>
+  import("@/features/d1/components/perf/perf-page").then((module) => ({
+    default: module.PerfPage,
+  })),
+)

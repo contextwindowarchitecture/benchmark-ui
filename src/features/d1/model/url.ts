@@ -83,3 +83,15 @@ export const viewerParams = {
   adapter: z.string().min(1).max(32),
   view: z.enum(VIEWER_VIEWS),
 }
+
+/** The performance page's state (ui-plan.md 8.7): the plots' choice and the cells table's filters. */
+export const perfParams = {
+  /** The scaling plots' budget label. */
+  label: z.string().min(1).max(32),
+  series: z.enum(["candidates", "tokens", "diagonal"]),
+  method: z.enum(["inprocess", "net", "e2e"]),
+  adapter: z.string().min(1).max(32),
+  shape: z.string().min(1).max(64),
+  status: z.string().min(1).max(32),
+  page: z.coerce.number().int().min(1),
+}

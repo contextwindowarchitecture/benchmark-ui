@@ -43,10 +43,9 @@ describe("the shell", () => {
     expect(crumbs.getByRole("link", { name: "Domain 1" })).toHaveAttribute("href", "/d1")
   })
 
-  it("renders a later phase's route as a placeholder in the shell, not a 404", async () => {
+  it("renders a lazy run page in the shell with the run in its title", async () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}/perf`)
     expect(await screen.findByRole("heading", { name: "Performance" })).toBeInTheDocument()
-    expect(screen.getByText(/phase UI-P4/)).toBeInTheDocument()
     expect(screen.queryByText("Page not found")).not.toBeInTheDocument()
     await waitFor(() =>
       expect(document.title).toBe(`Performance · ${FIXTURE_RUNS.nightly} · CWA benchmark`),

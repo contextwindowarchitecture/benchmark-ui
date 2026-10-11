@@ -1,10 +1,8 @@
-// The routes of ui-plan.md 6.2, exactly. Later phases' routes render a placeholder inside the
-// shell rather than a 404, so every link in the plan resolves from day one.
+// The routes of ui-plan.md 6.2, exactly. Every link in the plan resolves to a built page.
 
 import { Suspense } from "react"
 import type { RouteObject } from "react-router"
 
-import { NotBuiltYet } from "@/components/dashboard/not-built-yet"
 import { PageFallback } from "@/components/dashboard/page-fallback"
 import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { RunPage } from "@/features/d1/components/run-page"
@@ -23,7 +21,7 @@ import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
 import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
-import { D2OverviewPage, OverviewPage, ViewerPage } from "./pages/lazy-pages"
+import { D2OverviewPage, OverviewPage, PerfPage, ViewerPage } from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
 import { RouteErrorPage } from "./pages/route-error-page"
 import type { RouteHandle } from "./route-meta"
@@ -147,11 +145,9 @@ export const routes: RouteObject[] = [
                       {
                         path: "perf",
                         element: (
-                          <NotBuiltYet
-                            title="Performance"
-                            phase="UI-P4"
-                            note="S7's startup, scaling fits, throughput and time to refusal."
-                          />
+                          <Suspense fallback={<PageFallback title="Performance" width="wide" />}>
+                            <PerfPage />
+                          </Suspense>
                         ),
                         handle: handle({
                           title: () => "Performance",
