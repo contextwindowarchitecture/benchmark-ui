@@ -167,12 +167,32 @@ describe("a Domain 2 suite page", () => {
         name: "concat, 8,192 tokens, Per correct answer: 3,292 tokens",
       }),
     ).toBeInTheDocument()
+    // Correct of the answers given, not the arm's accuracy; an overflow gave no answer.
+    expect(
+      within(byArm).getAllByRole("columnheader", { name: "Correct of answered" }).length,
+    ).toBeGreaterThan(0)
+    // A sum of per-call relative errors means nothing: the estimator's cells carry no total.
+    const estimate = within(byArm).getByRole("cell", {
+      name: /^concat, 8,192 tokens, Own count less the server's: /,
+    })
+    expect(estimate.getAttribute("aria-label")).not.toMatch(/total/)
     const lengths = cost.getByRole("region", { name: "Answer length by turn count, S2" })
     expect(
       within(lengths).getByRole("cell", {
         name: /^concat, 8,192 tokens, 100 turns: 6, p95 51 over 135/,
       }),
     ).toBeInTheDocument()
+  })
+
+  it("flags an arm whose overflows its attribution files under facts sent", async () => {
+    renderApp(`/d2/runs/${run}/suites/S2`)
+    const attribution = await loaded("attribution")
+    expect(
+      await attribution.findByRole("cell", {
+        name: /^concat, 8,192 tokens: with the facts sent .*; not sent none; 135 of these reached no model$/,
+      }),
+    ).toBeInTheDocument()
+    expect(attribution.getByText(/An overflow or a refusal reaches no model/)).toBeInTheDocument()
   })
 
   it("offers a file above the worker's budget as a download at once, without fetching it", async () => {

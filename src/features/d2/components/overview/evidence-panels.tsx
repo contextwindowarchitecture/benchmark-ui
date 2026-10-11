@@ -24,7 +24,7 @@ import {
   type LoopArm,
   type LqArm,
 } from "@/features/d2/model/blocks"
-import { intervalLevel, metricText } from "@/features/d2/model/metric-text"
+import { intervalLevel, intervalWords, metricText } from "@/features/d2/model/metric-text"
 import { tierLabel, type D2Metric } from "@/features/d2/model/metrics"
 import {
   aptitudeRows,
@@ -151,11 +151,12 @@ export function AptitudePanel({
   const rows = aptitudeRows(s2, budget, s1)
   const reference = rows.find((row) => row.id === REFERENCE_ARMS.conversations)
   const label = tierLabel(budget)
+  const interval = intervalWords(rows.find((row) => row.metric.interval)?.metric.interval)
   return (
     <div className="space-y-2">
       <ArmPlot
         title={`Correct answers per arm at ${label}`}
-        summary={`Each arm's share of correct answers over every probe and sample at ${label}, with its 95% cluster-bootstrap interval over conversations; the upper bounds have no budget.${factSource ? " Behind each, the share of the arm's probes whose needed facts were in the payload at that budget, so a wrong answer can be told from a fact that was never sent." : ""}${reference ? ` The dashed rule is ${REFERENCE_ARMS.conversations}, the fair reference.` : ""}`}
+        summary={`Each arm's share of correct answers over every probe and sample at ${label}${interval ? `, with its ${interval}` : ""}; the upper bounds have no budget.${factSource ? " Behind each, the share of the arm's probes whose needed facts were in the payload at that budget, so a wrong answer can be told from a fact that was never sent." : ""}${reference ? ` The dashed rule is ${REFERENCE_ARMS.conversations}, the fair reference.` : ""}`}
         rows={rows}
         groups={GROUPS}
         domain={[0, 1]}
@@ -167,7 +168,11 @@ export function AptitudePanel({
             ? { value: reference.value, label: REFERENCE_ARMS.conversations }
             : null
         }
-        legend={{ mark: "correct answers (S2)", backdrop: "needed facts in the payload (S1)" }}
+        legend={{
+          mark: "correct answers (S2)",
+          interval: interval ?? undefined,
+          backdrop: "needed facts in the payload (S1)",
+        }}
         table={
           <RowsTable
             rows={rows}
@@ -195,18 +200,19 @@ export function UnreliabilityPanel({
 }) {
   const rows = valueRows(metrics, "s3.unreliability", budget)
   const label = tierLabel(budget)
+  const interval = intervalWords(rows.find((row) => row.metric.interval)?.metric.interval)
   return (
     <div className="space-y-2">
       <ArmPlot
         title={`Unreliability per arm at ${label}`}
-        summary={`Unreliability, the study's U90−10: for each probe, the 90th less the 10th percentile of its repeated samples' scores at a temperature above zero, averaged over probes, in points out of 100, with its 95% interval. Lower is steadier.`}
+        summary={`Unreliability, the study's U90−10: for each probe, the 90th less the 10th percentile of its repeated samples' scores at a temperature above zero, averaged over probes, in points out of 100${interval ? `, with its ${interval}` : ""}. Lower is steadier.`}
         rows={rows}
         groups={GROUPS}
         domain="auto"
         mark="dot"
         format={formatPoints}
         formatTick={(value) => formatCount(value)}
-        legend={{ mark: "unreliability (S3), points" }}
+        legend={{ mark: "unreliability (S3), points", interval: interval ?? undefined }}
         table={
           <RowsTable
             rows={rows}
@@ -334,10 +340,13 @@ export function LoopPanel({
   metrics,
   source,
   blocks = [],
+  blocksStatus = "ok",
 }: {
   metrics: readonly D2Metric[]
   source: PanelSource
   blocks?: readonly LoopArm[]
+  /** Whether S6's own summary, which holds the pairing in the loop, has loaded. */
+  blocksStatus?: "pending" | "failed" | "ok"
 }) {
   const rows = loopRows(metrics)
   const paired = new Map(blocks.map((block) => [block.arm, block.paired]))
@@ -438,6 +447,17 @@ export function LoopPanel({
           : ""}
         .
       </p>
+      {blocksStatus === "pending" ? (
+        <p className="text-xs text-muted-foreground" role="status">
+          Loading S6's own summary, which holds each arm's difference from the reference in the
+          loop…
+        </p>
+      ) : blocksStatus === "failed" ? (
+        <p className="text-xs text-muted-foreground" data-state="empty">
+          S6's own summary, which holds each arm's difference from the reference in the loop, could
+          not be read; its suite page says why.
+        </p>
+      ) : null}
       <SourceNote source={source} />
     </div>
   )
@@ -461,6 +481,7 @@ export function PairedPanel({
   const reference = pairedReference(entries) ?? REFERENCE_ARMS.conversations
   const label = tierLabel(budget)
   const title = `Paired difference from ${reference} at ${label}`
+  const interval = intervalWords(rows[0]?.paired.interval)
   if (rows.length === 0) {
     return (
       <p className="text-sm text-muted-foreground" data-state="empty">
@@ -472,7 +493,7 @@ export function PairedPanel({
     <div className="space-y-2">
       <ArmPlot
         title={title}
-        summary={`Each arm's share of correct answers less ${reference}'s on the same probes and samples at ${label}, in percentage points, with its 95% cluster-bootstrap interval over conversations; the dashed rule at zero is ${reference} itself. The upper bounds have no budget and are not paired.`}
+        summary={`Each arm's share of correct answers less ${reference}'s on the same probes and samples at ${label}, in percentage points${interval ? `, with its ${interval}` : ""}; the dashed rule at zero is ${reference} itself. The upper bounds have no budget and are not paired.`}
         rows={rows}
         groups={GROUPS}
         domain="auto"
@@ -480,7 +501,10 @@ export function PairedPanel({
         format={formatPointsDifference}
         formatTick={(value) => `${Math.round(value * 100)} pp`}
         reference={{ value: 0, label: reference }}
-        legend={{ mark: `difference from ${reference} (S2), percentage points` }}
+        legend={{
+          mark: `difference from ${reference} (S2), percentage points`,
+          interval: interval ?? undefined,
+        }}
         table={
           <PairedTable
             entries={entries}
@@ -512,26 +536,42 @@ export function AttributionPanel({
   const rows = attributionRows(entries, budget)
   const label = tierLabel(budget)
   const title = `Correct answers by whether the facts were sent at ${label}`
+  if (rows.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground" data-state="empty">
+        S2's summary splits no arm's answers by whether the facts were sent at {label}.
+      </p>
+    )
+  }
   const byArm = new Map(rows.map((row) => [row.arm, row]))
+  const unsentAnywhere = rows.some((row) => row.unsent > 0)
   const cell = (arm: string, column: string) => {
     const row = byArm.get(arm)
     if (!row) return null
     const tally = column === "sent" ? row.given.present : row.given.absent
+    // Answers that reached no model, which S2 may file under "facts sent": flagged there.
+    const flag =
+      column === "sent" && row.unsent > 0
+        ? `${formatCount(row.unsent)} of the arm's answers reached no model`
+        : null
     if (tally.n === 0) {
       return {
         node: <span className="text-muted-foreground">none</span>,
-        text: column === "sent" ? "no probe had its facts sent" : "every probe had its facts sent",
+        text: "no probe counted here",
       }
     }
     const percent = share(tally.n, tally.correct)
     return {
       node: (
-        <ShareCell
-          percent={percent === null ? null : formatPercent(percent)}
-          fraction={`${formatCount(tally.correct)} / ${formatCount(tally.n)}`}
-        />
+        <span className="inline-flex flex-col items-end">
+          <ShareCell
+            percent={percent === null ? null : formatPercent(percent)}
+            fraction={`${formatCount(tally.correct)} / ${formatCount(tally.n)}`}
+          />
+          {flag ? <span className="text-xs text-warning">† {flag}</span> : null}
+        </span>
       ),
-      text: formatRate(percent, tally.correct, tally.n),
+      text: `${formatRate(percent, tally.correct, tally.n)}${flag ? `; ${flag}` : ""}`,
     }
   }
   return (
@@ -548,8 +588,16 @@ export function AttributionPanel({
       />
       <p className="text-xs text-muted-foreground">
         A wrong answer with the facts sent is the model's; one without them is the payload's. The
-        upper bounds are read at no budget.
+        upper bounds are read at no budget. A probe whose answer needs no fact is in neither column.
       </p>
+      {unsentAnywhere ? (
+        <p className="text-xs text-muted-foreground" data-note="unsent">
+          † An overflow or a refusal reaches no model. S2 files such an answer by whether S1 found
+          the facts in the payload the arm would have sent, so it can be counted under facts sent
+          although nothing was sent; S1's share above, which counts only payloads that fit, is the
+          one to read for those arms. The harness is asked to file them as not sent.
+        </p>
+      ) : null}
       <SourceNote source={source} />
     </div>
   )

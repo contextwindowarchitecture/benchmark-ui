@@ -8,6 +8,7 @@ import type { ArmRow } from "@/components/charts/arm-plot-geometry"
 import type { TierSeries } from "@/components/charts/tier-lines-geometry"
 
 import { byArmAndTier, type ArmBlock, type Paired } from "./blocks"
+import { unsentAnswers } from "./metric-text"
 import { armPoints, compareTiers, crossArm, metricsOf, parseTier, type D2Metric } from "./metrics"
 
 /** The arms the write-up compares the others with. */
@@ -185,6 +186,12 @@ export type AttributionRow = {
   /** The tier the row is from: the chosen one, or no budget for an upper bound. */
   tier: string
   given: ArmBlock["given"]
+  /**
+   * The arm's answers that reached no model (overflows, refusals). S2 files each by S1's record of
+   * whether the facts would have been in the payload, so they can sit under "facts sent" though
+   * nothing was sent (the plan's harness ask 15).
+   */
+  unsent: number
 }
 
 /**
@@ -195,6 +202,16 @@ export function attributionRows(entries: readonly ArmBlock[], tier: string): Att
   const layout = byArmAndTier(entries)
   return layout.arms.flatMap((arm) => {
     const entry = layout.at(arm.id, tier) ?? layout.at(arm.id, "control")
-    return entry ? [{ arm: arm.id, group: arm.group, tier: entry.tier, given: entry.given }] : []
+    return entry
+      ? [
+          {
+            arm: arm.id,
+            group: arm.group,
+            tier: entry.tier,
+            given: entry.given,
+            unsent: unsentAnswers(entry.verdicts),
+          },
+        ]
+      : []
   })
 }

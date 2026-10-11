@@ -187,7 +187,13 @@ function Overview({ view }: { view: Composite }) {
     suite: string,
   ): { status: "pending" } | { status: "failed" } | { status: "ok"; blocks: ArmBlocks } => {
     const i = blockPaths.findIndex((entry) => entry.suite === suite)
-    const query = i < 0 ? undefined : blockQueries[i]
+    if (i < 0) {
+      // No path yet: the run's summary is loading, or it loaded (or failed) without the suite.
+      const entry = view.suites.find((s) => s.suite === suite)
+      const k = entry ? runIds.indexOf(entry.run.run_id) : -1
+      return k >= 0 && summaries[k]?.isPending ? { status: "pending" } : { status: "failed" }
+    }
+    const query = blockQueries[i]
     if (!query || query.isPending) return { status: "pending" }
     if (query.isError || !query.data.ok) return { status: "failed" }
     return { status: "ok", blocks: armBlocks(query.data.document) }
@@ -444,6 +450,7 @@ function Overview({ view }: { view: Composite }) {
                   metrics={entry.metrics}
                   source={entry.source}
                   blocks={state.status === "ok" ? state.blocks.loop : []}
+                  blocksStatus={state.status}
                 />
               )
             })}

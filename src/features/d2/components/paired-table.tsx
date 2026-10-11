@@ -30,7 +30,15 @@ export function PairedTable({
   const shown = tiers ? layout.tiers.filter((tier) => tiers.includes(tier)) : layout.tiers
   const cell = (arm: string, tier: string): ArmCell => {
     const entry = layout.at(arm, tier)
-    if (!entry) return null
+    if (!entry) {
+      // An upper bound has only its no-budget entry; in a table cut to the budgets, say so.
+      return layout.at(arm, "control")
+        ? {
+            node: <span className="text-muted-foreground">no budget</span>,
+            text: "not paired, no budget",
+          }
+        : null
+    }
     const paired = entry.paired
     if (paired) {
       const difference = formatPointsDifference(paired.difference)

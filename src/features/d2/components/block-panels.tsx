@@ -41,7 +41,7 @@ import {
   type ModelBlock,
   type Percentiles,
 } from "@/features/d2/model/blocks"
-import { intervalLevel } from "@/features/d2/model/metric-text"
+import { intervalLevel, unsentAnswers } from "@/features/d2/model/metric-text"
 import { parseTier, tierLabel } from "@/features/d2/model/metrics"
 import { d2SuitePageParams } from "@/features/d2/model/url"
 import {
@@ -173,10 +173,10 @@ export function GivenTable({ entries, label }: { entries: readonly ArmBlock[]; l
     if (!entry) return null
     const { present, absent } = entry.given
     const sent = formatRate(share(present.n, present.correct), present.correct, present.n)
-    const unsent =
-      absent.n === 0
-        ? "none: every probe had its facts sent"
-        : formatRate(share(absent.n, absent.correct), absent.correct, absent.n)
+    const unsent = formatRate(share(absent.n, absent.correct), absent.correct, absent.n)
+    // Answers that reached no model, which S2 may file under "facts sent" (harness ask 15).
+    const noModel = unsentAnswers(entry.verdicts)
+    const flag = noModel > 0 ? `${formatCount(noModel)} of these reached no model` : null
     return {
       node: (
         <span className="inline-flex flex-col items-end gap-0.5">
@@ -188,19 +188,29 @@ export function GivenTable({ entries, label }: { entries: readonly ArmBlock[]; l
             <span className="text-muted-foreground">not sent </span>
             {absent.n === 0 ? "none" : unsent}
           </span>
+          {flag ? <span className="text-xs text-warning">† {flag}</span> : null}
         </span>
       ),
-      text: `with the facts sent ${present.n === 0 ? "none" : sent}; not sent ${unsent}`,
+      text: `with the facts sent ${present.n === 0 ? "none" : sent}; not sent ${absent.n === 0 ? "none" : unsent}${flag ? `; ${flag}` : ""}`,
     }
   }
+  const flagged = entries.some((entry) => unsentAnswers(entry.verdicts) > 0)
   return (
-    <GroupedArmTable
-      label={label}
-      caption="Correct answers among the probes whose needed facts were in the payload, and among those whose facts were not, by arm and tier."
-      arms={layout.arms}
-      columns={layout.tiers.map((tier) => ({ key: tier, label: tierLabel(tier) }))}
-      cell={cell}
-    />
+    <div className="space-y-2">
+      <GroupedArmTable
+        label={label}
+        caption="Correct answers among the probes whose needed facts were in the payload, and among those whose facts were not, by arm and tier."
+        arms={layout.arms}
+        columns={layout.tiers.map((tier) => ({ key: tier, label: tierLabel(tier) }))}
+        cell={cell}
+      />
+      <p className="text-xs text-muted-foreground">
+        A probe whose answer needs no fact is in neither tally.
+        {flagged
+          ? " † An overflow or a refusal reaches no model; the suite files such an answer by whether S1 found the facts in the payload the arm would have sent, so it can be counted under facts sent although nothing was sent. The harness is asked to file them as not sent."
+          : ""}
+      </p>
+    </div>
   )
 }
 
@@ -365,10 +375,11 @@ export function LoopBlocks({ entries }: { entries: readonly LoopArm[] }) {
             }
           }
           const against = entry.against_scripted
+          // Null when the scripted suite did not run, or ran on no probe the loop also asked.
           if (!against) {
             return {
-              node: <span className="text-muted-foreground">no scripted run</span>,
-              text: "not compared: the scripted suite did not run",
+              node: <span className="text-muted-foreground">not compared</span>,
+              text: "not compared: no scripted result on the same probes",
             }
           }
           const difference = formatPointsDifference(against.difference)
@@ -418,13 +429,20 @@ export function LoopBlocks({ entries }: { entries: readonly LoopArm[] }) {
 const signedPercent = (value: number) =>
   value === 0 ? formatPercent(0) : `${value < 0 ? "−" : "+"}${formatPercent(Math.abs(value))}`
 
-/** p50 and p95 in a unit, with the count, the max and the total as the title. */
-function percentilesCell(percentiles: Percentiles, format: (value: number) => string): ArmCell {
+/**
+ * p50 and p95 in a unit, with the count, the max and, where a sum means something (tokens, not
+ * the estimator's relative error), the total as the title.
+ */
+function percentilesCell(
+  percentiles: Percentiles,
+  format: (value: number) => string,
+  { total = true }: { total?: boolean } = {},
+): ArmCell {
   if (percentiles.count === 0 || percentiles.p50 === null || percentiles.p95 === null) {
     return null
   }
   const text = `${format(percentiles.p50)}, p95 ${format(percentiles.p95)}`
-  const detail = `over ${formatCount(percentiles.count)}${percentiles.max === null ? "" : `, max ${format(percentiles.max)}`}${percentiles.total === null ? "" : `, total ${format(percentiles.total)}`}`
+  const detail = `over ${formatCount(percentiles.count)}${percentiles.max === null ? "" : `, max ${format(percentiles.max)}`}${total && percentiles.total !== null ? `, total ${format(percentiles.total)}` : ""}`
   return {
     node: (
       <span className="inline-flex flex-col items-end" title={detail}>
@@ -445,17 +463,25 @@ export function CostPanel({ block }: { block: CostBlock }) {
     cell: (row: CostBlock["by_arm"][number]) => ArmCell
   }[] = [
     {
+      // Of the answers the model gave: an overflow, which reaches no model, is not among them, so
+      // this is not the arm's accuracy over its probes.
       key: "answered",
-      label: "Answered",
-      cell: (row) => ({
-        node: (
-          <ShareCell
-            percent={formatPercent(row.correct / row.answered)}
-            fraction={`${formatCount(row.correct)} correct / ${formatCount(row.answered)}`}
-          />
-        ),
-        text: `${formatCount(row.answered)} answered, ${formatCount(row.correct)} correct`,
-      }),
+      label: "Correct of answered",
+      cell: (row) =>
+        row.answered === 0
+          ? {
+              node: <span className="text-muted-foreground">none answered</span>,
+              text: "none answered",
+            }
+          : {
+              node: (
+                <ShareCell
+                  percent={formatPercent(row.correct / row.answered)}
+                  fraction={`${formatCount(row.correct)} / ${formatCount(row.answered)}`}
+                />
+              ),
+              text: `${formatCount(row.correct)} correct of ${formatCount(row.answered)} answered`,
+            },
     },
     {
       key: "prompt",
@@ -482,7 +508,7 @@ export function CostPanel({ block }: { block: CostBlock }) {
     {
       key: "estimate",
       label: "Own count less the server's",
-      cell: (row) => percentilesCell(row.estimator_error, signedPercent),
+      cell: (row) => percentilesCell(row.estimator_error, signedPercent, { total: false }),
     },
     {
       key: "cached",

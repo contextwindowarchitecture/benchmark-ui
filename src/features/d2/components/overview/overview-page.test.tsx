@@ -80,7 +80,26 @@ describe("Domain 2's overview", () => {
     ).toBeInTheDocument()
     expect(
       within(attribution).getByRole("cell", {
-        name: "control-full, Facts not sent: every probe had its facts sent",
+        name: "control-full, Facts not sent: no probe counted here",
+      }),
+    ).toBeInTheDocument()
+    // concat overflowed on 135 probes, which S2 files under "facts sent" although nothing was
+    // sent: the cell says so rather than claiming every probe had its facts sent.
+    expect(
+      within(attribution).getByRole("cell", {
+        name: /^concat, Facts sent: .*; 135 of the arm's answers reached no model$/,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(attribution).getByRole("cell", {
+        name: "concat, Facts not sent: no probe counted here",
+      }),
+    ).toBeInTheDocument()
+    expect(evidence.getByText(/An overflow or a refusal reaches no model/)).toBeInTheDocument()
+    // The upper bounds have no budget, so the paired table cut to the budget says so.
+    expect(
+      within(paired).getByRole("cell", {
+        name: "control-full, 8,192 tokens: not paired, no budget",
       }),
     ).toBeInTheDocument()
     const documents = await evidence.findByRole("region", {
@@ -150,5 +169,16 @@ describe("Domain 2's overview", () => {
     expect(
       await screen.findByText(/This viewer does not read cwa-bench-d1\/runs-index\/v1 where/),
     ).toBeInTheDocument()
+  })
+
+  it("says when S6's own summary cannot be read, rather than dropping its column", async () => {
+    renderApp("/d2", {
+      overrides: { [`/results/d2/${run}/suites/S6/summary.json`]: { status: 404 } },
+    })
+    const evidence = await section("evidence")
+    expect(
+      await evidence.findByText(/S6's own summary, which holds each arm's difference/),
+    ).toBeInTheDocument()
+    expect(evidence.getByRole("region", { name: "The model in the loop" })).toBeInTheDocument()
   })
 })

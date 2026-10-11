@@ -41,8 +41,11 @@ export type ArmPlotProps = {
   /** A tick's text on the axis. */
   formatTick?: (value: number) => string
   reference?: { value: number; label: string } | null
-  /** The legend's words for the mark, and for the backdrop bar when there is one. */
-  legend: { mark: string; backdrop?: string }
+  /**
+   * The legend's words for the mark, for the whisker (the interval as its record names it), and
+   * for the backdrop bar when there is one.
+   */
+  legend: { mark: string; interval?: string; backdrop?: string }
   /** The table alternative, shown under a disclosure. */
   table: ReactNode
   tableOpen?: boolean
@@ -243,7 +246,7 @@ export function ArmPlot({
               <line x1="1" x2="1" y1="1" y2="9" />
               <line x1="13" x2="13" y1="1" y2="9" />
             </svg>
-            95% interval
+            {legend.interval ?? "interval"}
           </li>
         ) : null}
         {hasBackdrop && legend.backdrop ? (
