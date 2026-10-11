@@ -5,7 +5,7 @@
 
 export const CONTENT_SOURCE = {
   repository: "contextwindowarchitecture/benchmark",
-  commit: "603fe20145eaf03f9193b75bd3bb000db78b0bd0",
+  commit: "091eb9fbaa736e6fece66932360f20b678dcb2b8",
 } as const
 
 export type Citation = {
@@ -22,3 +22,4 @@ export function sourceUrl(file: string): string {
 
 export const VIABILITY_DOCUMENT = "docs/benchmarking_cwa_viability.md"
 export const DOMAIN_1_WRITE_UP = "docs/domain1.md"
+export const DOMAIN_2_WRITE_UP = "docs/domain2.md"

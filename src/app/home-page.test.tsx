@@ -43,7 +43,7 @@ describe("home page", () => {
     )
     expect(screen.getByRole("link", { name: "The Domain 1 write-up" })).toHaveAttribute(
       "href",
-      expect.stringContaining("/blob/603fe20145eaf03f9193b75bd3bb000db78b0bd0/docs/domain1.md"),
+      expect.stringContaining("/blob/091eb9fbaa736e6fece66932360f20b678dcb2b8/docs/domain1.md"),
     )
   })
 

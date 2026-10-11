@@ -24,16 +24,20 @@ const VENDOR_DIR = "vendor/cwa-bench"
 const LOCK_FILE = "vendor/cwa-bench.lock.json"
 const EXPECTED_REPOSITORY = "contextwindowarchitecture/benchmark"
 
-// What is vendored, relative to the benchmark root (ui-plan.md 3.1): the schemas the types are
-// generated from, the fixture runs the tests run against, and the write-ups. Each source is a git
-// pathspec plus a filter over the paths git lists under it (git's tree listing takes no globs).
+// What is vendored, relative to the benchmark root (ui-plan.md 3.1): per domain, the schemas the
+// types are generated from, the fixture runs the tests run against, and the write-up; and the
+// viability document. Each source is a git pathspec plus a filter over the paths git lists under
+// it (git's tree listing takes no globs).
+const DOMAINS = ["domain1", "domain2"]
 const SOURCES = [
-  {
-    pathspec: "domain1/schemas",
-    keep: (path) => /^domain1\/schemas\/[^/]+\.v1\.schema\.json$/.test(path),
-  },
-  { pathspec: "domain1/fixtures/runs", keep: () => true },
-  { pathspec: "docs/domain1.md", keep: () => true },
+  ...DOMAINS.flatMap((domain) => [
+    {
+      pathspec: `${domain}/schemas`,
+      keep: (path) => new RegExp(`^${domain}/schemas/[^/]+\\.v1\\.schema\\.json$`).test(path),
+    },
+    { pathspec: `${domain}/fixtures/runs`, keep: () => true },
+    { pathspec: `docs/${domain}.md`, keep: () => true },
+  ]),
   { pathspec: "docs/benchmarking_cwa_viability.md", keep: () => true },
 ]
 const PATHSPECS = SOURCES.map((source) => source.pathspec)

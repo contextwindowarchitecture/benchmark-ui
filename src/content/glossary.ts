@@ -463,7 +463,7 @@ const BENCHMARK: readonly Omit<GlossaryEntry, "group">[] = [
     id: "drift-report",
     term: "Drift report",
     also: ["drift"],
-    text: "What changed since the previous run of the same profile: contract or assembler bumps, changed suites and metrics, new and resolved findings, and golden drift.",
+    text: "What changed since the previous run of the same profile: contract, assembler or host bumps, changed suites and metrics, new and resolved findings, and golden drift.",
     see: ["golden", "run"],
     citation: writeUp("Reproducing it"),
   },
