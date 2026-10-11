@@ -14,3 +14,9 @@ export const OverviewPage = lazy(() =>
     default: module.OverviewPage,
   })),
 )
+
+export const ViewerPage = lazy(() =>
+  import("@/features/d1/components/sweeps/viewer-page").then((module) => ({
+    default: module.ViewerPage,
+  })),
+)

@@ -36,8 +36,8 @@ export type SheddingCurveProps = {
   /** Draw the line once, now; the parent marks the reveal done when it has run or was declined. */
   reveal?: boolean
   onRevealed?: () => void
-  /** The frame to mark with a cursor, by index into the shown series; none by default. */
-  cursor?: number
+  /** The budget to mark with a cursor (the viewer's current frame); none by default. */
+  cursorBudget?: number
   /** Whether to show the frames table open; closed by default. */
   tableOpen?: boolean
 }
@@ -51,7 +51,7 @@ export function SheddingCurve({
   summary,
   reveal = false,
   onRevealed,
-  cursor,
+  cursorBudget,
   tableOpen = false,
 }: SheddingCurveProps) {
   const id = useId()
@@ -309,11 +309,11 @@ export function SheddingCurve({
                 ))}
               </g>
             ))}
-            {cursor !== undefined && first?.points[cursor] ? (
+            {cursorBudget !== undefined && Number.isFinite(cursorBudget) ? (
               <line
-                data-cursor={cursor}
-                x1={layout.x(first.points[cursor].budget)}
-                x2={layout.x(first.points[cursor].budget)}
+                data-cursor={cursorBudget}
+                x1={layout.x(cursorBudget)}
+                x2={layout.x(cursorBudget)}
                 y1={layout.margin.top}
                 y2={layout.height - layout.margin.bottom}
                 className="stroke-foreground"

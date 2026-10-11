@@ -22,7 +22,7 @@ import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
 import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
-import { D2OverviewPage, OverviewPage } from "./pages/lazy-pages"
+import { D2OverviewPage, OverviewPage, ViewerPage } from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
 import { RouteErrorPage } from "./pages/route-error-page"
 import type { RouteHandle } from "./route-meta"
@@ -181,11 +181,11 @@ export const routes: RouteObject[] = [
                           {
                             path: ":digest",
                             element: (
-                              <NotBuiltYet
-                                title="Shedding viewer"
-                                phase="UI-P4"
-                                note="A budget sweep replayed frame by frame."
-                              />
+                              <Suspense
+                                fallback={<PageFallback title="Shedding viewer" width="wide" />}
+                              >
+                                <ViewerPage />
+                              </Suspense>
                             ),
                             handle: handle({
                               title: (p) => `Sweep ${param(p, "digest").slice(0, 7)}`,

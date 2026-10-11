@@ -72,3 +72,14 @@ export function runScopedPath(
     return `${base}/runs/${runId}${pathname.slice(prefix.length)}`
   return `${base}/runs/${runId}`
 }
+
+/** The shedding viewer's views (ui-plan.md 9.2). */
+export const VIEWER_VIEWS = ["curve", "items", "lanes"] as const
+export type ViewerView = (typeof VIEWER_VIEWS)[number]
+
+/** The shedding viewer's state (ui-plan.md 6.2, 9.3): the frame, whose frames, and the view. */
+export const viewerParams = {
+  frame: z.coerce.number().int().min(0),
+  adapter: z.string().min(1).max(32),
+  view: z.enum(VIEWER_VIEWS),
+}
