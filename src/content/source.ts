@@ -5,7 +5,7 @@
 
 export const CONTENT_SOURCE = {
   repository: "contextwindowarchitecture/benchmark",
-  commit: "58ef771565c7f0df7ecd872853353eff8d0a6e4e",
+  commit: "73c4757efabb1a8d0b0cfc59ef420e67f1f1ccea",
 } as const
 
 export type Citation = {

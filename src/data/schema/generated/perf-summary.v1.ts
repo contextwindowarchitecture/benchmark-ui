@@ -11,8 +11,21 @@ export interface PerfSummaryV1 {
    * false when the host slept during measurement
    */
   reliable: boolean
+  /**
+   * When a cell's sampling stops: at least min_samples (min_slow once a sample takes slow_ms), at most max_samples or max_seconds, earlier once the 95% interval's half-width is within ci_target of the mean
+   */
   policy: {
-    [k: string]: unknown | undefined
+    warmup: number
+    min_samples: number
+    min_slow: number
+    slow_ms: number
+    max_samples: number
+    max_seconds: number
+    ci_target: number
+    /**
+     * Cells measured one at a time
+     */
+    serial: boolean
   }
   methods: {
     [k: string]: string | undefined
@@ -126,9 +139,15 @@ export interface PerfSummaryV1 {
   }[]
   samples: string
   /**
-   * The perf series' parameters
+   * The perf series' parameters. Per shape, the candidates series is (n, fixed_tokens), the tokens series (fixed_candidates, tokens_per_candidate × n) and the diagonal (n, tokens_per_candidate × n), for n in candidates; a fit's points are those cells' p50s
    */
   series: {
-    [k: string]: unknown | undefined
+    /**
+     * @minItems 1
+     */
+    candidates: [number, ...number[]]
+    fixed_tokens: number
+    fixed_candidates: number
+    tokens_per_candidate: number
   }
 }

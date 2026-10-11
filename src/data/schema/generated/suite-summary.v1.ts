@@ -253,7 +253,220 @@ export interface SuiteSummaryV1 {
    * S7: shapes, settings, constructible cells, skips, timeouts, threshold searches, sweeps and timing loops
    */
   scale?: {
-    [k: string]: unknown | undefined
+    /**
+     * Every shape the corpus generator knows, with what it holds
+     */
+    shapes: {
+      [k: string]: string | undefined
+    }
+    /**
+     * The [s7] configuration in effect: the suite's defaults merged with domain1.toml's section. The keys named here are always written; any other key the section adds is carried as written
+     */
+    settings: {
+      /**
+       * The per-call timeout, in seconds
+       */
+      timeout_s: number
+      /**
+       * The grid's candidate counts
+       */
+      candidates: number[]
+      /**
+       * The grid's candidate token totals
+       */
+      candidate_tokens: number[]
+      /**
+       * The grid's budgets, as fractions of full
+       */
+      budget_ratio: number[]
+      /**
+       * Whether the grid also runs one token below the protected-only charged count (label threshold-1)
+       */
+      below_threshold: boolean
+      /**
+       * Candidates and tokens of the cell run with every tokenizer and renderer
+       *
+       * @minItems 2
+       * @maxItems 2
+       */
+      components_cell: [number, number]
+      components_ratio: number[]
+      /**
+       * Candidates and tokens of the cell run at fixed windows
+       *
+       * @minItems 2
+       * @maxItems 2
+       */
+      window_cell: [number, number]
+      window_shapes: string[]
+      /**
+       * The fixed windows, in tokens (labels window:<n>)
+       */
+      windows: number[]
+      /**
+       * Candidates and tokens of the cells whose refusal threshold is searched
+       */
+      threshold_cells: [number, number][]
+      /**
+       * Candidates and tokens of the swept cell
+       *
+       * @minItems 2
+       * @maxItems 2
+       */
+      sweep_cell: [number, number]
+      sweep_step_percent: number
+      /**
+       * Where a sweep writes timelines, as fractions of full
+       */
+      timeline_points: number[]
+      perf: boolean
+      perf_candidates: number[]
+      perf_tokens_per_candidate: number
+      perf_fixed_tokens: number
+      perf_fixed_candidates: number
+      perf_labels: string[]
+      perf_min_samples: number
+      perf_max_samples: number
+      perf_max_seconds: number
+      perf_ci_target: number
+      inprocess: boolean
+      /**
+       * @minItems 2
+       * @maxItems 2
+       */
+      throughput_cell: [number, number]
+      throughput_invocations: number
+      max_tests: number
+      /**
+       * The shapes run, when the section narrows them
+       */
+      shapes?: string[]
+      seed?: number
+      [k: string]: unknown | undefined
+    }
+    /**
+     * Cells in the grid
+     */
+    cells: number
+    /**
+     * Rows in results.jsonl
+     */
+    rows: number
+    /**
+     * Grid cells the generator cannot build, and why
+     */
+    not_constructible: {
+      shape: string
+      candidates: number
+      candidate_tokens: number
+      why: string
+    }[]
+    /**
+     * Answers not asked for, over every row: an adapter's cells at least the work of one it timed out on
+     */
+    skipped: number
+    /**
+     * One per timeout warning finding
+     */
+    timeouts: {
+      adapter: string
+      summary: string
+    }[]
+    /**
+     * Items: One adapter's binary search for the smallest budget that assembles. A not_constructible search has only the cell, the adapter, the status and the detail; full_did_not_assemble has no found budget
+     */
+    thresholds: {
+      cell: ScaleCell
+      adapter: string
+      /**
+       * exact when the budget found equals the harness's computed one
+       */
+      status: "exact" | "inexact" | "full_did_not_assemble" | "not_constructible"
+      /**
+       * Why the cell cannot be built
+       */
+      detail?: string
+      /**
+       * The smallest budget that assembled
+       */
+      found?: number | null
+      /**
+       * The harness's charged count of the protected items, or the floor
+       */
+      computed?: number
+      computed_from?: "protected" | "floor"
+      protected?: number
+      floor?: number | null
+      full?: number
+      /**
+       * Assemblies the search made
+       */
+      probes?: number
+      /**
+       * Probes whose outcome or refusal code differs from the rules'
+       */
+      mispredicted?: number
+      /**
+       * Audit checks any probe failed
+       */
+      audit_failed?: string[]
+    }[]
+    /**
+     * Items: One budget sweep: what its file holds, without the frames
+     */
+    sweeps: {
+      cell: ScaleCell
+      path: string
+      /**
+       * Every adapter's frames are the same
+       */
+      agree: boolean
+      /**
+       * Frames per adapter
+       */
+      frames: {
+        [k: string]: number | undefined
+      }
+      /**
+       * The reference adapter's frames one token from a different frame
+       */
+      exact_steps: number
+      /**
+       * The smallest budget the reference adapter assembled at
+       */
+      threshold: number | null
+      /**
+       * The harness's charged count of the protected items, or the floor
+       */
+      computed: number
+      /**
+       * Frames per adapter whose outcome or refusal code differs from the rules'
+       */
+      mispredicted: {
+        [k: string]: number | undefined
+      }
+      /**
+       * Audit checks any frame failed, per adapter
+       */
+      audit_failed: {
+        [k: string]: string[] | undefined
+      }
+      /**
+       * Timeline files the sweep wrote
+       */
+      timelines: number
+    }[]
+    /**
+     * Per adapter, whether its in-process timing loop ran
+     */
+    timing_loops: {
+      [k: string]:
+        | {
+            available: boolean
+            error: string | null
+          }
+        | undefined
+    }
   }
   /**
    * S11: mode, arms, chunks and rows, fit utility per arm; the detail is in summarizer/summary.json
@@ -261,4 +474,15 @@ export interface SuiteSummaryV1 {
   summarizer?: {
     [k: string]: unknown | undefined
   }
+}
+/**
+ * A scale cell: the shape, its size and the components it was built with
+ */
+export interface ScaleCell {
+  shape: string
+  candidates: number
+  candidate_tokens: number
+  tokenizer: string
+  renderer: string
+  seed: number
 }
