@@ -8,5 +8,11 @@ export { TRUST, TRUST_CITATION } from "./d1/trust"
 export type { TrustNote } from "./d1/trust"
 export { LANES, laneWords, PLANES, planeOf, VOCABULARY_CITATION } from "./d1/vocabulary"
 export type { Lane, LaneWords, PlaneId, PlaneWords } from "./d1/vocabulary"
-export { CONTENT_SOURCE, DOMAIN_1_WRITE_UP, sourceUrl, VIABILITY_DOCUMENT } from "./source"
+export {
+  CONTENT_SOURCE,
+  DOMAIN_1_WRITE_UP,
+  DOMAIN_2_WRITE_UP,
+  sourceUrl,
+  VIABILITY_DOCUMENT,
+} from "./source"
 export type { Citation } from "./source"

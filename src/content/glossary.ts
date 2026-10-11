@@ -1,11 +1,12 @@
 // The glossary (ui-plan.md 8.11): the words of the architecture and of the benchmark, each defined
 // once and cited to the file it was read against at CONTENT_SOURCE. The architecture's terms come
 // from the specification's contract as the nightly fixture carries it (contract commit 16de4be)
-// and from the viability document; the benchmark's from the Domain 1 write-up and, for the
-// domains not yet started, the viability document. Words only: no definition states a result.
+// and from the viability document; the benchmark's from the Domain 1 and Domain 2 write-ups and,
+// for the domains not yet started, the viability document. Words only: no definition states a
+// result.
 
 import { VOCABULARY_CITATION } from "./d1/vocabulary"
-import { DOMAIN_1_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "./source"
+import { DOMAIN_1_WRITE_UP, DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "./source"
 
 export type GlossaryGroup = "architecture" | "benchmark"
 
@@ -27,6 +28,8 @@ const CONTRACT = VOCABULARY_CITATION.file
 const contract = (section: string): Citation => ({ file: CONTRACT, section })
 const writeUp = (section?: string): Citation =>
   section ? { file: DOMAIN_1_WRITE_UP, section } : { file: DOMAIN_1_WRITE_UP }
+const writeUp2 = (section?: string): Citation =>
+  section ? { file: DOMAIN_2_WRITE_UP, section } : { file: DOMAIN_2_WRITE_UP }
 const viability = (section?: string): Citation =>
   section ? { file: VIABILITY_DOCUMENT, section } : { file: VIABILITY_DOCUMENT }
 
@@ -408,7 +411,7 @@ const BENCHMARK: readonly Omit<GlossaryEntry, "group">[] = [
   {
     id: "suite",
     term: "Suite",
-    text: "A group of tests aimed at one property, with an id such as S5. Domain 1's suites cover the oracle self-check, conformance, repeatability, metamorphic relations, fuzzing, admission, budget pressure, refusal, conflicts, purity, the producer pipeline and consensus goldens.",
+    text: "A group of tests aimed at one property, with an id such as S5, numbered within its domain. Domain 1's suites cover the oracle self-check, conformance, repeatability, metamorphic relations, fuzzing, admission, budget pressure, refusal, conflicts, purity, the producer pipeline and consensus goldens. Domain 2's cover the self-check, the assembly gate, scripted conversations, unreliability, long context, cost, the model in the loop and goldens.",
     see: ["run", "domain"],
     citation: writeUp("Suites and results"),
   },
@@ -528,6 +531,177 @@ const BENCHMARK: readonly Omit<GlossaryEntry, "group">[] = [
     text: "Built so that no answer can come from memorized training data, for example questions generated from a database of fictional entities, as Context-Bench does. Domain 3 is designed around it.",
     see: ["domain"],
     citation: viability("Domain 3: Agentic Context Engineering Capability"),
+  },
+  {
+    id: "arm",
+    term: "Arm",
+    also: ["CWA arm"],
+    text: "One way of building the payload for the same task. Domain 2 holds the model, its settings, the facts, the user's turns, the budget, the token counter and the grader equal across arms, so only the way the payload is built differs.",
+    see: ["conventional-baseline", "upper-bound"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "conventional-baseline",
+    term: "Conventional baseline",
+    also: ["baseline", "truncation", "pinned truncation", "window", "concatenation"],
+    text: "What a conventional application sends, built by the harness from the same script: every turn concatenated, the newest turns that fit with the system prompt dropped or pinned, a fixed window of recent turns, that window with a rolling summary, or over documents the retriever's best chunks. Pinned truncation is Domain 2's fair reference.",
+    see: ["arm", "rolling-summary"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "upper-bound",
+    term: "Upper bound",
+    also: ["control", "control-full", "control-concat"],
+    text: "An arm that sends the whole task with no budget, the whole conversation or every fact in one turn, to show what the model does when nothing is left out.",
+    see: ["arm"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "probe",
+    term: "Probe",
+    also: ["checkpoint"],
+    text: "A question asked at a checkpoint of a scripted conversation, with the turns so far as its history. It never enters the history itself, and it carries what grading needs and the turns its answer needs.",
+    see: ["conversation-family", "fact-in-payload-oracle"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "conversation-family",
+    term: "Conversation family",
+    also: ["family", "VT", "FR", "CC", "IP", "LQ", "variable tracking", "corrections"],
+    text: "A seeded generator of whole conversations with their ground truth known by construction: variable tracking (VT), facts revealed (FR), corrections (CC) and instruction persistence (IP); and of document corpora for long-context questions (LQ). Every name, figure and booking is fictional.",
+    see: ["probe", "contamination-proof"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "aptitude",
+    term: "Aptitude",
+    also: ["accuracy", "A90", "aptitude retention"],
+    text: "The rate of correct answers over an arm's probes, with a cluster-bootstrap interval over conversations. Under repeated sampling, the study's aptitude A90 is the 90th percentile of a probe's scores, averaged over probes.",
+    see: ["unreliability", "cluster-bootstrap"],
+    citation: writeUp2("What it proves, and what it does not"),
+  },
+  {
+    id: "unreliability",
+    term: "Unreliability",
+    also: ["U90−10", "U90-10"],
+    text: "How much repeated samples of the same probe vary: the 90th less the 10th percentile of its scores at a temperature above zero, averaged over probes and given in points.",
+    see: ["aptitude"],
+    citation: writeUp2("Unreliability (S3)"),
+  },
+  {
+    id: "grade",
+    term: "Grade",
+    also: ["stale", "distractor", "unparsed", "overflow", "verdict"],
+    text: "What a deterministic grader makes of one reply: correct; stale, an earlier value of the figure asked; distractor, another figure's value or the wrong site's; wrong; or unparsed, a reply with no single answer. A baseline over its budget is an overflow and a refused assembly a refusal; neither reaches the model.",
+    see: ["probe", "abstention"],
+    citation: writeUp2("How it judges an answer"),
+  },
+  {
+    id: "abstention",
+    term: "Abstention",
+    also: ["NOT FOUND"],
+    text: "Answering NOT FOUND, or choosing the option that says the documents do not say. It is right only for a question the documents never answer.",
+    see: ["grade"],
+    citation: writeUp2("Long context (S4)"),
+  },
+  {
+    id: "fact-in-payload-oracle",
+    term: "Fact-in-payload oracle",
+    also: ["fact oracle", "attribution"],
+    text: "For every probe, whether every fact its answer needs was in the payload, read once from the trace or the baseline's own record and again from the payload's text; the two readings must agree. It attributes a wrong answer to the payload or to the model.",
+    see: ["probe", "assembly-gate"],
+    citation: writeUp2("How it judges an answer"),
+  },
+  {
+    id: "assembly-gate",
+    term: "Assembly gate",
+    also: ["gate"],
+    text: "Domain 2's S1: every CWA payload is assembled by all four assemblers, which must agree byte for byte, pass Domain 1's trace audit and equal the harness's own prediction before the payload is sent to a model.",
+    see: ["differential-testing", "trace-auditor"],
+    citation: writeUp2("How it judges an answer"),
+  },
+  {
+    id: "oracle-state",
+    term: "Oracle state",
+    also: ["oracle state writer"],
+    text: "State the application writes from the facts the user actually stated, at their current values. It holds the facts, never the answer, and is an upper bound on what an application's state can be.",
+    see: ["extractor", "memory"],
+    citation: writeUp2("How far to trust it"),
+  },
+  {
+    id: "extractor",
+    term: "Extractor",
+    also: ["state extractor", "model-written state"],
+    text: "A model-based producer that reads each user message, told the task and the state so far, and returns only what the message adds or changes; the application merges it into its state. It is the realistic state writer.",
+    see: ["oracle-state", "producer"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "rolling-summary",
+    term: "Rolling summary",
+    also: ["summarizer"],
+    text: "A summary of the turns that have left the window, updated by the model, told the task and a word limit, as each turn leaves: the summary baseline's, the strongest conventional control.",
+    see: ["conventional-baseline"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "format-control",
+    term: "Format control",
+    text: "An arm that takes a baseline's exact selection at each budget and renders it as CWA renders it, so the two differ in format alone.",
+    see: ["arm"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "cluster-bootstrap",
+    term: "Cluster bootstrap",
+    also: ["interval", "confidence interval"],
+    text: "An interval found by resampling whole conversations rather than single answers, since the answers within one conversation are not independent.",
+    see: ["aptitude", "paired-difference"],
+    citation: writeUp2("How far to trust it"),
+  },
+  {
+    id: "paired-difference",
+    term: "Paired difference",
+    text: "An arm's accuracy less the reference arm's on the same probes and samples, with its interval, so two arms are compared on exactly the same questions.",
+    see: ["cluster-bootstrap", "conventional-baseline"],
+    citation: writeUp2("Scripted conversations (S2)"),
+  },
+  {
+    id: "model-cache",
+    term: "Model cache",
+    also: ["replay", "cache"],
+    text: "The committed record of every request Domain 2 sent and the reply it got, keyed by the request's hash and the sample. A run in replay mode answers from it alone, so every result replays without a model.",
+    see: ["run"],
+    citation: writeUp2("How it is set up"),
+  },
+  {
+    id: "token-margin",
+    term: "Token margin",
+    also: ["margin", "under-count", "estimator"],
+    text: "The share a route adds to its token estimate so a payload never exceeds its budget by the server's own count. An estimate from bytes under-counts some texts, and a margin covers an under-count only when it is at least the under-count divided by one less the under-count.",
+    see: ["budget"],
+    citation: writeUp2("Cost and the token estimate (S5)"),
+  },
+  {
+    id: "model-in-the-loop",
+    term: "Model in the loop",
+    text: "A setup where the model's own reply at each turn becomes the history of the next, instead of a scripted reply, so its errors can carry forward.",
+    see: ["probe"],
+    citation: writeUp2("Model in the loop (S6)"),
+  },
+  {
+    id: "instruction-persistence",
+    term: "Instruction persistence",
+    text: "Whether a rule given in the system prompt, such as brackets around figures, a sign-off or capital letters, still holds late in a conversation; checked by code on every answer.",
+    see: ["conversation-family"],
+    citation: writeUp2("Scripted conversations (S2)"),
+  },
+  {
+    id: "corpus-tier",
+    term: "Corpus tier",
+    text: "The size of a long-context corpus as a multiple of the budget, from a fraction of it to many times it, so a question can be asked of documents that fit and of documents that cannot.",
+    see: ["needle-in-a-haystack"],
+    citation: writeUp2("Long context (S4)"),
   },
   {
     id: "prefix-caching",

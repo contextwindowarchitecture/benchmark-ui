@@ -1,8 +1,9 @@
 // The benchmark as a whole (ui-plan.md 1, 8.11): what CWA is, what each domain is designed to
 // establish, and how to read the results. Words only; every number on the site comes from a
-// record. Reviewed against the viability document and the Domain 1 write-up at CONTENT_SOURCE.
+// record. Reviewed against the viability document and the Domain 1 and 2 write-ups at
+// CONTENT_SOURCE.
 
-import { DOMAIN_1_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "./source"
+import { DOMAIN_1_WRITE_UP, DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "./source"
 
 export type DomainId = "d1" | "d2" | "d3" | "d4" | "d5"
 
@@ -63,6 +64,10 @@ export const DOMAINS: readonly DomainContent[] = [
       "The design adapts long-context suites such as LongBench v2 and RULER, including variable tracking across a long context, to multi-turn agentic tasks of fifty to a hundred turns, and compares a conventional baseline with the same model behind a CWA assembler.",
       "What it would measure: aptitude retained across turns, state reconciliation, variance between sessions, and long-context question answering, each against the same baseline.",
     ],
+    writeUp: {
+      file: DOMAIN_2_WRITE_UP,
+      title: "Domain 2: long-horizon multi-turn stability",
+    },
     citation: {
       file: VIABILITY_DOCUMENT,
       section: "Domain 2: Long-Horizon Multi-Turn Stability and Context Drift",

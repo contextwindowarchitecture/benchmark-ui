@@ -16,7 +16,8 @@ describe("about page", () => {
       expect.stringContaining("/docs/benchmarking_cwa_viability.md"),
     )
     expect(screen.getByRole("link", { name: /docs\/domain1\.md/ })).toBeInTheDocument()
-    expect(screen.getAllByText(/no write-up yet/)).toHaveLength(4)
+    expect(screen.getByRole("link", { name: /docs\/domain2\.md/ })).toBeInTheDocument()
+    expect(screen.getAllByText(/no write-up yet/)).toHaveLength(3)
     expect(screen.getByRole("link", { name: /The Rust assembler/ })).toHaveAttribute(
       "href",
       "https://github.com/contextwindowarchitecture/assembler-rust",
@@ -26,5 +27,6 @@ describe("about page", () => {
     const kinds = screen.getByRole("region", { name: "Schema kinds table" })
     expect(within(kinds).getAllByRole("row")).toHaveLength(buildInfo.kinds.length + 1)
     expect(within(kinds).getByText("cwa-bench-d1/sweep/v1")).toBeInTheDocument()
+    expect(within(kinds).getByText("cwa-bench-d2/grade-row/v1")).toBeInTheDocument()
   })
 })
