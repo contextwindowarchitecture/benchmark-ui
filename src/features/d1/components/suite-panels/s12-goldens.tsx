@@ -40,7 +40,7 @@ export function S12Goldens({ summary }: SuitePanelProps) {
           This run's summary has no goldens block.
         </p>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <TableRegion label="Golden drift table" className="self-start">
             <Table>
               <TableCaption className="sr-only">Drift counts per adapter.</TableCaption>

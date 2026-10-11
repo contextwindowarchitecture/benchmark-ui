@@ -17,7 +17,7 @@ export function S2Environment({ summary }: SuitePanelProps) {
       id="panel"
       description="Whether each adapter's decision, payload and trace stay the same as on the host baseline when the environment changes."
     >
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
         <EnvironmentMatrix cells={cells} label="Environment matrix" />
         <div className="grid gap-4 self-start">
           {environment ? (
