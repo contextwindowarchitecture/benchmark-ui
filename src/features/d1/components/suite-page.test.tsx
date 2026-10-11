@@ -108,12 +108,50 @@ describe("suite page", () => {
   it("renders S7's scale rows from the dedicated run, opened by the address", async () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.s7}/suites/S7?page=1`)
     expect(await screen.findByRole("heading", { level: 1, name: /^S7 · / })).toBeInTheDocument()
-    expect(await screen.findByText("The scale grid is phase UI-P4")).toBeInTheDocument()
+    expect(await screen.findByRole("button", { name: "Draw the grid" })).toBeInTheDocument()
     const table = await screen.findByRole("region", { name: "S7 rows table" })
     expect(within(table).getAllByRole("row").length).toBeGreaterThan(1)
     expect(within(table).getAllByText("droppable-heavy", { exact: false }).length).toBeGreaterThan(
       0,
     )
+  })
+
+  it("shows S7's thresholds, timeouts and sweeps from the summary, and the grid on request", async () => {
+    renderApp(`/d1/runs/${FIXTURE_RUNS.s7}/suites/S7`)
+    const panel = await section("panel")
+    expect(await panel.findByText(/: 64 of 64 searches exact\.$/)).toBeInTheDocument()
+    const thresholds = panel.getByRole("region", { name: "Threshold searches table" })
+    expect(within(thresholds).getAllByRole("row")).toHaveLength(17)
+    expect(
+      within(thresholds).getAllByLabelText(/^Python: exact, found \d+ in \d+ probes$/),
+    ).toHaveLength(16)
+    expect(
+      panel.getAllByRole("listitem").filter((item) => item.hasAttribute("data-timeout")),
+    ).toHaveLength(33)
+    const sweeps = panel.getByRole("region", { name: "Sweeps table" })
+    expect(within(sweeps).getAllByRole("row")).toHaveLength(9)
+    expect(panel.getByText(/16 cells the generator cannot build/)).toBeInTheDocument()
+    expect(
+      panel.getByText(
+        (_, node) =>
+          node?.tagName === "P" &&
+          /^In-process timing loops: Python available; TypeScript available/.test(
+            node.textContent ?? "",
+          ),
+      ),
+    ).toBeInTheDocument()
+    expect(panel.queryByRole("region", { name: "Scale grid" })).toBeNull()
+    await userEvent.click(panel.getByRole("button", { name: "Draw the grid" }))
+    const grid = await panel.findByRole("region", { name: "Scale grid" })
+    expect(
+      within(grid).getByLabelText(
+        "droppable-heavy, 10 × 10,000: every adapter agreed on 6 of 6 budgets",
+      ),
+    ).toHaveTextContent("6/6")
+    expect(
+      within(grid).getAllByLabelText(/^compressible-v0, 5,000 × 10,000: not constructible, /),
+    ).toHaveLength(1)
+    expect(panel.queryByRole("region", { name: "Fixed windows table" })).toBeNull()
   })
 
   it("filters the rows from the address and reports the count", async () => {

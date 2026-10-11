@@ -4,11 +4,11 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import type { RunIndexV1, SuiteSummaryV1 } from "@/data/schema/generated"
+import type { RunIndexV1, ScaleRowV1, SuiteSummaryV1 } from "@/data/schema/generated"
 import { parseDocumentAs } from "@/data/validate"
 import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
 
-import { sweepRows, thresholdCells, type Scale } from "./scale"
+import { cellKey, scaleGrid, sweepRows, thresholdCells, windowRows, type Scale } from "./scale"
 
 async function load(): Promise<{ scale: Scale; index: RunIndexV1 }> {
   const read = async (path: string) =>
@@ -73,5 +73,76 @@ describe("S7's sweeps and thresholds", () => {
       "go",
       "rust",
     ])
+  })
+})
+
+async function rows(): Promise<ScaleRowV1[]> {
+  const text = await readFile(
+    join(FIXTURES_DIR, FIXTURE_RUNS.s7, "suites/S7/results.jsonl"),
+    "utf8",
+  )
+  return text
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map((line) => JSON.parse(line) as ScaleRowV1)
+}
+
+describe("S7's grid", () => {
+  it("counts each cell's budgets, agreement, timeouts and skips, and the unbuildable cells", async () => {
+    const { scale } = await load()
+    const all = await rows()
+    const grid = scaleGrid(all, scale)
+    expect(grid.components).toEqual({
+      tokenizer: "fixture-whitespace/v1",
+      renderer: "fixture-xml/v1",
+    })
+    expect(grid.shapes[0]).toBe("droppable-heavy")
+    const cell = grid.cells.get(
+      cellKey({ shape: "droppable-heavy", candidates: 10, candidate_tokens: 10_000 }),
+    )
+    expect(cell).toMatchObject({
+      rows: 6,
+      compared: 6,
+      agreed: 6,
+      failed: 0,
+      timeouts: 0,
+      skipped: 0,
+    })
+    const unbuildable = grid.cells.get(
+      cellKey({ shape: "compressible-v0", candidates: 5000, candidate_tokens: 10_000 }),
+    )
+    expect(unbuildable?.notConstructible).toMatch(/cannot share 10000 tokens/)
+    expect(grid.sizes[0]).toEqual({ candidates: 10, tokens: 10_000 })
+    // A timeout, a skip, a disagreement and a failure in one row, and a row at other components.
+    const [first] = all
+    const changed: ScaleRowV1 = {
+      ...first!,
+      agree: false,
+      verdict: "failed",
+      answers: [{ ...first!.answers[0]!, outcome: "timeout" }, ...first!.answers.slice(1)],
+      skipped: [{ adapter: "go", reason: "at least the work of a cell that timed out" }],
+    }
+    const other: ScaleRowV1 = {
+      ...first!,
+      cell: { ...first!.cell, tokenizer: "cl100k" },
+    }
+    const second = scaleGrid([changed, ...all.slice(1), other], scale)
+    expect(
+      second.cells.get(
+        cellKey({ shape: "droppable-heavy", candidates: 10, candidate_tokens: 10_000 }),
+      ),
+    ).toMatchObject({ rows: 6, compared: 6, agreed: 5, failed: 1, timeouts: 1, skipped: 1 })
+    expect(second.componentRows).toBe(1)
+    expect(scaleGrid([], undefined)).toMatchObject({ shapes: [], sizes: [], components: null })
+  })
+
+  it("takes the fixed-window rows, smallest window first", async () => {
+    const [first] = await rows()
+    const at = (label: string): ScaleRowV1 => ({ ...first!, label, case_id: label })
+    expect(
+      windowRows([at("window:1000000"), at("ratio:1.0"), at("window:8192")]).map(
+        (row) => row.label,
+      ),
+    ).toEqual(["window:8192", "window:1000000"])
   })
 })

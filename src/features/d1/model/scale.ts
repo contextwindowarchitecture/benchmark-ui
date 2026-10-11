@@ -2,7 +2,7 @@
 // sweeps list, the threshold searches by cell, and the scale grid. Nothing here judges anything:
 // the harness's statuses and verdicts are carried, and counts are counted.
 
-import type { RunIndexV1, SuiteSummaryV1 } from "@/data/schema/generated"
+import type { RunIndexV1, ScaleRowV1, SuiteSummaryV1 } from "@/data/schema/generated"
 import { orderAdapters } from "@/lib/adapters"
 
 import { sweepDigestOf } from "./sweep-curve"
@@ -75,4 +75,124 @@ export function thresholdCells(scale: Scale): ThresholdCell[] {
     group.searches.sort((a, b) => order.indexOf(a.adapter) - order.indexOf(b.adapter))
   }
   return [...groups.values()]
+}
+
+/** One shape at one size of the grid, over its budget labels. */
+export type GridCell = {
+  shape: string
+  candidates: number
+  tokens: number
+  /** Rows at this cell: one per budget label. */
+  rows: number
+  /** Rows at least two adapters answered, and those whose answers agree. */
+  compared: number
+  agreed: number
+  /** Rows the harness judged failed. */
+  failed: number
+  /** Answers that timed out, and answers skipped after a timeout. */
+  timeouts: number
+  skipped: number
+  /** Why the generator cannot build the cell, when it cannot. */
+  notConstructible: string | null
+}
+
+export type ScaleGrid = {
+  shapes: string[]
+  sizes: { candidates: number; tokens: number }[]
+  cells: Map<string, GridCell>
+  /** The tokenizer and renderer of the grid; rows at other components are counted apart. */
+  components: { tokenizer: string; renderer: string } | null
+  componentRows: number
+}
+
+const isGridLabel = (label: string) => label.startsWith("ratio:") || label === "threshold-1"
+
+/**
+ * The scale grid (ui-plan.md 8.4, 10): shape × (candidates, tokens) at the grid's tokenizer and
+ * renderer (those of most of its rows), each cell's budget labels counted. Fixed-window rows are
+ * the window table's; rows at the other components are counted, not drawn.
+ */
+export function scaleGrid(rows: readonly ScaleRowV1[], scale: Scale | undefined): ScaleGrid {
+  const gridRows = rows.filter((row) => isGridLabel(row.label))
+  const tally = new Map<string, number>()
+  for (const row of gridRows) {
+    const key = `${row.cell.tokenizer}|${row.cell.renderer}`
+    tally.set(key, (tally.get(key) ?? 0) + 1)
+  }
+  const top = [...tally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0]
+  const components = top
+    ? { tokenizer: top.split("|")[0] ?? "", renderer: top.split("|")[1] ?? "" }
+    : null
+  const inGrid = gridRows.filter(
+    (row) =>
+      components !== null &&
+      row.cell.tokenizer === components.tokenizer &&
+      row.cell.renderer === components.renderer,
+  )
+  const cells = new Map<string, GridCell>()
+  const cellOf = (shape: string, candidates: number, tokens: number): GridCell => {
+    const key = cellKey({ shape, candidates, candidate_tokens: tokens })
+    let cell = cells.get(key)
+    if (!cell) {
+      cell = {
+        shape,
+        candidates,
+        tokens,
+        rows: 0,
+        compared: 0,
+        agreed: 0,
+        failed: 0,
+        timeouts: 0,
+        skipped: 0,
+        notConstructible: null,
+      }
+      cells.set(key, cell)
+    }
+    return cell
+  }
+  for (const row of inGrid) {
+    const cell = cellOf(row.cell.shape, row.cell.candidates, row.cell.candidate_tokens)
+    cell.rows++
+    if (row.not_constructible) cell.notConstructible = row.not_constructible
+    if (row.answers.length >= 2) {
+      cell.compared++
+      if (row.agree) cell.agreed++
+    }
+    if (row.verdict === "failed") cell.failed++
+    cell.timeouts += row.answers.filter((answer) => answer.outcome === "timeout").length
+    cell.skipped += row.skipped.length
+  }
+  for (const entry of scale?.not_constructible ?? []) {
+    const cell = cellOf(entry.shape, entry.candidates, entry.candidate_tokens)
+    cell.notConstructible ??= entry.why
+  }
+  const known = Object.keys(scale?.shapes ?? {})
+  const present = new Set([...cells.values()].map((cell) => cell.shape))
+  const shapes = [
+    ...known.filter((shape) => present.has(shape)),
+    ...[...present].filter((shape) => !known.includes(shape)).sort(),
+  ]
+  const sizes = [
+    ...new Map(
+      [...cells.values()].map((cell) => [
+        `${cell.candidates}|${cell.tokens}`,
+        { candidates: cell.candidates, tokens: cell.tokens },
+      ]),
+    ).values(),
+  ].sort((a, b) => a.candidates - b.candidates || a.tokens - b.tokens)
+  return {
+    shapes,
+    sizes,
+    cells,
+    components,
+    componentRows: gridRows.length - inGrid.length,
+  }
+}
+
+/** The fixed-window rows (`window:<tokens>`), smallest window first. */
+export function windowRows(rows: readonly ScaleRowV1[]): ScaleRowV1[] {
+  const size = (label: string) => Number(label.slice("window:".length))
+  return rows
+    .filter((row) => row.label.startsWith("window:"))
+    .sort((a, b) => size(a.label) - size(b.label))
 }
