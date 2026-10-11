@@ -31,14 +31,17 @@ export function StatusLine({
   const document: ManifestV1 | undefined = manifest?.data?.ok ? manifest.data.document : undefined
   const report: CiReportV1 | undefined = ci?.data?.ok ? ci.data.document : undefined
   return (
-    <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_minmax(0,1fr)]" data-status-line>
+    <dl
+      className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_minmax(0,1fr)]"
+      data-status-line
+    >
       <dt className="text-muted-foreground">Contract</dt>
       <dd>
         {manifest?.isPending ? (
           <Skeleton className="h-5 w-64" aria-label="Loading the contract commit" />
         ) : document ? (
           <span className="flex flex-wrap items-center gap-x-2">
-            <span>{document.contract.repository}</span>
+            <span className="min-w-0 break-words">{document.contract.repository}</span>
             <Digest
               value={document.contract.commit ?? document.contract.pinned}
               label="contract commit"

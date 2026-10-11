@@ -96,15 +96,23 @@ function RunPickers({
   const nightlies = nightlyCandidates(index)
   const s7s = s7Candidates(index)
   return (
-    <div className="flex flex-wrap items-center gap-3" role="group" aria-label="Composite runs">
-      <label className="flex items-center gap-2 text-sm">
+    <div
+      className="flex max-w-full min-w-0 flex-wrap items-center gap-3"
+      role="group"
+      aria-label="Composite runs"
+    >
+      <label className="flex max-w-full min-w-0 items-center gap-2 text-sm">
         <span className="text-muted-foreground">Nightly run</span>
         <Select
           value={composite.nightly?.run.run_id ?? ""}
           onValueChange={(value) => onChange({ nightly: value })}
           disabled={nightlies.length === 0}
         >
-          <SelectTrigger size="sm" aria-label="Nightly run" className="w-72 font-mono text-xs">
+          <SelectTrigger
+            size="sm"
+            aria-label="Nightly run"
+            className="w-72 max-w-full min-w-0 font-mono text-xs"
+          >
             <SelectValue placeholder="no finished nightly run" />
           </SelectTrigger>
           <SelectContent>
@@ -116,14 +124,18 @@ function RunPickers({
           </SelectContent>
         </Select>
       </label>
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex max-w-full min-w-0 items-center gap-2 text-sm">
         <span className="text-muted-foreground">S7 run</span>
         <Select
           value={composite.s7?.run.run_id ?? ""}
           onValueChange={(value) => onChange({ s7: value })}
           disabled={s7s.length === 0}
         >
-          <SelectTrigger size="sm" aria-label="S7 run" className="w-72 font-mono text-xs">
+          <SelectTrigger
+            size="sm"
+            aria-label="S7 run"
+            className="w-72 max-w-full min-w-0 font-mono text-xs"
+          >
             <SelectValue placeholder="no run with S7" />
           </SelectTrigger>
           <SelectContent>
