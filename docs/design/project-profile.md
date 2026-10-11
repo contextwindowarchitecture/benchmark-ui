@@ -153,13 +153,14 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     replica stands, since every pod lands on the volume's node and a ReadWriteOnce volume mounts in any number of
     pods there. The claim is read-only on the container's mount and read-write at the pod level, because the
     driver formats the volume at its first mount and refuses to when that mount is read-only.
-  - Domain 2's suite summaries' open blocks (`model`, `by_arm`, `cost`) are not read either (the plan's section 14,
-    ask 13): the paired differences from the reference arm, accuracy with the needed fact sent and not, the
-    breakdowns by family, turn count and IP rule, S5's under-count by prompt size and S6's reply length wait for the
-    harness to type them. The overview and the suite pages say so; every number they show is a typed metric.
-  - Domain 2's `lq-corpus` schema requires a question's `answer.expected` without declaring it, which JSON Schema
-    allows and Ajv's `strictRequired` refuses; that one strict check is off for Domain 2's validators only
-    (`scripts/schema-domains.mjs`), and the harness is asked to declare it (ask 14).
+  - Domain 2's suite summaries' `model`, `by_arm` and `cost` blocks are typed since the pin at `58ef771` (the
+    plan's section 14, ask 13) and read: the paired differences from the reference arm, accuracy with the needed
+    facts sent and not, the breakdowns by family, turn count, rule, kind and format, S4's abstentions, S5's
+    under-count by prompt size, S6's reply lengths and the model's calls. Two records inside them stay open by
+    nature, the request's extra fields and the server's own listing of the model, and are shown as the key-value
+    lists they are, never read by name.
+  - Every schema of both domains compiles under Ajv's full strict mode: `lq-corpus` declares a question's
+    `answer` (ask 14), so no per-domain Ajv option remains in `scripts/schema-domains.mjs`.
   - Domain 2's overview reads each suite from the newest finished run outside a CI profile that has it, else the
     newest that has it, with `?run=` pinning one run's suites: the viewer's composite, since the write-up combines
     runs and the harness names no reported run. The page names the run and the scripts' size of every panel.
