@@ -38,6 +38,7 @@ export type RunFindingsProps = {
 
 /** Findings by suite and severity, from the summary's totals and findings.jsonl (ui-plan.md 8.3). */
 export function RunFindings({ runId, summary, findingsFile }: RunFindingsProps) {
+  const pages = useDomainPages()
   const totals = summary.data?.ok ? summary.data.document.findings : null
   const rows = useRunRows(
     runId,
@@ -98,8 +99,21 @@ export function RunFindings({ runId, summary, findingsFile }: RunFindingsProps) 
               <Alert data-state="over-budget">
                 <AlertTitle>Too many findings to list here</AlertTitle>
                 <AlertDescription>
-                  {formatCount(data.rows)} rows exceed the {formatCount(data.budget)}-row budget;
-                  the findings page (phase UI-P3) will load them through the worker.
+                  {formatCount(data.rows)} rows exceed the {formatCount(data.budget)}-row budget
+                  {pages.findingPages ? (
+                    <>
+                      ; the{" "}
+                      <Link
+                        to={`${pages.base}/runs/${runId}/findings`}
+                        className="underline underline-offset-3"
+                      >
+                        findings page
+                      </Link>{" "}
+                      loads them through the worker.
+                    </>
+                  ) : (
+                    "; the file is there to download."
+                  )}
                 </AlertDescription>
               </Alert>
             )

@@ -26,8 +26,6 @@ export type NavItem = {
   needsRun?: boolean
   /** Route patterns that make the item active. */
   patterns: string[]
-  /** The phase that builds the page, when it is not built yet. */
-  phase?: string
 }
 
 export type NavGroup = {
@@ -114,7 +112,6 @@ export const navigation: NavGroup[] = [
         href: runPath("coverage"),
         needsRun: true,
         patterns: ["/d1/runs/:runId/coverage"],
-        phase: "UI-P3",
       },
       {
         id: "d1-findings",
@@ -123,7 +120,6 @@ export const navigation: NavGroup[] = [
         href: runPath("findings"),
         needsRun: true,
         patterns: ["/d1/runs/:runId/findings/*"],
-        phase: "UI-P3",
       },
       {
         id: "d1-perf",
@@ -132,7 +128,6 @@ export const navigation: NavGroup[] = [
         href: runPath("perf"),
         needsRun: true,
         patterns: ["/d1/runs/:runId/perf"],
-        phase: "UI-P4",
       },
       {
         id: "d1-sweeps",
@@ -141,7 +136,6 @@ export const navigation: NavGroup[] = [
         href: runPath("sweeps"),
         needsRun: true,
         patterns: ["/d1/runs/:runId/sweeps/*"],
-        phase: "UI-P4",
       },
       {
         id: "d1-compare",
