@@ -1,19 +1,10 @@
 import { HOW_TO_READ } from "@/content"
-import { ORACLES, oracleMetrics, type OracleId } from "@/features/d1/model/oracles"
+import { ORACLES, oracleMetrics } from "@/features/d1/model/oracles"
 import { metricDefinition, type SummaryMetric } from "@/features/d1/model/run"
+import { useMeasure } from "@/hooks/use-measure"
 
 import { DiagramFrame } from "./diagram-frame"
-
-const W = 640
-const H = 300
-const CENTER = { x: W / 2, y: H / 2 }
-const BOX = { w: 230, h: 56 }
-const POSITIONS: Record<OracleId, { x: number; y: number }> = {
-  expected: { x: 8, y: 8 },
-  differential: { x: W - BOX.w - 8, y: 8 },
-  auditor: { x: 8, y: H - BOX.h - 8 },
-  metamorphic: { x: W - BOX.w - 8, y: H - BOX.h - 8 },
-}
+import { ANSWER, BOX_HEIGHT, oraclesLayout } from "./oracles-geometry"
 
 /**
  * The oracles (ui-plan.md 7.3): why the results are credible. Four independent judges around one
@@ -21,6 +12,10 @@ const POSITIONS: Record<OracleId, { x: number; y: number }> = {
  */
 export function OraclesDiagram({ metrics, runId }: { metrics: SummaryMetric[]; runId: string }) {
   const numbers = (oracle: (typeof ORACLES)[number]) => oracleMetrics(oracle, metrics)
+  const { ref, width: available } = useMeasure<HTMLDivElement>()
+  const layout = oraclesLayout(available)
+  const answerX = layout.answer.x + ANSWER.w / 2
+  const answerY = layout.answer.y + ANSWER.h / 2
   return (
     <DiagramFrame
       id="oracles-diagram"
@@ -32,78 +27,85 @@ export function OraclesDiagram({ metrics, runId }: { metrics: SummaryMetric[]; r
         </>
       }
       figure={
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="block h-auto w-full max-w-[44rem] text-foreground"
-          style={{ minWidth: 480 }}
-        >
-          {ORACLES.map((oracle) => {
-            const p = POSITIONS[oracle.id]
-            const measured = numbers(oracle)
-            const anchorX = p.x < CENTER.x ? p.x + BOX.w : p.x
-            const anchorY = p.y + BOX.h / 2
-            return (
-              <g key={oracle.id} data-oracle={oracle.id}>
-                <line
-                  x1={anchorX}
-                  y1={anchorY}
-                  x2={CENTER.x}
-                  y2={CENTER.y}
-                  className="stroke-border"
-                  strokeDasharray="3 3"
-                />
-                <rect
-                  x={p.x}
-                  y={p.y}
-                  width={BOX.w}
-                  height={BOX.h}
-                  rx={8}
-                  className="fill-card stroke-border"
-                />
-                <text x={p.x + 10} y={p.y + 20} className="fill-foreground text-[12px] font-medium">
-                  {oracle.name}
-                </text>
-                {measured.length > 0 ? (
-                  <text x={p.x + 10} y={p.y + 40} className="fill-success text-[11px]">
-                    {measured.length === 1
-                      ? `${measured[0]!.label}: ${metricDefinition(measured[0]!).formattedValue}`
-                      : `${measured.length} primitives reproduced, each ${metricDefinition(measured[0]!).formattedValue.replace(/ \(.*\)$/, "")}`}
+        <div ref={ref} className="w-full">
+          <svg
+            viewBox={`0 0 ${layout.width} ${layout.height}`}
+            width={layout.width}
+            height={layout.height}
+            className={
+              layout.kind === "stack"
+                ? "block h-auto max-w-full text-foreground"
+                : "block h-auto w-full max-w-[44rem] text-foreground"
+            }
+            data-layout={layout.kind}
+          >
+            {ORACLES.map((oracle) => {
+              const p = layout.boxes[oracle.id]
+              const measured = numbers(oracle)
+              return (
+                <g key={oracle.id} data-oracle={oracle.id}>
+                  <polyline
+                    points={layout.connectors[oracle.id]}
+                    className="fill-none stroke-border"
+                    strokeDasharray="3 3"
+                  />
+                  <rect
+                    x={p.x}
+                    y={p.y}
+                    width={layout.boxWidth}
+                    height={BOX_HEIGHT}
+                    rx={8}
+                    className="fill-card stroke-border"
+                  />
+                  <text
+                    x={p.x + 10}
+                    y={p.y + 20}
+                    className="fill-foreground text-[12px] font-medium"
+                  >
+                    {oracle.name}
                   </text>
-                ) : (
-                  <text x={p.x + 10} y={p.y + 40} className="fill-muted-foreground text-[11px]">
-                    judged on every answer
-                  </text>
-                )}
-              </g>
-            )
-          })}
-          <g data-answer>
-            <rect
-              x={CENTER.x - 70}
-              y={CENTER.y - 30}
-              width={140}
-              height={60}
-              rx={30}
-              className="fill-primary/10 stroke-primary"
-            />
-            <text
-              x={CENTER.x}
-              y={CENTER.y - 4}
-              textAnchor="middle"
-              className="fill-foreground text-[12px] font-medium"
-            >
-              one answer
-            </text>
-            <text
-              x={CENTER.x}
-              y={CENTER.y + 14}
-              textAnchor="middle"
-              className="fill-muted-foreground text-[11px]"
-            >
-              payload + trace
-            </text>
-          </g>
-        </svg>
+                  {measured.length > 0 ? (
+                    <text x={p.x + 10} y={p.y + 40} className="fill-success text-[11px]">
+                      {measured.length === 1
+                        ? `${measured[0]!.label}: ${metricDefinition(measured[0]!).formattedValue}`
+                        : `${measured.length} primitives reproduced, each ${metricDefinition(measured[0]!).formattedValue.replace(/ \(.*\)$/, "")}`}
+                    </text>
+                  ) : (
+                    <text x={p.x + 10} y={p.y + 40} className="fill-muted-foreground text-[11px]">
+                      judged on every answer
+                    </text>
+                  )}
+                </g>
+              )
+            })}
+            <g data-answer>
+              <rect
+                x={layout.answer.x}
+                y={layout.answer.y}
+                width={ANSWER.w}
+                height={ANSWER.h}
+                rx={ANSWER.h / 2}
+                className="fill-primary/10 stroke-primary"
+              />
+              <text
+                x={answerX}
+                y={answerY - 4}
+                textAnchor="middle"
+                className="fill-foreground text-[12px] font-medium"
+              >
+                one answer
+              </text>
+              <text
+                x={answerX}
+                y={answerY + 14}
+                textAnchor="middle"
+                className="fill-muted-foreground text-[11px]"
+              >
+                payload + trace
+              </text>
+            </g>
+          </svg>
+        </div>
       }
       equivalent={
         <ol className="space-y-2">

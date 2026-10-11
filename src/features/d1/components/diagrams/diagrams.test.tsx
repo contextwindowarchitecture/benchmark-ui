@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import type { DocumentByKind, SchemaKind } from "@/data/schema/generated"
 import { parseDocumentAs } from "@/data/validate"
@@ -10,8 +10,10 @@ import { environmentCells } from "@/features/d1/model/environment"
 import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
 
 import { EnvironmentDiagram } from "./environment-diagram"
+import { environmentLayout } from "./environment-geometry"
 import { ModelDiagram } from "./model-diagram"
 import { OraclesDiagram } from "./oracles-diagram"
+import { ANSWER, BOX_HEIGHT, oraclesLayout } from "./oracles-geometry"
 import { PipelineDiagram } from "./pipeline-diagram"
 
 async function document<K extends SchemaKind>(path: string, kind: K): Promise<DocumentByKind[K]> {
@@ -96,5 +98,62 @@ describe("the diagrams", () => {
   it("says when there are no cells", () => {
     render(<EnvironmentDiagram cells={[]} runId="r" />)
     expect(screen.getByText("No cells were run.")).toBeInTheDocument()
+  })
+})
+
+describe("the diagrams on a narrow screen", () => {
+  it("keep the platforms side by side on a desktop frame and band them on a phone", async () => {
+    const s2 = await document("suites/S2/summary.json", "suite-summary")
+    const groups = environmentCells(s2.cells ?? [])
+    const unmeasured = environmentLayout(groups, 0)
+    expect(unmeasured.columns.map((column) => column.y)).toEqual([1, 1, 1])
+    expect(unmeasured.width).toBe(562)
+    // A frame a little narrower than three columns shrinks the picture rather than banding it.
+    expect(environmentLayout(groups, 547)).toEqual(unmeasured)
+    // A 375 px phone's frame holds one platform per band, at full size.
+    const phone = environmentLayout(groups, 311)
+    expect(phone.width).toBeLessThanOrEqual(311)
+    expect(phone.columns.map((column) => column.x)).toEqual([1, 1, 1])
+    const tops = phone.columns.map((column) => column.y)
+    expect(tops).toEqual([...tops].sort((a, b) => a - b))
+    expect(new Set(tops).size).toBe(3)
+    // A wider phone holds two, shrunk by no more than 15%.
+    const wider = environmentLayout(groups, 330)
+    expect(wider.columns.map((column) => column.y)).toEqual([1, 1, wider.columns[2]!.y])
+    expect(wider.width * 0.85).toBeLessThanOrEqual(330)
+  })
+
+  it("stack the oracles on a spine from the answer where the radial picture would not read", () => {
+    expect(oraclesLayout(0).kind).toBe("radial")
+    expect(oraclesLayout(547)).toEqual(oraclesLayout(0))
+    const phone = oraclesLayout(311)
+    expect(phone.kind).toBe("stack")
+    expect(phone.width).toBe(311)
+    const boxes = Object.values(phone.boxes)
+    expect(boxes.every((box) => box.x + phone.boxWidth <= phone.width)).toBe(true)
+    expect(boxes[0]!.y).toBeGreaterThan(phone.answer.y + ANSWER.h)
+    boxes.slice(1).forEach((box, index) => {
+      expect(box.y).toBeGreaterThanOrEqual(boxes[index]!.y + BOX_HEIGHT)
+    })
+    expect(boxes.at(-1)!.y + BOX_HEIGHT).toBeLessThanOrEqual(phone.height)
+    // Narrower than a box's words, the stack keeps its size and the picture scales to the frame.
+    expect(oraclesLayout(256).width).toBeGreaterThan(256)
+  })
+
+  it("draw the stack when the frame measures a phone's width", async () => {
+    const summary = await document("summary.json", "summary")
+    const measure = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({ width: 311 } as DOMRect)
+    try {
+      render(<OraclesDiagram metrics={summary.metrics} runId={FIXTURE_RUNS.nightly} />)
+      const figure = screen.getByRole("figure", { name: /four judges of one answer/ })
+      const svg = figure.querySelector("svg")!
+      expect(svg.dataset["layout"]).toBe("stack")
+      expect(svg.getAttribute("viewBox")).toBe(`0 0 311 ${oraclesLayout(311).height}`)
+      expect(figure.querySelectorAll("[data-oracle]")).toHaveLength(4)
+    } finally {
+      measure.mockRestore()
+    }
   })
 })

@@ -12,12 +12,10 @@ import {
 } from "@/components/ui/table"
 import { environmentCells, type EnvironmentCell } from "@/features/d1/model/environment"
 import type { MatrixCell } from "@/features/d1/model/suite"
+import { useMeasure } from "@/hooks/use-measure"
 
 import { DiagramFrame } from "./diagram-frame"
-
-const TILE = { w: 176, h: 30, gap: 6 }
-const COLUMN_GAP = 16
-const HEADER = 26
+import { environmentLayout, HEADER, TILE } from "./environment-geometry"
 
 function clip(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text
@@ -38,9 +36,8 @@ export function EnvironmentDiagram({
 }) {
   const groups = environmentCells(cells)
   const [active, setActive] = useState<EnvironmentCell | null>(null)
-  const maxRows = Math.max(1, ...groups.map((group) => group.cells.length))
-  const width = groups.length * TILE.w + Math.max(groups.length - 1, 0) * COLUMN_GAP + 2
-  const height = HEADER + maxRows * (TILE.h + TILE.gap) + 4
+  const { ref, width: available } = useMeasure<HTMLDivElement>()
+  const { width, height, columns } = environmentLayout(groups, available)
   return (
     <DiagramFrame
       id="environment-diagram"
@@ -57,18 +54,19 @@ export function EnvironmentDiagram({
             No cells were run.
           </p>
         ) : (
-          <div className="space-y-2">
+          <div ref={ref} className="w-full space-y-2">
             <svg
               viewBox={`0 0 ${width} ${height}`}
-              className="block h-auto w-full text-foreground"
-              style={{ minWidth: Math.min(width, 640), maxWidth: width }}
+              width={width}
+              height={height}
+              className="block h-auto max-w-full text-foreground"
             >
-              {groups.map((group, column) => {
-                const x = column * (TILE.w + COLUMN_GAP) + 1
+              {groups.map((group, index) => {
+                const { x, y } = columns[index]!
                 return (
                   <g
                     key={group.platform}
-                    transform={`translate(${x},1)`}
+                    transform={`translate(${x},${y})`}
                     data-platform={group.platform}
                   >
                     <text
