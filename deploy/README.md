@@ -103,6 +103,17 @@ deploy/publish.sh <local copy of domain2/results> d2 <run-id> <run-id>
 ```
 
 The Domain 2 overview reads each suite from the newest finished run outside a CI profile that has it, and a CI
-profile's run only for a suite no such run has. So the recorded run, and the S4 and S6 runs the write-up names beside
-it, must be on the volume for the overview to show the write-up's results; otherwise it shows the newest nightly's,
-and says so. Add the runs the write-up cites to `keep.txt`.
+profile's run only for a suite no such run has. So the recorded run, and the S6 run the write-up reports beside it,
+must be on the volume for the overview to show the write-up's results, and the S6 run must be older than the
+recorded run, so the overview takes only S6 from it. The overview chooses from the index, not from what the volume
+holds: a newer reported run the index lists but the volume lacks is chosen and cannot be read. So when a reported
+run is left off the volume on purpose (a pilot of every suite made after the recorded run would otherwise take every
+panel), rebuild the index over the local copy that holds only the runs to publish, with the harness's own writer,
+and publish that index:
+
+```sh
+cd ../benchmark/domain2 && uv run python -c "from pathlib import Path; from cwabench.rundir import update_runs_index; \
+  from cwabench2 import output; update_runs_index(Path('results/d2'), domain=output.D2)"
+```
+
+Add the runs the write-up cites to `keep.txt`.
