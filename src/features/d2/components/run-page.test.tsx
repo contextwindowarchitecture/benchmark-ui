@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
-import { D2_FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, D2_FIXTURES_DIR } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 const run = D2_FIXTURE_RUNS.nightly
@@ -75,6 +78,41 @@ describe("Domain 2's run page", () => {
       "href",
       `/results/d2/${run}/summary.json`,
     )
+  })
+
+  it("lists a kind of many files as one row, a page at a time on request", async () => {
+    const index = JSON.parse(readFileSync(join(D2_FIXTURES_DIR, run, "index.json"), "utf8")) as {
+      files: unknown[]
+    }
+    for (let i = 0; i < 250; i += 1) {
+      index.files.push({
+        path: `timelines/${String(i).padStart(64, "0")}/go.json`,
+        kind: "timeline",
+        schema: "cwa-bench-d2/timeline/v1",
+        description: `Assembly timeline ${i}`,
+      })
+    }
+    renderApp(`/d2/runs/${run}`, {
+      overrides: {
+        [`/results/d2/${run}/index.json`]: {
+          status: 200,
+          body: JSON.stringify(index),
+          contentType: "application/json",
+        },
+      },
+    })
+    const files = await loaded("files")
+    expect(
+      await files.findByText(/250 timeline files, too many to list at once/),
+    ).toBeInTheDocument()
+    expect(files.queryByText("Assembly timeline 0")).toBeNull()
+    const user = userEvent.setup()
+    await user.click(files.getByRole("button", { name: "List 200 more timeline files" }))
+    expect(files.getByText("Assembly timeline 0")).toBeInTheDocument()
+    expect(files.queryByText("Assembly timeline 200")).toBeNull()
+    await user.click(files.getByRole("button", { name: "List 50 more timeline files" }))
+    expect(files.getByText("Assembly timeline 249")).toBeInTheDocument()
+    expect(files.queryByRole("button", { name: /List \d+ more/ })).toBeNull()
   })
 
   it("shows a run the server no longer holds as pruned", async () => {

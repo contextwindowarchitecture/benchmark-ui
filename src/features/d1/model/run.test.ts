@@ -12,6 +12,7 @@ import {
   adapterMetricTally,
   driftSummary,
   fileRows,
+  groupFiles,
   filterMetrics,
   groupFindings,
   groupMetricsBySuite,
@@ -132,5 +133,28 @@ describe("findings and drift", () => {
     expect(rows.find((f) => f.path === "summary.json")?.readAs).toBe("summary")
     expect(rows.find((f) => f.path === "config.toml")?.readAs).toBeNull()
     expect(rows.map((f) => f.path)).toEqual([...rows.map((f) => f.path)].sort())
+  })
+
+  it("lists the files of small kinds and groups a kind of many files under its directory", () => {
+    const row = (path: string, kind: string) => ({
+      path,
+      kind,
+      schema: null,
+      description: "",
+      readAs: null,
+    })
+    const timelines = Array.from({ length: 5 }, (_, i) => row(`timelines/${i}/go.json`, "timeline"))
+    const rows = [row("summary.json", "summary"), ...timelines, row("timelines.md", "notes")]
+    const grouped = groupFiles(rows, 4)
+    expect(grouped.listed.map((f) => f.path)).toEqual(["summary.json", "timelines.md"])
+    expect(grouped.groups).toHaveLength(1)
+    expect(grouped.groups[0]).toMatchObject({ kind: "timeline", prefix: "timelines/" })
+    expect(grouped.groups[0]?.files).toHaveLength(5)
+    expect(groupFiles(rows, 5).groups).toEqual([])
+    // Files of one kind in different directories share only what they share.
+    expect(groupFiles([row("a/x/1.json", "k"), row("a/y/2.json", "k")], 1).groups[0]?.prefix).toBe(
+      "a/",
+    )
+    expect(groupFiles([row("x.json", "k"), row("y/z.json", "k")], 1).groups[0]?.prefix).toBe("")
   })
 })

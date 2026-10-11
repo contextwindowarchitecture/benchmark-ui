@@ -225,6 +225,50 @@ export function fileRows(index: RunIndexV1): FileRow[] {
     })
 }
 
+/** Above this many files of one kind, the kind is one row of the files table, listed on request. */
+export const FILE_KIND_LIST_LIMIT = 100
+
+export type FileGroup = {
+  kind: string
+  files: FileRow[]
+  /** The directory every file of the kind sits under, with its trailing slash; "" when none. */
+  prefix: string
+}
+
+/**
+ * The file list split for the table: the files of every kind with no more than `limit` files,
+ * listed, and each larger kind as one group (Domain 2's recorded run lists 9,072 timelines).
+ */
+export function groupFiles(
+  rows: readonly FileRow[],
+  limit: number = FILE_KIND_LIST_LIMIT,
+): { listed: FileRow[]; groups: FileGroup[] } {
+  const byKind = new Map<string, FileRow[]>()
+  for (const row of rows) byKind.set(row.kind, [...(byKind.get(row.kind) ?? []), row])
+  const large = new Set(
+    [...byKind].filter(([, files]) => files.length > limit).map(([kind]) => kind),
+  )
+  return {
+    listed: rows.filter((row) => !large.has(row.kind)),
+    groups: [...large].map((kind) => {
+      const files = byKind.get(kind) ?? []
+      return { kind, files, prefix: commonDirectory(files.map((file) => file.path)) }
+    }),
+  }
+}
+
+function commonDirectory(paths: readonly string[]): string {
+  const first = paths[0]
+  if (first === undefined) return ""
+  let prefix = first.slice(0, first.lastIndexOf("/") + 1)
+  for (const path of paths) {
+    while (prefix !== "" && !path.startsWith(prefix)) {
+      prefix = prefix.slice(0, prefix.slice(0, -1).lastIndexOf("/") + 1)
+    }
+  }
+  return prefix
+}
+
 export function fileByPath(
   index: RunIndexV1,
   path: string,
