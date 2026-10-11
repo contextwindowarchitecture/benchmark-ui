@@ -61,7 +61,13 @@ const GROUPS = ARM_GROUPS.map((group) => ({ ...group, tone: TONES[group.id] }))
 const percentTick = (value: number) => `${Math.round(value * 100)}%`
 
 /** Where a panel's numbers come from: its run, linked, and the scripts' size. */
-export type PanelSource = { runId: string; suite: string; size: string | null }
+export type PanelSource = {
+  runId: string
+  suite: string
+  size: string | null
+  /** The run the rule would read, passed over because the volume no longer holds it. */
+  insteadOf?: string
+}
 
 export function SourceNote({ source }: { source: PanelSource }) {
   return (
@@ -73,7 +79,20 @@ export function SourceNote({ source }: { source: PanelSource }) {
       >
         {source.runId}
       </Link>
-      {source.size ? `, ${source.size} size` : ""}.
+      {source.size ? `, ${source.size} size` : ""}
+      {source.insteadOf ? (
+        <>
+          , read instead of{" "}
+          <Link
+            to={`/d2/runs/${source.insteadOf}`}
+            className="font-mono underline underline-offset-3"
+          >
+            {source.insteadOf}
+          </Link>
+          , which the index lists but the volume no longer holds
+        </>
+      ) : null}
+      .
     </p>
   )
 }

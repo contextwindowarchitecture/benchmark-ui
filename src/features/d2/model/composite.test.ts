@@ -77,6 +77,46 @@ describe("the composite", () => {
     expect(sourceOf(view, "S2")?.run_id).toBe("20261011T100000Z-ddddddd")
   })
 
+  it("reads past a pruned run to the next that has the suite, and says which it stands in for", () => {
+    const pruned = new Set(["20261011T200000Z-bbbbbbb"])
+    const view = composite(index, undefined, pruned)
+    // S4: the pruned run's place is taken by the next reported run that has S4.
+    const s4 = view.suites.find((source) => source.suite === "S4")
+    expect(s4?.run.run_id).toBe("20261011T100000Z-ddddddd")
+    expect(s4?.insteadOf?.run_id).toBe("20261011T200000Z-bbbbbbb")
+    // S0 and S1 too; S2 was never read from the pruned run, so nothing stands in.
+    expect(view.suites.find((source) => source.suite === "S1")?.insteadOf?.run_id).toBe(
+      "20261011T200000Z-bbbbbbb",
+    )
+    expect(view.suites.find((source) => source.suite === "S2")?.insteadOf).toBeUndefined()
+    expect(view.runs.map((r) => r.run_id)).toEqual([
+      "20261012T000000Z-aaaaaaa",
+      "20261011T100000Z-ddddddd",
+    ])
+    expect(view.passedOver.map((r) => r.run_id)).toEqual(["20261011T200000Z-bbbbbbb"])
+    // With no other run having a suite, the CI run is next; with none at all, the suite is absent.
+    const all = composite(
+      index,
+      undefined,
+      new Set(["20261011T200000Z-bbbbbbb", "20261011T100000Z-ddddddd"]),
+    )
+    expect(all.suites.find((source) => source.suite === "S2")?.run.run_id).toBe(
+      "20261012T000000Z-aaaaaaa",
+    )
+    const gone = composite(index, undefined, new Set(index.runs.map((r) => r.run_id)))
+    expect(gone.suites).toEqual([])
+    expect(gone.passedOver.map((r) => r.run_id)).toEqual([])
+  })
+
+  it("falls back from a pruned pinned run to the rule, and says so", () => {
+    const view = composite(index, "20261011T200000Z-bbbbbbb", new Set(["20261011T200000Z-bbbbbbb"]))
+    const s4 = view.suites.find((source) => source.suite === "S4")
+    expect(s4?.run.run_id).toBe("20261011T100000Z-ddddddd")
+    expect(s4?.pinned).toBe(false)
+    expect(s4?.insteadOf?.run_id).toBe("20261011T200000Z-bbbbbbb")
+    expect(view.pinned?.run_id).toBe("20261011T200000Z-bbbbbbb")
+  })
+
   it("is empty for an index with no finished run", () => {
     expect(composite({ ...index, runs: [] }).suites).toEqual([])
   })

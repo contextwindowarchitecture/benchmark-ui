@@ -1,9 +1,10 @@
 // The Domain 2 overview (the UI-D2 plan; ui-plan.md 7.1; DESIGN.md 4.5): the claim, the evidence,
 // how far to trust it, the drill-down, over the composite of the runs each suite is read from.
 // Every panel names its run and the scripts' size; words come from the content files, numbers
-// from the records.
+// from the records. A run the index lists but the volume no longer holds is found gone when its
+// summary is asked for; the composite then reads past it, and the page says which run stands in.
 
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { Link } from "react-router"
 
 import { DashboardPage, PageSection } from "@/components/dashboard/dashboard-page"
@@ -85,7 +86,7 @@ export function D2OverviewPage() {
         label="the runs index"
         skeleton={<Skeleton className="h-96 w-full" />}
       >
-        {(index) => <Overview view={composite(index, params.run)} />}
+        {(index) => <Overview index={index} pin={params.run} />}
       </DataRegion>
     </DashboardPage>
   )
@@ -144,12 +145,24 @@ function RunPin({
   )
 }
 
-function Overview({ view }: { view: Composite }) {
+function Overview({ index, pin }: { index: D2RunsIndexV1; pin: string | undefined }) {
+  // The runs found gone from the volume so far: a summary asked for and not there. The set only
+  // grows, so the composite settles on the newest runs that are actually there.
+  const [pruned, setPruned] = useState<ReadonlySet<string>>(() => new Set())
+  const view = composite(index, pin, pruned)
   const runIds = view.runs.map((run) => run.run_id)
   const summaries = useDocumentsOfRuns(
     runIds.map((runId) => ({ runId, path: "summary.json" })),
     "d2/summary",
   )
+  const gone = runIds.filter(
+    (_, i) => summaries[i]?.isError && summaries[i].error.kind === "not-found",
+  )
+  if (gone.some((runId) => !pruned.has(runId))) {
+    // Derived from this render's queries, not synchronized in an effect: React re-renders at
+    // once with the grown set, and the composite reads past the run.
+    setPruned(new Set([...pruned, ...gone]))
+  }
   const indexes = useDocumentsOfRuns(
     runIds.map((runId) => ({ runId, path: "index.json" })),
     "d2/run-index",
@@ -225,7 +238,12 @@ function Overview({ view }: { view: Composite }) {
     const summary = summaryOf.get(entry.run.run_id)
     if (!summary) return null
     return {
-      source: { runId: entry.run.run_id, suite, size: sizes.get(entry.run.run_id) ?? null },
+      source: {
+        runId: entry.run.run_id,
+        suite,
+        size: sizes.get(entry.run.run_id) ?? null,
+        ...(entry.insteadOf ? { insteadOf: entry.insteadOf.run_id } : {}),
+      },
       metrics: summary.metrics.filter((metric) => metric.suite === suite),
     }
   }
@@ -241,8 +259,11 @@ function Overview({ view }: { view: Composite }) {
   const checkSources: CheckSource[] = [s0, s1, s5, s7].flatMap((entry) =>
     entry ? [{ suite: entry.source.suite, runId: entry.source.runId, metrics: entry.metrics }] : [],
   )
+  // A summary that failed for any reason but being gone: that is a defect to show, not to read past.
   const failed = summaries.flatMap((query, i) =>
-    query.isError || (query.data && !query.data.ok) ? [runIds[i] as string] : [],
+    (query.isError && query.error.kind !== "not-found") || (query.data && !query.data.ok)
+      ? [runIds[i] as string]
+      : [],
   )
 
   const panel = (
@@ -299,6 +320,26 @@ function Overview({ view }: { view: Composite }) {
         ) : (
           <SourcesTable view={view} sizes={sizes} />
         )}
+        {view.passedOver.length > 0 ? (
+          <Alert data-state="passed-over">
+            <AlertTitle>A run the index lists is no longer on the volume</AlertTitle>
+            <AlertDescription>
+              <p>
+                {view.passedOver.map((run) => (
+                  <Link
+                    key={run.run_id}
+                    to={`/d2/runs/${run.run_id}`}
+                    className="mr-2 font-mono underline underline-offset-3"
+                  >
+                    {run.run_id}
+                  </Link>
+                ))}
+                {view.passedOver.length === 1 ? "was" : "were"} pruned, so each suite it would have
+                been read for is read from the next run that has it; the table says which.
+              </p>
+            </AlertDescription>
+          </Alert>
+        ) : null}
         {failed.length > 0 ? (
           <Alert variant="destructive" data-state="unreadable">
             <AlertTitle>A run's summary could not be read</AlertTitle>
@@ -581,6 +622,20 @@ function SourcesTable({ view, sizes }: { view: Composite; sizes: ReadonlyMap<str
                       <Badge variant="secondary">pinned</Badge>
                     ) : null}
                   </div>
+                  {[
+                    ...new Set(suites.flatMap((s) => (s.insteadOf ? [s.insteadOf.run_id] : []))),
+                  ].map((instead) => (
+                    <p key={instead} className="text-xs text-muted-foreground">
+                      instead of{" "}
+                      <Link
+                        to={`/d2/runs/${instead}`}
+                        className="font-mono underline underline-offset-3"
+                      >
+                        {instead}
+                      </Link>
+                      , pruned
+                    </p>
+                  ))}
                   <time dateTime={isoUtc(run.started_at)} className="text-xs text-muted-foreground">
                     {formatUtc(run.started_at)}
                   </time>

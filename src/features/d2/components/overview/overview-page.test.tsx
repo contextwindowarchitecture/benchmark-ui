@@ -142,6 +142,66 @@ describe("Domain 2's overview", () => {
     expect(await screen.findByRole("region", { name: "Runs read" })).toBeInTheDocument()
   })
 
+  it("reads past a run the index lists but the volume no longer holds, and says so", async () => {
+    // A newer reported run of every suite that is not served: its summary is not found, so each
+    // suite is read from the nightly fixture instead, and the page names the run it stands in for.
+    const gone = "20261012T000000Z-aaaaaaa"
+    const nightly = {
+      run_id: run,
+      status: "pass",
+      started_at: "2026-10-11T16:12:04.005Z",
+      finished_at: "2026-10-11T16:22:37.987Z",
+      path: run,
+      suites: ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"],
+      adapters: ["go", "python", "rust", "typescript"],
+      ci_profile: "nightly",
+      commits: { contract: "16de4be0534583f135a597171c927d42c87ee82c" },
+    }
+    const index = {
+      $schema: "cwa-bench-d2/runs-index/v1",
+      latest: gone,
+      profiles: { nightly: run },
+      runs: [
+        {
+          ...nightly,
+          run_id: gone,
+          path: gone,
+          started_at: "2026-10-12T00:00:00.000Z",
+          finished_at: "2026-10-12T01:00:00.000Z",
+          ci_profile: null,
+        },
+        nightly,
+      ],
+    }
+    renderApp("/d2", {
+      overrides: {
+        "/results/d2/index.json": {
+          status: 200,
+          body: JSON.stringify(index),
+          contentType: "application/json",
+        },
+      },
+    })
+    expect(
+      await screen.findByText("A run the index lists is no longer on the volume"),
+    ).toBeInTheDocument()
+    const claim = await section("claim")
+    const runs = claim.getByRole("region", { name: "Runs read" })
+    const row = within(runs).getByRole("link", { name: run }).closest("tr") as HTMLElement
+    expect(within(row).getByText(/instead of/)).toBeInTheDocument()
+    expect(within(row).getByRole("link", { name: gone })).toHaveAttribute(
+      "href",
+      `/d2/runs/${gone}`,
+    )
+    expect(within(row).getAllByRole("link", { name: /^S[0-9]$/ })).toHaveLength(8)
+    const evidence = await section("evidence")
+    expect(
+      await evidence.findByRole("img", { name: /^Correct answers per arm at 8,192 tokens/ }),
+    ).toBeInTheDocument()
+    expect(evidence.getAllByText(/read instead of/).length).toBeGreaterThan(0)
+    expect(screen.queryByText("A run's summary could not be read")).toBeNull()
+  })
+
   it("says there is no evidence when the index lists no finished run", async () => {
     renderApp("/d2", {
       overrides: {
