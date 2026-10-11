@@ -1,14 +1,25 @@
 // TanStack Query over the ResultsSource (ui-plan.md 5.2; DESIGN.md 6.2). A run is immutable once
 // it stops running, so everything under a run id is cached for the session and never refetched;
 // the runs index is the one document that changes and refetches on focus. Query keys carry the
-// results root, the run id and the path, so a changed root never serves another root's cache.
+// results root, the domain, the run id and the path, so a changed root or another domain never
+// serves another's cache.
+//
+// Each domain has its own source; the route tree says which domain a page belongs to
+// (ResultsDomainContext, Domain 1's by default), and every hook here reads that domain's source.
 
 import { QueryClient, useQueries, useQuery, type UseQueryResult } from "@tanstack/react-query"
 import { createContext, useContext } from "react"
 
 import type { DocumentByKind, SchemaKind } from "./schema/generated"
-import { type BlobRef, type ResultsSource, SourceError } from "./source"
-import { parseDocumentAs, parseRows, type ParsedRows, type ParseResultOf } from "./validate"
+import { type BlobRef, type ResultsDomain, type ResultsSource, SourceError } from "./source"
+import {
+  domainOfKind,
+  loadValidators,
+  parseDocumentAs,
+  parseRows,
+  type ParsedRows,
+  type ParseResultOf,
+} from "./validate"
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -26,33 +37,81 @@ export function createQueryClient(): QueryClient {
   })
 }
 
-export const ResultsSourceContext = createContext<ResultsSource | null>(null)
+/** Every domain's source over one results root: built once per domain, on first use. */
+export type ResultsSources = { forDomain(domain: ResultsDomain): ResultsSource }
 
-export function useResultsSource(): ResultsSource {
-  const source = useContext(ResultsSourceContext)
-  if (!source) throw new Error("useResultsSource needs a ResultsSourceContext provider")
-  return source
+export const ResultsSourcesContext = createContext<ResultsSources | null>(null)
+
+/** The domain the current page reads; the route tree sets it, Domain 1's when nothing does. */
+export const ResultsDomainContext = createContext<ResultsDomain>("d1")
+
+export function useResultsDomain(): ResultsDomain {
+  return useContext(ResultsDomainContext)
 }
+
+/** The source of a domain: the page's own when none is named. */
+export function useResultsSource(domain?: ResultsDomain): ResultsSource {
+  const sources = useContext(ResultsSourcesContext)
+  const current = useContext(ResultsDomainContext)
+  if (!sources) throw new Error("useResultsSource needs a ResultsSourcesContext provider")
+  return sources.forDomain(domain ?? current)
+}
+
+type Scope = Pick<ResultsSource, "root" | "domain">
 
 export const queryKeys = {
-  index: (root: string) => ["results", root, "index"] as const,
-  document: (root: string, runId: string, path: string) =>
-    ["results", root, "run", runId, "document", path] as const,
-  rows: (root: string, runId: string, path: string) =>
-    ["results", root, "run", runId, "rows", path] as const,
-  blob: (root: string, runId: string, digest: string) =>
-    ["results", root, "run", runId, "blob", digest] as const,
+  index: (scope: Scope) => ["results", scope.root, scope.domain, "index"] as const,
+  document: (scope: Scope, runId: string, path: string) =>
+    ["results", scope.root, scope.domain, "run", runId, "document", path] as const,
+  rows: (scope: Scope, runId: string, path: string) =>
+    ["results", scope.root, scope.domain, "run", runId, "rows", path] as const,
+  blob: (scope: Scope, runId: string, digest: string) =>
+    ["results", scope.root, scope.domain, "run", runId, "blob", digest] as const,
 }
 
-/** The runs index: refetched on window focus and on mount, since it is the only thing that changes. */
-export function useRunsIndex(): UseQueryResult<ParseResultOf<"runs-index">, SourceError> {
-  const source = useResultsSource()
-  return useQuery<ParseResultOf<"runs-index">, SourceError>({
-    queryKey: queryKeys.index(source.root),
-    queryFn: async ({ signal }) => parseDocumentAs(await source.index(signal), "runs-index"),
+/** Parses a document as `kind` once its domain's validators are there. */
+async function parseAs<K extends SchemaKind>(json: unknown, kind: K): Promise<ParseResultOf<K>> {
+  await loadValidators(domainOfKind(kind))
+  return parseDocumentAs(json, kind)
+}
+
+/** The kind of a domain's runs index. */
+export type RunsIndexKind = "runs-index" | "d2/runs-index"
+
+const RUNS_INDEX_KIND: Record<ResultsDomain, RunsIndexKind> = {
+  d1: "runs-index",
+  d2: "d2/runs-index",
+}
+
+/** The query for a domain's runs index, shared by useRunsIndex and useDomainRunsIndex. */
+function runsIndexOptions<K extends RunsIndexKind>(source: ResultsSource, kind: K) {
+  return {
+    queryKey: queryKeys.index(source),
+    queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<ParseResultOf<K>> =>
+      parseAs(await source.index(signal), kind),
     staleTime: 0,
     refetchOnWindowFocus: true,
-  })
+  }
+}
+
+/**
+ * Domain 1's runs index: refetched on window focus and on mount, since it is the only thing that
+ * changes. Domain 1's pages read it; a page of another domain reads its own with
+ * useDomainRunsIndex.
+ */
+export function useRunsIndex(): UseQueryResult<ParseResultOf<"runs-index">, SourceError> {
+  const source = useResultsSource("d1")
+  return useQuery<ParseResultOf<"runs-index">, SourceError>(runsIndexOptions(source, "runs-index"))
+}
+
+/** A domain's runs index, as its own producer writes it. */
+export function useDomainRunsIndex<D extends ResultsDomain>(
+  domain: D,
+): UseQueryResult<ParseResultOf<(typeof RUNS_INDEX_KIND)[D]>, SourceError> {
+  const source = useResultsSource(domain)
+  return useQuery<ParseResultOf<(typeof RUNS_INDEX_KIND)[D]>, SourceError>(
+    runsIndexOptions(source, RUNS_INDEX_KIND[domain] as (typeof RUNS_INDEX_KIND)[D]),
+  )
 }
 
 const immutable = { staleTime: Infinity, gcTime: Infinity } as const
@@ -65,9 +124,9 @@ export function runDocumentOptions<K extends SchemaKind>(
   kind: K,
 ) {
   return {
-    queryKey: queryKeys.document(source.root, runId, path),
+    queryKey: queryKeys.document(source, runId, path),
     queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<ParseResultOf<K>> =>
-      parseDocumentAs(await source.document(runId, path, signal), kind),
+      parseAs(await source.document(runId, path, signal), kind),
     ...immutable,
   }
 }
@@ -114,13 +173,14 @@ export function useRunRows<K extends SchemaKind>(
 ): UseQueryResult<RowsState<K>, SourceError> {
   const source = useResultsSource()
   return useQuery<RowsState<K>, SourceError>({
-    queryKey: queryKeys.rows(source.root, runId ?? "", path),
+    queryKey: queryKeys.rows(source, runId ?? "", path),
     queryFn: async ({ signal }) => {
       const result = await source.rows(runId ?? "", path, {
         signal,
         expectedRows: options.expectedRows,
       })
       if (!result.ok) return result
+      await loadValidators(domainOfKind(kind))
       return { ok: true, bytes: result.bytes, ...parseRows(kind, result.rows, result.errors) }
     },
     enabled: runId !== undefined && (options.enabled ?? true),
@@ -139,7 +199,7 @@ export function useRunRaw(
 ): UseQueryResult<unknown, SourceError> {
   const source = useResultsSource()
   return useQuery<unknown, SourceError>({
-    queryKey: [...queryKeys.document(source.root, runId ?? "", path), "raw"],
+    queryKey: [...queryKeys.document(source, runId ?? "", path), "raw"],
     queryFn: ({ signal }) => source.document(runId ?? "", path, signal),
     enabled: runId !== undefined && (options.enabled ?? true),
     ...immutable,
@@ -154,7 +214,7 @@ export function useRunBlob(
 ): UseQueryResult<unknown, SourceError> {
   const source = useResultsSource()
   return useQuery<unknown, SourceError>({
-    queryKey: queryKeys.blob(source.root, runId ?? "", ref?.digest ?? ""),
+    queryKey: queryKeys.blob(source, runId ?? "", ref?.digest ?? ""),
     queryFn: async ({ signal }) => source.blob(runId ?? "", ref as BlobRef, signal),
     enabled: runId !== undefined && ref !== undefined && (options.enabled ?? true),
     ...immutable,

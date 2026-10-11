@@ -1,9 +1,11 @@
 // The one module that knows where files live (DESIGN.md 6.4; ui-plan.md 5.1): a ResultsSource over
-// a base URL with one method per file kind. It returns parsed JSON and leaves validation to the
-// boundary (validate.ts), so that a document of an unknown schema is a state, not an exception.
+// a base URL and one domain's results under it (`<root>/<domain>/…`), with one method per file
+// kind. It returns parsed JSON and leaves validation to the boundary (validate.ts), so that a
+// document of an unknown schema is a state, not an exception.
 
 import { MAIN_THREAD_ROW_BUDGET } from "./budgets"
 import { errorMessage } from "./config"
+import type { SchemaDomain } from "./schema/generated"
 
 export type SourceErrorKind = "not-found" | "http" | "network" | "parse" | "aborted"
 
@@ -44,9 +46,15 @@ export type RowsOptions = {
 /** A content-addressed blob, located by the path its index row gives (blobs/index.jsonl). */
 export type BlobRef = { digest: string; path: string }
 
+/** A domain whose results the site reads: its runs live under `<root>/<domain>/`. */
+export type ResultsDomain = SchemaDomain
+
 export type ResultsSource = {
+  /** The results root, without a trailing slash: the same for every domain. */
   readonly root: string
-  /** `${root}/d1/index.json`: the runs index, the only document that changes. */
+  /** The domain this source reads. */
+  readonly domain: ResultsDomain
+  /** `${root}/<domain>/index.json`: the runs index, the only document that changes. */
   index(signal?: AbortSignal): Promise<unknown>
   /** A JSON document of one run, by its path inside the run directory. */
   document(runId: string, path: string, signal?: AbortSignal): Promise<unknown>
@@ -58,15 +66,17 @@ export type ResultsSource = {
   url(runId: string, path: string): string
 }
 
-export const DOMAIN_1 = "d1"
-
 /**
- * Builds the source over a base URL. `fetchFn` is injectable so tests can serve the vendored
- * fixtures without a server.
+ * Builds the source of one domain over a base URL (Domain 1's unless told). `fetchFn` is
+ * injectable so tests can serve the vendored fixtures without a server.
  */
-export function createResultsSource(root: string, fetchFn: typeof fetch = fetch): ResultsSource {
+export function createResultsSource(
+  root: string,
+  fetchFn: typeof fetch = fetch,
+  domain: ResultsDomain = "d1",
+): ResultsSource {
   const base = root.replace(/\/+$/, "")
-  const url = (runId: string, path: string) => `${base}/${DOMAIN_1}/${encodeRun(runId)}/${path}`
+  const url = (runId: string, path: string) => `${base}/${domain}/${encodeRun(runId)}/${path}`
 
   async function get(target: string, signal: AbortSignal | undefined): Promise<Response> {
     let response: Response
@@ -101,8 +111,9 @@ export function createResultsSource(root: string, fetchFn: typeof fetch = fetch)
 
   return {
     root: base,
+    domain,
     index(signal) {
-      return json(`${base}/${DOMAIN_1}/index.json`, signal)
+      return json(`${base}/${domain}/index.json`, signal)
     },
     document(runId, path, signal) {
       return json(url(runId, path), signal)

@@ -117,8 +117,8 @@ export function AboutPage() {
               the commit the schemas, the fixtures and the content were taken from
             </span>
           </dd>
-          <dt className="text-muted-foreground">Producer</dt>
-          <dd className="font-mono">{buildInfo.producer}</dd>
+          <dt className="text-muted-foreground">Producers</dt>
+          <dd className="font-mono">{buildInfo.producers.join(", ")}</dd>
         </dl>
         <TableRegion label="Schema kinds table">
           <Table>
@@ -135,9 +135,7 @@ export function AboutPage() {
               {buildInfo.kinds.map((kind) => (
                 <TableRow key={kind.kind}>
                   <TableCell className="font-mono text-xs">{kind.kind}</TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {buildInfo.producer}/{kind.kind}/v{kind.version}
-                  </TableCell>
+                  <TableCell className="font-mono text-xs">{kind.schema}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

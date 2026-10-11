@@ -29,6 +29,33 @@ import type { SummaryV1 } from "./summary.v1"
 import type { SweepV1 } from "./sweep.v1"
 import type { TimelineV1 } from "./timeline.v1"
 import type { UpstreamV1 } from "./upstream.v1"
+import type { D2BaselineRowV1 } from "./d2/baseline-row.v1"
+import type { D2BlobV1 } from "./d2/blob.v1"
+import type { D2CallRowV1 } from "./d2/call-row.v1"
+import type { D2ChainRowV1 } from "./d2/chain-row.v1"
+import type { D2CiReportV1 } from "./d2/ci-report.v1"
+import type { D2ContractV1 } from "./d2/contract.v1"
+import type { D2ConversationIndexV1 } from "./d2/conversation-index.v1"
+import type { D2ConversationV1 } from "./d2/conversation.v1"
+import type { D2DriftRowV1 } from "./d2/drift-row.v1"
+import type { D2FindingV1 } from "./d2/finding.v1"
+import type { D2GoldensV1 } from "./d2/goldens.v1"
+import type { D2GradeRowV1 } from "./d2/grade-row.v1"
+import type { D2LqBaselineRowV1 } from "./d2/lq-baseline-row.v1"
+import type { D2LqCorpusV1 } from "./d2/lq-corpus.v1"
+import type { D2LqGateRowV1 } from "./d2/lq-gate-row.v1"
+import type { D2LqGradeRowV1 } from "./d2/lq-grade-row.v1"
+import type { D2LqIndexV1 } from "./d2/lq-index.v1"
+import type { D2ManifestV1 } from "./d2/manifest.v1"
+import type { D2ProducerRowV1 } from "./d2/producer-row.v1"
+import type { D2RunIndexV1 } from "./d2/run-index.v1"
+import type { D2RunsIndexV1 } from "./d2/runs-index.v1"
+import type { D2SelfCheckV1 } from "./d2/self-check.v1"
+import type { D2SuiteSummaryV1 } from "./d2/suite-summary.v1"
+import type { D2SummaryV1 } from "./d2/summary.v1"
+import type { D2TimelineV1 } from "./d2/timeline.v1"
+import type { D2TurnRowV1 } from "./d2/turn-row.v1"
+import type { D2UpstreamV1 } from "./d2/upstream.v1"
 
 export type { BlobV1 } from "./blob.v1"
 export type { CiReportV1 } from "./ci-report.v1"
@@ -59,41 +86,261 @@ export type { SummaryV1 } from "./summary.v1"
 export type { SweepV1 } from "./sweep.v1"
 export type { TimelineV1 } from "./timeline.v1"
 export type { UpstreamV1 } from "./upstream.v1"
+export type { D2BaselineRowV1 } from "./d2/baseline-row.v1"
+export type { D2BlobV1 } from "./d2/blob.v1"
+export type { D2CallRowV1 } from "./d2/call-row.v1"
+export type { D2ChainRowV1 } from "./d2/chain-row.v1"
+export type { D2CiReportV1 } from "./d2/ci-report.v1"
+export type { D2ContractV1 } from "./d2/contract.v1"
+export type { D2ConversationIndexV1 } from "./d2/conversation-index.v1"
+export type { D2ConversationV1 } from "./d2/conversation.v1"
+export type { D2DriftRowV1 } from "./d2/drift-row.v1"
+export type { D2FindingV1 } from "./d2/finding.v1"
+export type { D2GoldensV1 } from "./d2/goldens.v1"
+export type { D2GradeRowV1 } from "./d2/grade-row.v1"
+export type { D2LqBaselineRowV1 } from "./d2/lq-baseline-row.v1"
+export type { D2LqCorpusV1 } from "./d2/lq-corpus.v1"
+export type { D2LqGateRowV1 } from "./d2/lq-gate-row.v1"
+export type { D2LqGradeRowV1 } from "./d2/lq-grade-row.v1"
+export type { D2LqIndexV1 } from "./d2/lq-index.v1"
+export type { D2ManifestV1 } from "./d2/manifest.v1"
+export type { D2ProducerRowV1 } from "./d2/producer-row.v1"
+export type { D2RunIndexV1 } from "./d2/run-index.v1"
+export type { D2RunsIndexV1 } from "./d2/runs-index.v1"
+export type { D2SelfCheckV1 } from "./d2/self-check.v1"
+export type { D2SuiteSummaryV1 } from "./d2/suite-summary.v1"
+export type { D2SummaryV1 } from "./d2/summary.v1"
+export type { D2TimelineV1 } from "./d2/timeline.v1"
+export type { D2TurnRowV1 } from "./d2/turn-row.v1"
+export type { D2UpstreamV1 } from "./d2/upstream.v1"
 
-/** Every schema kind this viewer reads, with the major version it reads it at. */
+/**
+ * Every schema kind this viewer reads: the domain whose producer writes it, the kind as its
+ * schema names it, the major version it reads, and the schema's $id.
+ */
 export const schemaKinds = {
-  blob: { version: 1, id: "urn:cwa-bench-d1:blob:v1" },
-  "ci-report": { version: 1, id: "urn:cwa-bench-d1:ci-report:v1" },
-  contract: { version: 1, id: "urn:cwa-bench-d1:contract:v1" },
-  "corpus-index": { version: 1, id: "urn:cwa-bench-d1:corpus-index:v1" },
-  coverage: { version: 1, id: "urn:cwa-bench-d1:coverage:v1" },
-  "determinism-row": { version: 1, id: "urn:cwa-bench-d1:determinism-row:v1" },
-  "drift-row": { version: 1, id: "urn:cwa-bench-d1:drift-row:v1" },
-  finding: { version: 1, id: "urn:cwa-bench-d1:finding:v1" },
-  "fuzz-row": { version: 1, id: "urn:cwa-bench-d1:fuzz-row:v1" },
-  goldens: { version: 1, id: "urn:cwa-bench-d1:goldens:v1" },
-  manifest: { version: 1, id: "urn:cwa-bench-d1:manifest:v1" },
-  minimization: { version: 1, id: "urn:cwa-bench-d1:minimization:v1" },
-  "perf-sample": { version: 1, id: "urn:cwa-bench-d1:perf-sample:v1" },
-  "perf-summary": { version: 1, id: "urn:cwa-bench-d1:perf-summary:v1" },
-  "relation-row": { version: 1, id: "urn:cwa-bench-d1:relation-row:v1" },
-  "result-row": { version: 1, id: "urn:cwa-bench-d1:result-row:v1" },
-  "run-index": { version: 1, id: "urn:cwa-bench-d1:run-index:v1" },
-  "runs-index": { version: 1, id: "urn:cwa-bench-d1:runs-index:v1" },
-  "scale-row": { version: 1, id: "urn:cwa-bench-d1:scale-row:v1" },
-  "self-check": { version: 1, id: "urn:cwa-bench-d1:self-check:v1" },
-  "suite-summary": { version: 1, id: "urn:cwa-bench-d1:suite-summary:v1" },
-  "summarizer-call": { version: 1, id: "urn:cwa-bench-d1:summarizer-call:v1" },
-  "summarizer-row": { version: 1, id: "urn:cwa-bench-d1:summarizer-row:v1" },
-  "summarizer-summary": { version: 1, id: "urn:cwa-bench-d1:summarizer-summary:v1" },
-  "summarizer-variant": { version: 1, id: "urn:cwa-bench-d1:summarizer-variant:v1" },
-  summary: { version: 1, id: "urn:cwa-bench-d1:summary:v1" },
-  sweep: { version: 1, id: "urn:cwa-bench-d1:sweep:v1" },
-  timeline: { version: 1, id: "urn:cwa-bench-d1:timeline:v1" },
-  upstream: { version: 1, id: "urn:cwa-bench-d1:upstream:v1" },
+  blob: { domain: "d1", kind: "blob", version: 1, id: "urn:cwa-bench-d1:blob:v1" },
+  "ci-report": { domain: "d1", kind: "ci-report", version: 1, id: "urn:cwa-bench-d1:ci-report:v1" },
+  contract: { domain: "d1", kind: "contract", version: 1, id: "urn:cwa-bench-d1:contract:v1" },
+  "corpus-index": {
+    domain: "d1",
+    kind: "corpus-index",
+    version: 1,
+    id: "urn:cwa-bench-d1:corpus-index:v1",
+  },
+  coverage: { domain: "d1", kind: "coverage", version: 1, id: "urn:cwa-bench-d1:coverage:v1" },
+  "determinism-row": {
+    domain: "d1",
+    kind: "determinism-row",
+    version: 1,
+    id: "urn:cwa-bench-d1:determinism-row:v1",
+  },
+  "drift-row": { domain: "d1", kind: "drift-row", version: 1, id: "urn:cwa-bench-d1:drift-row:v1" },
+  finding: { domain: "d1", kind: "finding", version: 1, id: "urn:cwa-bench-d1:finding:v1" },
+  "fuzz-row": { domain: "d1", kind: "fuzz-row", version: 1, id: "urn:cwa-bench-d1:fuzz-row:v1" },
+  goldens: { domain: "d1", kind: "goldens", version: 1, id: "urn:cwa-bench-d1:goldens:v1" },
+  manifest: { domain: "d1", kind: "manifest", version: 1, id: "urn:cwa-bench-d1:manifest:v1" },
+  minimization: {
+    domain: "d1",
+    kind: "minimization",
+    version: 1,
+    id: "urn:cwa-bench-d1:minimization:v1",
+  },
+  "perf-sample": {
+    domain: "d1",
+    kind: "perf-sample",
+    version: 1,
+    id: "urn:cwa-bench-d1:perf-sample:v1",
+  },
+  "perf-summary": {
+    domain: "d1",
+    kind: "perf-summary",
+    version: 1,
+    id: "urn:cwa-bench-d1:perf-summary:v1",
+  },
+  "relation-row": {
+    domain: "d1",
+    kind: "relation-row",
+    version: 1,
+    id: "urn:cwa-bench-d1:relation-row:v1",
+  },
+  "result-row": {
+    domain: "d1",
+    kind: "result-row",
+    version: 1,
+    id: "urn:cwa-bench-d1:result-row:v1",
+  },
+  "run-index": { domain: "d1", kind: "run-index", version: 1, id: "urn:cwa-bench-d1:run-index:v1" },
+  "runs-index": {
+    domain: "d1",
+    kind: "runs-index",
+    version: 1,
+    id: "urn:cwa-bench-d1:runs-index:v1",
+  },
+  "scale-row": { domain: "d1", kind: "scale-row", version: 1, id: "urn:cwa-bench-d1:scale-row:v1" },
+  "self-check": {
+    domain: "d1",
+    kind: "self-check",
+    version: 1,
+    id: "urn:cwa-bench-d1:self-check:v1",
+  },
+  "suite-summary": {
+    domain: "d1",
+    kind: "suite-summary",
+    version: 1,
+    id: "urn:cwa-bench-d1:suite-summary:v1",
+  },
+  "summarizer-call": {
+    domain: "d1",
+    kind: "summarizer-call",
+    version: 1,
+    id: "urn:cwa-bench-d1:summarizer-call:v1",
+  },
+  "summarizer-row": {
+    domain: "d1",
+    kind: "summarizer-row",
+    version: 1,
+    id: "urn:cwa-bench-d1:summarizer-row:v1",
+  },
+  "summarizer-summary": {
+    domain: "d1",
+    kind: "summarizer-summary",
+    version: 1,
+    id: "urn:cwa-bench-d1:summarizer-summary:v1",
+  },
+  "summarizer-variant": {
+    domain: "d1",
+    kind: "summarizer-variant",
+    version: 1,
+    id: "urn:cwa-bench-d1:summarizer-variant:v1",
+  },
+  summary: { domain: "d1", kind: "summary", version: 1, id: "urn:cwa-bench-d1:summary:v1" },
+  sweep: { domain: "d1", kind: "sweep", version: 1, id: "urn:cwa-bench-d1:sweep:v1" },
+  timeline: { domain: "d1", kind: "timeline", version: 1, id: "urn:cwa-bench-d1:timeline:v1" },
+  upstream: { domain: "d1", kind: "upstream", version: 1, id: "urn:cwa-bench-d1:upstream:v1" },
+  "d2/baseline-row": {
+    domain: "d2",
+    kind: "baseline-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:baseline-row:v1",
+  },
+  "d2/blob": { domain: "d2", kind: "blob", version: 1, id: "urn:cwa-bench-d2:blob:v1" },
+  "d2/call-row": { domain: "d2", kind: "call-row", version: 1, id: "urn:cwa-bench-d2:call-row:v1" },
+  "d2/chain-row": {
+    domain: "d2",
+    kind: "chain-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:chain-row:v1",
+  },
+  "d2/ci-report": {
+    domain: "d2",
+    kind: "ci-report",
+    version: 1,
+    id: "urn:cwa-bench-d2:ci-report:v1",
+  },
+  "d2/contract": { domain: "d2", kind: "contract", version: 1, id: "urn:cwa-bench-d2:contract:v1" },
+  "d2/conversation-index": {
+    domain: "d2",
+    kind: "conversation-index",
+    version: 1,
+    id: "urn:cwa-bench-d2:conversation-index:v1",
+  },
+  "d2/conversation": {
+    domain: "d2",
+    kind: "conversation",
+    version: 1,
+    id: "urn:cwa-bench-d2:conversation:v1",
+  },
+  "d2/drift-row": {
+    domain: "d2",
+    kind: "drift-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:drift-row:v1",
+  },
+  "d2/finding": { domain: "d2", kind: "finding", version: 1, id: "urn:cwa-bench-d2:finding:v1" },
+  "d2/goldens": { domain: "d2", kind: "goldens", version: 1, id: "urn:cwa-bench-d2:goldens:v1" },
+  "d2/grade-row": {
+    domain: "d2",
+    kind: "grade-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:grade-row:v1",
+  },
+  "d2/lq-baseline-row": {
+    domain: "d2",
+    kind: "lq-baseline-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:lq-baseline-row:v1",
+  },
+  "d2/lq-corpus": {
+    domain: "d2",
+    kind: "lq-corpus",
+    version: 1,
+    id: "urn:cwa-bench-d2:lq-corpus:v1",
+  },
+  "d2/lq-gate-row": {
+    domain: "d2",
+    kind: "lq-gate-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:lq-gate-row:v1",
+  },
+  "d2/lq-grade-row": {
+    domain: "d2",
+    kind: "lq-grade-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:lq-grade-row:v1",
+  },
+  "d2/lq-index": { domain: "d2", kind: "lq-index", version: 1, id: "urn:cwa-bench-d2:lq-index:v1" },
+  "d2/manifest": { domain: "d2", kind: "manifest", version: 1, id: "urn:cwa-bench-d2:manifest:v1" },
+  "d2/producer-row": {
+    domain: "d2",
+    kind: "producer-row",
+    version: 1,
+    id: "urn:cwa-bench-d2:producer-row:v1",
+  },
+  "d2/run-index": {
+    domain: "d2",
+    kind: "run-index",
+    version: 1,
+    id: "urn:cwa-bench-d2:run-index:v1",
+  },
+  "d2/runs-index": {
+    domain: "d2",
+    kind: "runs-index",
+    version: 1,
+    id: "urn:cwa-bench-d2:runs-index:v1",
+  },
+  "d2/self-check": {
+    domain: "d2",
+    kind: "self-check",
+    version: 1,
+    id: "urn:cwa-bench-d2:self-check:v1",
+  },
+  "d2/suite-summary": {
+    domain: "d2",
+    kind: "suite-summary",
+    version: 1,
+    id: "urn:cwa-bench-d2:suite-summary:v1",
+  },
+  "d2/summary": { domain: "d2", kind: "summary", version: 1, id: "urn:cwa-bench-d2:summary:v1" },
+  "d2/timeline": { domain: "d2", kind: "timeline", version: 1, id: "urn:cwa-bench-d2:timeline:v1" },
+  "d2/turn-row": { domain: "d2", kind: "turn-row", version: 1, id: "urn:cwa-bench-d2:turn-row:v1" },
+  "d2/upstream": { domain: "d2", kind: "upstream", version: 1, id: "urn:cwa-bench-d2:upstream:v1" },
 } as const
 
 export type SchemaKind = keyof typeof schemaKinds
+
+/** The domains whose producers this viewer reads, each with the producer's name. */
+export const schemaDomains = {
+  d1: { producer: "cwa-bench-d1" },
+  d2: { producer: "cwa-bench-d2" },
+} as const
+
+export type SchemaDomain = keyof typeof schemaDomains
+
+/** The kinds one domain's producer writes. */
+export type SchemaKindOf<D extends SchemaDomain> = {
+  [K in SchemaKind]: (typeof schemaKinds)[K]["domain"] extends D ? K : never
+}[SchemaKind]
 
 /** The document type of each kind, discriminated by its `$schema` string. */
 export type DocumentByKind = {
@@ -126,6 +373,33 @@ export type DocumentByKind = {
   sweep: SweepV1
   timeline: TimelineV1
   upstream: UpstreamV1
+  "d2/baseline-row": D2BaselineRowV1
+  "d2/blob": D2BlobV1
+  "d2/call-row": D2CallRowV1
+  "d2/chain-row": D2ChainRowV1
+  "d2/ci-report": D2CiReportV1
+  "d2/contract": D2ContractV1
+  "d2/conversation-index": D2ConversationIndexV1
+  "d2/conversation": D2ConversationV1
+  "d2/drift-row": D2DriftRowV1
+  "d2/finding": D2FindingV1
+  "d2/goldens": D2GoldensV1
+  "d2/grade-row": D2GradeRowV1
+  "d2/lq-baseline-row": D2LqBaselineRowV1
+  "d2/lq-corpus": D2LqCorpusV1
+  "d2/lq-gate-row": D2LqGateRowV1
+  "d2/lq-grade-row": D2LqGradeRowV1
+  "d2/lq-index": D2LqIndexV1
+  "d2/manifest": D2ManifestV1
+  "d2/producer-row": D2ProducerRowV1
+  "d2/run-index": D2RunIndexV1
+  "d2/runs-index": D2RunsIndexV1
+  "d2/self-check": D2SelfCheckV1
+  "d2/suite-summary": D2SuiteSummaryV1
+  "d2/summary": D2SummaryV1
+  "d2/timeline": D2TimelineV1
+  "d2/turn-row": D2TurnRowV1
+  "d2/upstream": D2UpstreamV1
 }
 
 export type Document = DocumentByKind[SchemaKind]

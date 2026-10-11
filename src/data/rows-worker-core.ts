@@ -16,7 +16,7 @@ import {
   type RowQuery,
 } from "./row-store"
 import { parseJsonl, SourceError, type RowError, type SourceErrorKind } from "./source"
-import { parseRows, type ParsedRows } from "./validate"
+import { domainOfKind, loadValidators, parseRows, type ParsedRows } from "./validate"
 
 export type WorkerRequest =
   | { type: "load"; url: string; kind: RowKind; budget: number }
@@ -99,6 +99,7 @@ export function createRowsWorkerCore(
     try {
       const parsed = await parseJsonl(response, budget, url)
       if (!parsed.ok) return parsed
+      await loadValidators(domainOfKind(kind))
       const validated = parseRows(kind, parsed.rows, parsed.errors)
       rows = indexRows(kind, validated.rows)
       facets = facetsOf(rows)

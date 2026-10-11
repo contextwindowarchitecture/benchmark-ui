@@ -6,7 +6,7 @@ import type { RegionState } from "@/components/dashboard/data-region"
 
 import type { DocumentByKind, SchemaKind } from "./schema/generated"
 import type { SourceError } from "./source"
-import type { ParseResultOf } from "./validate"
+import { schemaStringOf, type ParseResultOf } from "./validate"
 
 export function regionOfDocument<K extends SchemaKind>(
   query: UseQueryResult<ParseResultOf<K>, SourceError>,
@@ -25,7 +25,7 @@ export function regionOfDocument<K extends SchemaKind>(
   if (result.reason === "wrong-kind") {
     return {
       status: "unsupported",
-      schema: `cwa-bench-d1/${result.actual}/v1 where ${result.expected} was expected`,
+      schema: `${schemaStringOf(result.actual)} where ${schemaStringOf(result.expected)} was expected`,
       path,
     }
   }

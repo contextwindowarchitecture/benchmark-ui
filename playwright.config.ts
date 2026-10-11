@@ -20,7 +20,10 @@ export default defineConfig({
     command: `pnpm exec vite preview --port ${port} --strictPort`,
     url: `http://localhost:${port}/config.json`,
     reuseExistingServer: !process.env["CI"],
-    env: { VITE_RESULTS_DIR: "vendor/cwa-bench/domain1/fixtures/runs" },
+    env: {
+      VITE_RESULTS_DIR: "vendor/cwa-bench/domain1/fixtures/runs",
+      VITE_D2_RESULTS_DIR: "vendor/cwa-bench/domain2/fixtures/runs",
+    },
     timeout: 60_000,
   },
 })

@@ -71,11 +71,11 @@ export function useSweep(
 ): SweepHandle {
   const source = useResultsSource()
   const enabled = (options.enabled ?? true) && runId !== undefined && path !== undefined
-  const key = `${source.root}|${runId ?? ""}|${path ?? ""}`
+  const key = `${source.root}|${source.domain}|${runId ?? ""}|${path ?? ""}`
   const url = runId && path ? source.url(runId, path) : ""
   const viaWorker = hasWorker()
   const query = useQuery<{ result: SweepLoadResult; via: "main" | "worker" }, SourceError>({
-    queryKey: [...queryKeys.document(source.root, runId ?? "", path ?? ""), "sweep-summary"],
+    queryKey: [...queryKeys.document(source, runId ?? "", path ?? ""), "sweep-summary"],
     queryFn: async ({ signal }) => {
       if (viaWorker) return { result: await workerStore(key, url).loaded, via: "worker" }
       const json = await source.document(runId ?? "", path ?? "", signal)

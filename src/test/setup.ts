@@ -2,6 +2,12 @@ import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
 import { afterEach, vi } from "vitest"
 
+import { loadValidators } from "@/data/validate"
+
+// Domain 2's validators load on first use in the app; tests that parse its documents directly
+// (the model tests, fixtureRows) find them loaded.
+await loadValidators("d2")
+
 afterEach(() => {
   cleanup()
   if (typeof window !== "undefined") window.localStorage.clear()

@@ -6,8 +6,8 @@ import { routes } from "./app/routes"
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert"
 import { TooltipProvider } from "./components/ui/tooltip"
 import { type AppConfig, CONFIG_URL, errorMessage, loadConfig } from "./data/config"
-import { createQueryClient, ResultsSourceContext } from "./data/queries"
-import { createResultsSource } from "./data/source"
+import { createQueryClient, ResultsSourcesContext, type ResultsSources } from "./data/queries"
+import { createResultsSource, type ResultsDomain, type ResultsSource } from "./data/source"
 import { ThemeProvider } from "./lib/theme"
 
 type ConfigState =
@@ -27,17 +27,26 @@ export function AppProviders({
   fetchFn?: typeof fetch
   queryClient?: QueryClient
 }) {
-  const source = useMemo(
-    () => createResultsSource(config.resultsRoot, fetchFn),
-    [config.resultsRoot, fetchFn],
-  )
+  const sources = useMemo<ResultsSources>(() => {
+    const built = new Map<ResultsDomain, ResultsSource>()
+    return {
+      forDomain(domain) {
+        let source = built.get(domain)
+        if (!source) {
+          source = createResultsSource(config.resultsRoot, fetchFn, domain)
+          built.set(domain, source)
+        }
+        return source
+      },
+    }
+  }, [config.resultsRoot, fetchFn])
   const queryClient = useMemo(() => givenClient ?? createQueryClient(), [givenClient])
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <ResultsSourceContext.Provider value={source}>
+        <ResultsSourcesContext.Provider value={sources}>
           <TooltipProvider>{children}</TooltipProvider>
-        </ResultsSourceContext.Provider>
+        </ResultsSourcesContext.Provider>
       </QueryClientProvider>
     </ThemeProvider>
   )

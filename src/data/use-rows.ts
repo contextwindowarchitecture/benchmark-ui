@@ -119,7 +119,7 @@ export function useRows<K extends RowKind>(
   const tooBig = expected !== undefined && expected > WORKER_ROW_BUDGET
   const viaWorker =
     !tooBig && hasWorker() && expected !== undefined && expected > MAIN_THREAD_ROW_BUDGET
-  const key = `${source.root}|${runId ?? ""}|${path}`
+  const key = `${source.root}|${source.domain}|${runId ?? ""}|${path}`
   const url = runId ? source.url(runId, path) : ""
 
   const main = useRunRows(runId, path, kind, {
@@ -127,7 +127,7 @@ export function useRows<K extends RowKind>(
     expectedRows: expected,
   })
   const worker = useQuery<LoadResult, SourceError>({
-    queryKey: [...queryKeys.rows(source.root, runId ?? "", path), "worker"],
+    queryKey: [...queryKeys.rows(source, runId ?? "", path), "worker"],
     queryFn: () => workerStore(key, url, kind).loaded,
     enabled: enabled && viaWorker,
     staleTime: Infinity,

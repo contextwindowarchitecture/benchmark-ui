@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 // Generates the viewer's types from the vendored schemas (ui-plan.md 5.3; DESIGN.md 2.3): one
-// module per schema kind under src/data/schema/generated/ and a barrel that maps each kind to its
-// type and major version. The output is checked in, so a schema bump shows up as a type error.
-// scripts/generate-validators.mjs generates the validators beside them; `pnpm generate:types`
-// runs both.
+// module per schema kind under src/data/schema/generated/ (Domain 1's) and generated/d2/ (Domain
+// 2's), and a barrel that maps each kind to its domain, type and major version. The output is
+// checked in, so a schema bump shows up as a type error. scripts/generate-validators.mjs generates
+// the validators beside them; `pnpm generate:types` runs both.
+//
+// Domain 1's kinds are named as its schemas name them (`summary`, `SummaryV1`), as they were
+// before a second domain existed; a later domain's kinds carry their domain (`d2/summary`,
+// `D2SummaryV1`), so a kind always says which producer wrote it.
 //
 //   node scripts/generate-types.mjs
 
@@ -14,8 +18,9 @@ import { fileURLToPath } from "node:url"
 import { compile } from "json-schema-to-typescript"
 import { format } from "prettier"
 
+import { SCHEMA_DOMAINS } from "./schema-domains.mjs"
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const schemasDir = join(root, "vendor/cwa-bench/domain1/schemas")
 const outDir = join(root, "src/data/schema/generated")
 
 const banner = (what) =>
@@ -31,46 +36,58 @@ function pascal(kind) {
 }
 
 const kinds = []
-for (const file of readdirSync(schemasDir).sort()) {
-  const match = /^([a-z0-9-]+)\.v([0-9]+)\.schema\.json$/.exec(file)
-  if (!match) continue
-  const [, kind, version] = match
-  const schema = JSON.parse(readFileSync(join(schemasDir, file), "utf8"))
-  const expectedId = `urn:cwa-bench-d1:${kind}:v${version}`
-  if (schema.$id !== expectedId) {
-    throw new Error(`${file}: $id is ${schema.$id}, expected ${expectedId}`)
+for (const domain of SCHEMA_DOMAINS) {
+  const schemasDir = join(root, domain.schemas)
+  for (const file of readdirSync(schemasDir).sort()) {
+    const match = /^([a-z0-9-]+)\.v([0-9]+)\.schema\.json$/.exec(file)
+    if (!match) continue
+    const [, kind, version] = match
+    const schema = JSON.parse(readFileSync(join(schemasDir, file), "utf8"))
+    const expectedId = `urn:${domain.producer}:${kind}:v${version}`
+    if (schema.$id !== expectedId) {
+      throw new Error(`${file}: $id is ${schema.$id}, expected ${expectedId}`)
+    }
+    const schemaString = schema.properties?.$schema?.const
+    const expectedSchema = `${domain.producer}/${kind}/v${version}`
+    if (schemaString !== expectedSchema) {
+      throw new Error(`${file}: $schema const is ${schemaString}, expected ${expectedSchema}`)
+    }
+    kinds.push({
+      domain,
+      kind,
+      key: domain.prefix ? `${domain.id}/${kind}` : kind,
+      version: Number(version),
+      file,
+      schemasDir,
+      schema,
+      typeName: `${domain.prefix}${pascal(kind)}V${version}`,
+    })
   }
-  const schemaString = schema.properties?.$schema?.const
-  const expectedSchema = `cwa-bench-d1/${kind}/v${version}`
-  if (schemaString !== expectedSchema) {
-    throw new Error(`${file}: $schema const is ${schemaString}, expected ${expectedSchema}`)
-  }
-  kinds.push({
-    kind,
-    version: Number(version),
-    file,
-    schema,
-    typeName: `${pascal(kind)}V${version}`,
-  })
 }
 
 rmSync(outDir, { recursive: true, force: true })
 mkdirSync(outDir, { recursive: true })
 
-for (const { kind, version, file, schema, typeName } of kinds) {
+const moduleDir = (k) => (k.domain.prefix ? join(outDir, k.domain.id) : outDir)
+const moduleName = (k) =>
+  k.domain.prefix ? `./${k.domain.id}/${k.kind}.v${k.version}` : `./${k.kind}.v${k.version}`
+
+for (const k of kinds) {
   // The root interface is named after the kind and version, not the schema's title or $id, so
   // a type name says which kind and major version it reads.
-  const source = await compile(schema, typeName, {
-    customName: (candidate) => (candidate.$id === schema.$id ? typeName : undefined),
+  const source = await compile(k.schema, k.typeName, {
+    customName: (candidate) => (candidate.$id === k.schema.$id ? k.typeName : undefined),
     bannerComment: "",
     strictIndexSignatures: true,
     style: prettierStyle,
-    cwd: schemasDir,
+    cwd: k.schemasDir,
   })
-  writeFileSync(join(outDir, `${kind}.v${version}.ts`), banner(`domain1/schemas/${file}`) + source)
+  mkdirSync(moduleDir(k), { recursive: true })
+  writeFileSync(
+    join(moduleDir(k), `${k.kind}.v${k.version}.ts`),
+    banner(`${k.domain.schemas.replace(/^vendor\/cwa-bench\//, "")}/${k.file}`) + source,
+  )
 }
-
-const moduleName = ({ kind, version }) => `./${kind}.v${version}`
 
 const index = [
   banner("the vendored schemas"),
@@ -78,16 +95,34 @@ const index = [
   "",
   ...kinds.map((k) => `export type { ${k.typeName} } from "${moduleName(k)}"`),
   "",
-  "/** Every schema kind this viewer reads, with the major version it reads it at. */",
+  "/**",
+  " * Every schema kind this viewer reads: the domain whose producer writes it, the kind as its",
+  " * schema names it, the major version it reads, and the schema's $id.",
+  " */",
   "export const schemaKinds = {",
-  ...kinds.map((k) => `  "${k.kind}": { version: ${k.version}, id: "${k.schema.$id}" },`),
+  ...kinds.map(
+    (k) =>
+      `  "${k.key}": { domain: "${k.domain.id}", kind: "${k.kind}", version: ${k.version}, id: "${k.schema.$id}" },`,
+  ),
   "} as const",
   "",
   "export type SchemaKind = keyof typeof schemaKinds",
   "",
+  "/** The domains whose producers this viewer reads, each with the producer's name. */",
+  "export const schemaDomains = {",
+  ...SCHEMA_DOMAINS.map((d) => `  ${d.id}: { producer: "${d.producer}" },`),
+  "} as const",
+  "",
+  "export type SchemaDomain = keyof typeof schemaDomains",
+  "",
+  "/** The kinds one domain's producer writes. */",
+  "export type SchemaKindOf<D extends SchemaDomain> = {",
+  '  [K in SchemaKind]: (typeof schemaKinds)[K]["domain"] extends D ? K : never',
+  "}[SchemaKind]",
+  "",
   "/** The document type of each kind, discriminated by its `$schema` string. */",
   "export type DocumentByKind = {",
-  ...kinds.map((k) => `  "${k.kind}": ${k.typeName}`),
+  ...kinds.map((k) => `  "${k.key}": ${k.typeName}`),
   "}",
   "",
   "export type Document = DocumentByKind[SchemaKind]",
@@ -98,4 +133,9 @@ writeFileSync(
   await format(index, { ...prettierStyle, parser: "typescript" }),
 )
 
-process.stdout.write(`generated ${kinds.length} kinds into src/data/schema/generated/\n`)
+const counts = SCHEMA_DOMAINS.map(
+  (d) => `${kinds.filter((k) => k.domain === d).length} of ${d.id}`,
+).join(", ")
+process.stdout.write(
+  `generated ${kinds.length} kinds (${counts}) into src/data/schema/generated/\n`,
+)

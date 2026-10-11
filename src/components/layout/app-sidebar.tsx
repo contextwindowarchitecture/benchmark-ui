@@ -86,7 +86,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <p className="px-2 text-xs leading-relaxed text-muted-foreground group-data-[collapsible=icon]:hidden">
-          Reads {buildInfo.producer} v1 · benchmark{" "}
+          Reads {buildInfo.producers.join(", ")} v1 · benchmark{" "}
           <span className="font-mono" title={buildInfo.benchmarkCommit}>
             {buildInfo.benchmarkCommit.slice(0, 7)}
           </span>{" "}

@@ -37,6 +37,9 @@ export default defineConfig(({ command }) => ({
   // With a nonce Vite stamps the tags it injects and the policy admits them; the build injects no
   // inline script, so the production policy applies unchanged.
   html: command === "serve" ? { cspNonce: randomBytes(16).toString("base64") } : {},
+  // The workers import a later domain's validators on first use, which splits them into a chunk
+  // of their own: an ES module worker can load one, an IIFE cannot. They are created as modules.
+  worker: { format: "es" as const },
   resolve: {
     alias: {
       "@": path.resolve(root, "./src"),

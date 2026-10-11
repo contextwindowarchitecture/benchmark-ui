@@ -2,11 +2,11 @@
 
 import type { ValidateFunction } from "ajv"
 
-import type { DocumentByKind, SchemaKind } from "./index"
+import type { DocumentByKind, SchemaKindOf } from "./index"
 import * as standalone from "./validators"
 
-/** One standalone validator per kind, typed by the kind's document. */
-export const validators: { [K in SchemaKind]: ValidateFunction<DocumentByKind[K]> } = {
+/** One standalone validator per kind of d1, typed by the kind's document. */
+export const validators: { [K in SchemaKindOf<"d1">]: ValidateFunction<DocumentByKind[K]> } = {
   blob: standalone.blobV1,
   "ci-report": standalone.ciReportV1,
   contract: standalone.contractV1,

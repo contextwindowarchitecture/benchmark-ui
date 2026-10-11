@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest"
 
-import { FIXTURE_ROOT, FIXTURE_RUNS, fixtureFetch } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, FIXTURE_ROOT, FIXTURE_RUNS, fixtureFetch } from "@/test/fixture-fetch"
 
 import { createResultsSource, parseJsonl, SourceError } from "./source"
 
@@ -16,6 +16,27 @@ describe("ResultsSource", () => {
     ).index()
     expect(requests).toEqual(["/results/d1/index.json"])
     expect(index).toMatchObject({ $schema: "cwa-bench-d1/runs-index/v1" })
+  })
+
+  it("reads another domain's runs and documents under <root>/<domain>/", async () => {
+    const requests: string[] = []
+    const d2 = createResultsSource(
+      FIXTURE_ROOT,
+      fixtureFetch({ onRequest: (u) => requests.push(u) }),
+      "d2",
+    )
+    expect(d2.domain).toBe("d2")
+    await expect(d2.index()).resolves.toMatchObject({ $schema: "cwa-bench-d2/runs-index/v1" })
+    await expect(d2.document(D2_FIXTURE_RUNS.nightly, "summary.json")).resolves.toMatchObject({
+      $schema: "cwa-bench-d2/summary/v1",
+    })
+    expect(requests).toEqual([
+      "/results/d2/index.json",
+      `/results/d2/${D2_FIXTURE_RUNS.nightly}/summary.json`,
+    ])
+    expect(d2.url(D2_FIXTURE_RUNS.nightly, "suites/S2/grades.jsonl")).toBe(
+      `/results/d2/${D2_FIXTURE_RUNS.nightly}/suites/S2/grades.jsonl`,
+    )
   })
 
   it("reads a document of a run by path", async () => {
