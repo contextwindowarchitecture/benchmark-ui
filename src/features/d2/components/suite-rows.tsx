@@ -18,6 +18,7 @@ import {
 import { familyWords } from "@/content/d2/vocabulary"
 import { useResultsSource } from "@/data/queries"
 import type { RowQuery } from "@/data/row-store"
+import { WORKER_ROW_BUDGET } from "@/data/budgets"
 import { useRowPage, useRows } from "@/data/use-rows"
 import { FacetSelect } from "@/features/d1/components/suite-rows"
 import { D2_VERDICT_LABELS } from "@/features/d2/model/row-kinds"
@@ -50,7 +51,13 @@ export function D2SuiteRows({
   )
   // A filter in the address opens the rows at once; otherwise they load on request.
   const [opened, setOpened] = useState(filtering || state.page !== undefined)
-  const handle = useRows(runId, file.path, file.kind, { expectedRows: file.rows, enabled: opened })
+  // A file the run index says is above the worker's budget is a download at once: no "load"
+  // offer that could only end in the same refusal.
+  const tooBig = file.rows !== undefined && file.rows > WORKER_ROW_BUDGET
+  const handle = useRows(runId, file.path, file.kind, {
+    expectedRows: file.rows,
+    enabled: opened || tooBig,
+  })
   const query = useMemo<RowQuery>(
     () => ({
       filter: {
@@ -78,7 +85,7 @@ export function D2SuiteRows({
   )
   const rowsText = file.rows === undefined ? "rows" : `${formatCount(file.rows)} rows`
 
-  if (!opened) {
+  if (!opened && !tooBig) {
     return (
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-4 text-sm">
         <span>{rowsText}, loaded on request.</span>

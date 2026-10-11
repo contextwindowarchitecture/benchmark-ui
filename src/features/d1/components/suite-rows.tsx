@@ -25,6 +25,7 @@ import { TableRegion } from "@/components/dashboard/table-region"
 import { useResultsSource } from "@/data/queries"
 import type { FacetEntry, RowQuery } from "@/data/row-store"
 import type { RunIndexV1 } from "@/data/schema/generated"
+import { WORKER_ROW_BUDGET } from "@/data/budgets"
 import { useRowPage, useRows } from "@/data/use-rows"
 import { VERDICT_LABELS, type RowKind } from "@/features/d1/model/row-kinds"
 import { suitePageParams } from "@/features/d1/model/url"
@@ -67,7 +68,13 @@ export function SuiteRows({ runId, suite, kind, file, autoOpen = false }: SuiteR
   )
   // A filter in the address (a matrix cell's link) opens the rows at once; otherwise on request.
   const [opened, setOpened] = useState(autoOpen || filtering || state.page !== undefined)
-  const handle = useRows(runId, file.path, kind, { expectedRows: file.rows, enabled: opened })
+  // A file the run index says is above the worker's budget is a download at once: no "load"
+  // offer that could only end in the same refusal.
+  const tooBig = file.rows !== undefined && file.rows > WORKER_ROW_BUDGET
+  const handle = useRows(runId, file.path, kind, {
+    expectedRows: file.rows,
+    enabled: opened || tooBig,
+  })
   const query = useMemo<RowQuery>(
     () => ({
       filter: {
@@ -107,7 +114,7 @@ export function SuiteRows({ runId, suite, kind, file, autoOpen = false }: SuiteR
   )
   const rowsText = file.rows === undefined ? "rows" : `${formatCount(file.rows)} rows`
 
-  if (!opened) {
+  if (!opened && !tooBig) {
     return (
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-4 text-sm">
         <span>

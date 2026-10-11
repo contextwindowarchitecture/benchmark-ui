@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
-import { D2_FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, D2_FIXTURES_DIR } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 const run = D2_FIXTURE_RUNS.nightly
@@ -170,6 +173,29 @@ describe("a Domain 2 suite page", () => {
         name: /^concat, 8,192 tokens, 100 turns: 6, p95 51 over 135/,
       }),
     ).toBeInTheDocument()
+  })
+
+  it("offers a file above the worker's budget as a download at once, without fetching it", async () => {
+    const index = JSON.parse(readFileSync(join(D2_FIXTURES_DIR, run, "index.json"), "utf8")) as {
+      files: { path: string; rows?: number }[]
+    }
+    for (const file of index.files) if (file.path === "suites/S2/grades.jsonl") file.rows = 93_312
+    const requests: string[] = []
+    renderApp(`/d2/runs/${run}/suites/S2`, {
+      onRequest: (url) => requests.push(url),
+      overrides: {
+        [`/results/d2/${run}/index.json`]: {
+          status: 200,
+          body: JSON.stringify(index),
+          contentType: "application/json",
+        },
+      },
+    })
+    const rows = await loaded("rows")
+    expect(await rows.findByText("Too many rows to show here")).toBeInTheDocument()
+    expect(rows.queryByRole("button", { name: "Load the rows" })).toBeNull()
+    expect(rows.getByText(/93,312 rows exceed/)).toBeInTheDocument()
+    expect(requests.some((url) => url.endsWith("suites/S2/grades.jsonl"))).toBe(false)
   })
 
   it("opens a filtered page of rows from the address", async () => {
