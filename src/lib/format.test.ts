@@ -6,11 +6,15 @@ import {
   formatCount,
   formatDuration,
   formatExponent,
+  formatInterval,
   formatMetricValue,
   formatMs,
   formatPercent,
+  formatPoints,
+  formatPointsDifference,
   formatRate,
   formatTarget,
+  formatTokens,
   formatUtc,
   isoUtc,
   shortDigest,
@@ -92,5 +96,29 @@ describe("digests and times", () => {
     expect(formatUtc("2026-10-08T00:42:13+02:00")).toBe("2026-10-07 22:42:13 UTC")
     expect(formatUtc("nope")).toBe("invalid time")
     expect(isoUtc("2026-10-08T13:34:53.817Z")).toBe("2026-10-08T13:34:53.817Z")
+  })
+})
+
+describe("Domain 2's units", () => {
+  it("writes tokens whole and grouped, points with one decimal", () => {
+    expect(formatTokens(4691.027)).toBe("4,691 tokens")
+    expect(formatPoints(6.759)).toBe("6.8 points")
+    expect(formatMetricValue("tokens", 1726.4)).toBe("1,726 tokens")
+    expect(formatMetricValue("points", 99.722)).toBe("99.7 points")
+    expect(formatTarget("points", null)).toBe("ungated")
+    expect(formatTokens(Number.NaN)).toBe("not available")
+  })
+
+  it("writes an interval in the value's unit", () => {
+    expect(formatInterval("rate", 0.717949, 0.94302)).toBe("71.8% to 94.3%")
+    expect(formatInterval("rate", 0.97619, 1)).toBe("97.6% to 100%")
+    expect(formatInterval("points", 0, 2.857143)).toBe("0.0 to 2.9 points")
+  })
+
+  it("signs a difference of rates in percentage points", () => {
+    expect(formatPointsDifference(0.166)).toBe("+16.6 pp")
+    expect(formatPointsDifference(-0.025)).toBe("−2.5 pp")
+    expect(formatPointsDifference(0.0001)).toBe("±0.0 pp")
+    expect(formatPointsDifference(Number.POSITIVE_INFINITY)).toBe("not available")
   })
 })

@@ -18,9 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useRunDocument } from "@/data/queries"
+import { kindIn, type DocumentIn } from "@/data/kinds"
+import { useResultsDomain, useRunDocument } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
-import type { ManifestV1 } from "@/data/schema/generated"
 import { adapterProvenance, provenanceWarnings } from "@/features/d1/model/run"
 import { formatCount, formatMs } from "@/lib/format"
 
@@ -50,7 +50,7 @@ function Field({
 const list = "grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[auto_minmax(0,1fr)]"
 
 export function RunProvenance({ runId }: { runId: string }) {
-  const manifest = useRunDocument(runId, "manifest.json", "manifest")
+  const manifest = useRunDocument(runId, "manifest.json", kindIn(useResultsDomain(), "manifest"))
   const region = regionOfDocument(manifest, `${runId}/manifest.json`, "the manifest")
   return (
     <DataRegion state={region} label="the manifest" skeleton={<Skeleton className="h-64 w-full" />}>
@@ -59,7 +59,7 @@ export function RunProvenance({ runId }: { runId: string }) {
   )
 }
 
-function Provenance({ manifest }: { manifest: ManifestV1 }) {
+function Provenance({ manifest }: { manifest: DocumentIn<"manifest"> }) {
   const warnings = provenanceWarnings(manifest)
   const adapters = adapterProvenance(manifest)
   const { contract, harness, config, host, container, settings, ci } = manifest

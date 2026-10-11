@@ -6,9 +6,11 @@ import {
   Ban,
   Check,
   CircleDashed,
+  CircleHelp,
   Crosshair,
   Equal,
   Flag,
+  History,
   Info,
   ListTodo,
   LoaderCircle,
@@ -16,6 +18,7 @@ import {
   OctagonAlert,
   Plus,
   ShieldCheck,
+  Shuffle,
   TrendingDown,
   TriangleAlert,
   X,
@@ -34,6 +37,18 @@ export const ROW_VERDICTS = ["passed", "failed", "skipped", "rejected", "triage"
 export const GOLDEN_DRIFTS = ["match", "spec_change", "regression", "new"] as const
 /** The self-check's mutants (S0): killed by a check, or survived every check. */
 export const MUTANT_STATUSES = ["killed", "survived"] as const
+/** Domain 2's grades: what a grader made of one reply (correct, stale, distractor, ...). */
+export const GRADES = [
+  "correct",
+  "stale",
+  "distractor",
+  "wrong",
+  "unparsed",
+  "overflow",
+  "refused",
+] as const
+/** Domain 2's outcomes: a baseline fits or overflows; a chain's turn is answered or halted. */
+export const D2_OUTCOMES = ["fits", "answered", "gate_failed", "call_failed"] as const
 /** The rest of the closed vocabulary the records carry. */
 export const OTHER_STATUSES = ["running", "unavailable", "warning"] as const
 
@@ -43,6 +58,7 @@ export type ChangeVerdict = (typeof CHANGE_VERDICTS)[number]
 export type RowVerdict = (typeof ROW_VERDICTS)[number]
 export type GoldenDrift = (typeof GOLDEN_DRIFTS)[number]
 export type MutantStatus = (typeof MUTANT_STATUSES)[number]
+export type Grade = (typeof GRADES)[number]
 export type Status =
   | OutcomeStatus
   | JudgmentStatus
@@ -50,6 +66,8 @@ export type Status =
   | RowVerdict
   | GoldenDrift
   | MutantStatus
+  | Grade
+  | (typeof D2_OUTCOMES)[number]
   | (typeof OTHER_STATUSES)[number]
 
 export type Tone = "success" | "destructive" | "warning" | "info" | "muted"
@@ -86,6 +104,19 @@ export const STATUS_STYLES: Record<Status, StatusStyle> = {
   // Mutants (S0): a killed mutant is the auditor working; a survivor is a gap it did not catch.
   killed: { tone: "success", label: "killed", icon: Crosshair },
   survived: { tone: "warning", label: "survived", icon: TriangleAlert },
+  // Domain 2's grades. A stale or distractor answer is a near miss of its own kind, never just
+  // wrong; an unparsed reply gave no single answer; an overflow and a refusal reached no model.
+  correct: { tone: "success", label: "correct", icon: Check },
+  stale: { tone: "warning", label: "stale", icon: History },
+  distractor: { tone: "warning", label: "distractor", icon: Shuffle },
+  wrong: { tone: "destructive", label: "wrong", icon: X },
+  unparsed: { tone: "muted", label: "unparsed", icon: CircleHelp },
+  overflow: { tone: "muted", label: "overflow", icon: Ban },
+  refused: { tone: "muted", label: "refused", icon: Ban },
+  fits: { tone: "success", label: "fits", icon: Check },
+  answered: { tone: "success", label: "answered", icon: Check },
+  gate_failed: { tone: "destructive", label: "gate failed", icon: OctagonAlert },
+  call_failed: { tone: "destructive", label: "call failed", icon: OctagonAlert },
 }
 
 export function isStatus(value: string): value is Status {

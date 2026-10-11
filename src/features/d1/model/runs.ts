@@ -2,7 +2,10 @@
 // resolved here, from the index document, never from a path: symlinks do not survive static
 // hosting (DESIGN.md 6.4).
 
-import type { RunsIndexV1 } from "@/data/schema/generated"
+import type { DocumentIn } from "@/data/kinds"
+
+/** Either domain's runs index: every producer writes it in the same shape. */
+type RunsIndexV1 = DocumentIn<"runs-index">
 
 export type RunEntry = RunsIndexV1["runs"][number]
 

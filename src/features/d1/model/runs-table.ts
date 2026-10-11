@@ -1,10 +1,12 @@
 // Pure sorting and filtering for the runs list (ui-plan.md 8.2), so the table is testable
 // without rendering and the URL state maps onto plain functions.
 
-import type { RunsIndexV1 } from "@/data/schema/generated"
+import type { DocumentIn } from "@/data/kinds"
 
 import { runDurationMs, type RunEntry } from "./runs"
 import type { RUNS_SORT_KEYS, RUN_STATUS_VALUES } from "./url"
+
+type RunsIndexV1 = DocumentIn<"runs-index">
 
 export type RunsSortKey = (typeof RUNS_SORT_KEYS)[number]
 export type RunStatusFilter = (typeof RUN_STATUS_VALUES)[number]

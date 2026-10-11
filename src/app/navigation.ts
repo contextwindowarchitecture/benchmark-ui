@@ -41,6 +41,27 @@ export type NavGroup = {
 const runPath = (suffix: string) => (runId: string | null) =>
   runId ? `/d1/runs/${runId}/${suffix}` : "/d1/runs"
 
+const domain2: NavGroup = {
+  id: "d2",
+  label: "Domain 2 · Long-horizon stability",
+  items: [
+    {
+      id: "d2-overview",
+      label: "Overview",
+      icon: Layers,
+      href: () => "/d2",
+      patterns: ["/d2"],
+    },
+    {
+      id: "d2-runs",
+      label: "Runs",
+      icon: ListChecks,
+      href: () => "/d2/runs",
+      patterns: ["/d2/runs", "/d2/runs/:runId", "/d2/runs/:runId/suites/*"],
+    },
+  ],
+}
+
 export const navigation: NavGroup[] = [
   {
     id: "benchmark",
@@ -131,9 +152,9 @@ export const navigation: NavGroup[] = [
       },
     ],
   },
+  domain2,
   ...(
     [
-      ["d2", "Domain 2 · Long-horizon stability"],
       ["d3", "Domain 3 · Agentic capability"],
       ["d4", "Domain 4 · Economics and caching"],
       ["d5", "Domain 5 · Hierarchy and security"],

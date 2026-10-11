@@ -15,7 +15,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useRunsIndex } from "@/data/queries"
+import { useResultsDomain, useRunsIndex } from "@/data/queries"
 import { resolveAlias } from "@/features/d1/model/runs"
 import { buildInfo } from "@/lib/build-info"
 
@@ -25,7 +25,11 @@ export function AppSidebar() {
   const params = useParams()
   const { isMobile, setOpenMobile } = useSidebar()
   const index = useRunsIndex()
-  const currentRunId = typeof params["runId"] === "string" ? params["runId"] : null
+  const domain = useResultsDomain()
+  // Domain 1's run-scoped pages (coverage, findings) take the run in the URL when the page is one
+  // of Domain 1's; another domain's run is not theirs.
+  const currentRunId =
+    domain === "d1" && typeof params["runId"] === "string" ? params["runId"] : null
   // Run-scoped pages without a run in the URL point at the latest run, resolved from the index.
   const latest = index.data?.ok
     ? (resolveAlias(index.data.document, "latest")?.run_id ?? null)

@@ -1,7 +1,9 @@
-import { Outlet } from "react-router"
+import { Outlet, useLocation } from "react-router"
 
 import { usePageMeta, useRouteFocus } from "@/app/route-meta"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { ResultsDomainContext } from "@/data/queries"
+import { domainOfPath } from "@/lib/domains"
 
 import { AppHeader } from "./app-header"
 import { AppSidebar } from "./app-sidebar"
@@ -21,12 +23,14 @@ function sidebarDefaultOpen(): boolean {
 /**
  * The one shell (DESIGN.md 4.1): skip link, collapsible sidebar, sticky header, one main. The
  * generated SidebarInset is the `main` landmark; the page region inside it takes the skip link.
+ * The path's domain is the results domain of everything inside, the header's run picker included.
  */
 export function DashboardShell() {
   const meta = usePageMeta()
+  const { pathname } = useLocation()
   useRouteFocus(meta.documentTitle)
   return (
-    <>
+    <ResultsDomainContext.Provider value={domainOfPath(pathname)}>
       <SkipLink />
       <SidebarProvider defaultOpen={sidebarDefaultOpen()}>
         <AppSidebar />
@@ -37,6 +41,6 @@ export function DashboardShell() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </>
+    </ResultsDomainContext.Provider>
   )
 }

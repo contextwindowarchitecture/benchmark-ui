@@ -14,10 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useRunDocument } from "@/data/queries"
+import { kindIn } from "@/data/kinds"
+import { useResultsDomain, useRunDocument } from "@/data/queries"
 import { compareSuites, parseRunId, runDurationMs, type RunEntry } from "@/features/d1/model/runs"
 import { commitsOf, type RunsSortKey } from "@/features/d1/model/runs-table"
 import { ADAPTER_IDS, adapterLabel, orderAdapters } from "@/lib/adapters"
+import { DOMAIN_PAGES, useDomainPages } from "@/lib/domains"
 import { formatDuration, formatUtc, isoUtc, shortDigest } from "@/lib/format"
 
 export type RunsTableProps = {
@@ -39,11 +41,12 @@ const COLUMNS: { key: RunsSortKey | null; label: string; className?: string }[] 
 ]
 
 export function RunsTable({ runs, sort, dir, onSort }: RunsTableProps) {
+  const pages = useDomainPages()
   return (
     <TableRegion label="Runs table">
       <Table>
         <TableCaption className="sr-only">
-          Runs of Domain 1, sorted by {sort} {dir === "asc" ? "ascending" : "descending"}
+          Runs of {pages.label}, sorted by {sort} {dir === "asc" ? "ascending" : "descending"}
         </TableCaption>
         <TableHeader>
           <TableRow>
@@ -90,9 +93,12 @@ export function RunsTable({ runs, sort, dir, onSort }: RunsTableProps) {
 }
 
 function RunRow({ run }: { run: RunEntry }) {
+  const domain = useResultsDomain()
   const running = run.status === "running"
   // The run's own index, lazily: a 404 means the index lists a run the server no longer holds.
-  const runIndex = useRunDocument(run.run_id, "index.json", "run-index", { enabled: !running })
+  const runIndex = useRunDocument(run.run_id, "index.json", kindIn(domain, "run-index"), {
+    enabled: !running,
+  })
   const pruned = runIndex.isError && runIndex.error.kind === "not-found"
   const files = runIndex.data?.ok ? runIndex.data.document.files : []
   const hasCi = files.some((file) => file.path === "ci.json")
@@ -109,7 +115,7 @@ function RunRow({ run }: { run: RunEntry }) {
             <span className="font-mono text-xs">{run.run_id}</span>
           ) : (
             <Link
-              to={`/d1/runs/${run.run_id}`}
+              to={`${DOMAIN_PAGES[domain].base}/runs/${run.run_id}`}
               className="font-mono text-xs underline underline-offset-3"
             >
               {run.run_id}
@@ -191,7 +197,7 @@ function RunRow({ run }: { run: RunEntry }) {
 }
 
 function VerdictCell({ runId }: { runId: string }) {
-  const ci = useRunDocument(runId, "ci.json", "ci-report")
+  const ci = useRunDocument(runId, "ci.json", kindIn(useResultsDomain(), "ci-report"))
   if (ci.isPending) return <span className="text-xs text-muted-foreground">…</span>
   if (ci.isError || !ci.data.ok)
     return <span className="text-xs text-muted-foreground">unreadable</span>

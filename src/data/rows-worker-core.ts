@@ -3,7 +3,7 @@
 // budget never crosses into the main thread whole. Free of the Worker API, so a test drives it
 // with a fake postMessage; rows.worker.ts wires it to `self`.
 
-import type { RowKind } from "@/features/d1/model/row-kinds"
+import type { AnyRowKind as RowKind } from "./row-kinds"
 
 import { errorMessage } from "./config"
 import {

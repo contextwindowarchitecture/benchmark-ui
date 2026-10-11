@@ -14,17 +14,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useRunDocument } from "@/data/queries"
+import { kindIn, type DocumentIn } from "@/data/kinds"
+import { useResultsDomain, useRunDocument } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
-import type { CiReportV1 } from "@/data/schema/generated"
 import { driftSummary } from "@/features/d1/model/run"
+import { useDomainPages } from "@/lib/domains"
 import { formatCount, formatMetricValue, formatUtc } from "@/lib/format"
+
+/** Either domain's drift report: every producer writes it in the same frame. */
+type CiReportV1 = DocumentIn<"ci-report">
 
 export type RunDriftProps = { runId: string; listed: boolean }
 
 /** The drift summary from ci.json when the run has one (ui-plan.md 8.3). */
 export function RunDrift({ runId, listed }: RunDriftProps) {
-  const ci = useRunDocument(runId, "ci.json", "ci-report", { enabled: listed })
+  const ci = useRunDocument(runId, "ci.json", kindIn(useResultsDomain(), "ci-report"), {
+    enabled: listed,
+  })
   if (!listed) {
     const state: RegionState<never> = { status: "absent", what: "A drift report (ci.json)" }
     return (
@@ -47,6 +53,7 @@ export function RunDrift({ runId, listed }: RunDriftProps) {
 
 /** The harness's own report, as the run page and the compare page both render it. */
 export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
+  const pages = useDomainPages()
   const drift = driftSummary(ci)
   const previous = drift.previous
   return (
@@ -58,7 +65,7 @@ export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
           {previous ? (
             <>
               <Link
-                to={`/d1/runs/${previous.run_id}`}
+                to={`${pages.base}/runs/${previous.run_id}`}
                 className="font-mono underline underline-offset-3"
               >
                 {previous.run_id}
@@ -75,9 +82,9 @@ export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
             "no previous run: this is the baseline"
           )}
         </span>
-        {previous ? (
+        {previous && pages.compare ? (
           <Link
-            to={`/d1/compare?from=${previous.run_id}&to=${runId}`}
+            to={`${pages.base}/compare?from=${previous.run_id}&to=${runId}`}
             className="underline underline-offset-3"
           >
             Compare
@@ -161,7 +168,7 @@ export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
                   </TableHeader>
                   <TableBody>
                     {drift.movedMetrics.map((metric) => (
-                      <TableRow key={`${metric.id}:${metric.adapter ?? ""}`}>
+                      <TableRow key={metricKey(metric)}>
                         <TableCell>
                           <div>{metric.label}</div>
                           <div className="font-mono text-xs text-muted-foreground">
@@ -172,6 +179,7 @@ export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
                                 <AdapterMark adapter={metric.adapter} />
                               </>
                             ) : null}
+                            {armTierOf(metric)}
                           </div>
                         </TableCell>
                         <TableCell className="tabular text-right">
@@ -223,13 +231,31 @@ export function DriftReport({ runId, ci }: { runId: string; ci: CiReportV1 }) {
                 .
               </p>
             ) : (
-              <p className="text-muted-foreground">No golden drift (S12 was not in this run).</p>
+              <p className="text-muted-foreground">
+                No golden drift ({pages.goldenSuite} was not in this run).
+              </p>
             )}
           </CardContent>
         </Card>
       </div>
     </div>
   )
+}
+
+type MovedMetric = CiReportV1["metrics"][number]
+
+/** A moved metric's identity: its id with the adapter, and the arm, family and tier Domain 2 adds. */
+function metricKey(metric: MovedMetric): string {
+  const extra = "arm" in metric ? [metric.arm, metric.family, metric.tier] : []
+  return [metric.id, metric.adapter ?? "", ...extra.map((part) => part ?? "")].join(":")
+}
+
+function armTierOf(metric: MovedMetric): string {
+  if (!("arm" in metric)) return ""
+  const parts = [metric.arm, metric.family, metric.tier].filter(
+    (part): part is string => typeof part === "string" && part !== "",
+  )
+  return parts.length > 0 ? ` · ${parts.join(" · ")}` : ""
 }
 
 function FindingList({
@@ -241,6 +267,7 @@ function FindingList({
   findings: CiReportV1["findings"]["new"]
   runId?: string
 }) {
+  const pages = useDomainPages()
   return (
     <div>
       <h3 className="font-medium">{title}</h3>
@@ -250,9 +277,9 @@ function FindingList({
             <StatusBadge status={finding.severity} />
             <span className="font-mono text-xs">{finding.suite}</span>
             {finding.adapter ? <AdapterMark adapter={finding.adapter} /> : null}
-            {runId ? (
+            {runId && pages.findingPages ? (
               <Link
-                to={`/d1/runs/${runId}/findings/${finding.finding_id}`}
+                to={`${pages.base}/runs/${runId}/findings/${finding.finding_id}`}
                 className="underline-offset-3 hover:underline"
               >
                 {finding.summary}

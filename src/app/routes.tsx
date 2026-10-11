@@ -15,6 +15,8 @@ import { FindingPage } from "@/features/d1/components/finding-page"
 import { FindingsPage } from "@/features/d1/components/findings-page"
 import { RunsPage } from "@/features/d1/components/runs-page"
 import { SuitePage } from "@/features/d1/components/suite-page"
+import { D2RunPage } from "@/features/d2/components/run-page"
+import { D2SuitePage } from "@/features/d2/components/suite-page"
 
 import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
@@ -30,7 +32,6 @@ const handle = (h: RouteHandle): RouteHandle => h
 const param = (params: Record<string, string | undefined>, name: string) => params[name] ?? ""
 
 const DOMAINS: Record<string, string> = {
-  d2: "Domain 2 · Long-horizon stability",
   d3: "Domain 3 · Agentic capability",
   d4: "Domain 4 · Economics and caching",
   d5: "Domain 5 · Hierarchy and security",
@@ -209,6 +210,61 @@ export const routes: RouteObject[] = [
                 path: "compare",
                 element: <ComparePage />,
                 handle: handle({ title: () => "Compare", crumb: () => ({ label: "Compare" }) }),
+              },
+            ],
+          },
+          {
+            path: "d2",
+            handle: handle({
+              title: () => "Domain 2",
+              crumb: () => ({ label: "Domain 2", to: "/d2" }),
+            }),
+            children: [
+              {
+                index: true,
+                element: (
+                  <NotBuiltYet
+                    title="Domain 2 · Long-horizon multi-turn stability"
+                    phase="UI-D2"
+                    note="The claim, the evidence and how far to trust it."
+                  />
+                ),
+                handle: handle({ title: () => "Domain 2 overview" }),
+              },
+              {
+                path: "runs",
+                handle: handle({
+                  title: () => "Runs",
+                  crumb: () => ({ label: "Runs", to: "/d2/runs" }),
+                }),
+                children: [
+                  { index: true, element: <RunsPage />, handle: handle({ title: () => "Runs" }) },
+                  {
+                    path: ":runId",
+                    handle: handle({
+                      title: () => "Run",
+                      crumb: (p) => ({
+                        label: param(p, "runId"),
+                        to: `/d2/runs/${param(p, "runId")}`,
+                      }),
+                    }),
+                    children: [
+                      {
+                        index: true,
+                        element: <D2RunPage />,
+                        handle: handle({ title: () => "Run" }),
+                      },
+                      {
+                        path: "suites/:suite",
+                        element: <D2SuitePage />,
+                        handle: handle({
+                          title: (p) => param(p, "suite"),
+                          crumb: (p) => ({ label: param(p, "suite") }),
+                        }),
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },

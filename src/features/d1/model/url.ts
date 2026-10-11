@@ -57,14 +57,18 @@ export const coveragePageParams = {
   family: z.string().min(1).max(64),
 }
 
-/** The path of the current page with another run in place of the current one, or the run page. */
+/**
+ * The path of the current page with another run in place of the current one, or the run page, in
+ * the domain whose routes start at `base` (`/d1`, `/d2`).
+ */
 export function runScopedPath(
   pathname: string,
   currentRunId: string | undefined,
   runId: string,
+  base = "/d1",
 ): string {
-  const prefix = currentRunId ? `/d1/runs/${currentRunId}` : null
+  const prefix = currentRunId ? `${base}/runs/${currentRunId}` : null
   if (prefix && pathname.startsWith(prefix))
-    return `/d1/runs/${runId}${pathname.slice(prefix.length)}`
-  return `/d1/runs/${runId}`
+    return `${base}/runs/${runId}${pathname.slice(prefix.length)}`
+  return `${base}/runs/${runId}`
 }

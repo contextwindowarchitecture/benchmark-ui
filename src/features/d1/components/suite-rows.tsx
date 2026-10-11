@@ -375,7 +375,7 @@ export function SuiteRows({ runId, suite, kind, file, autoOpen = false }: SuiteR
   )
 }
 
-function FacetSelect({
+export function FacetSelect({
   label,
   value,
   entries,

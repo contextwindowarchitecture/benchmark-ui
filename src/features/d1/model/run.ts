@@ -2,19 +2,21 @@
 // definitions from the summary, findings grouped, the file list annotated with what this build
 // reads.
 
-import type {
-  CiReportV1,
-  FindingV1,
-  ManifestV1,
-  RunIndexV1,
-  SummaryV1,
-} from "@/data/schema/generated"
+import type { DocumentIn } from "@/data/kinds"
+import type { SummaryV1 } from "@/data/schema/generated"
 import { isKnownKind, parseSchemaString, schemaStringOf } from "@/data/validate"
 import { ADAPTER_IDS, orderAdapters } from "@/lib/adapters"
 import { formatMetricValue, formatTarget } from "@/lib/format"
 import type { MetricDefinition } from "@/lib/metric"
 
 import { compareSuites } from "./runs"
+
+// The run's frame is written in the same shape by every domain's producer, so these selectors take
+// either domain's documents; the summary's metrics differ by domain and stay Domain 1's here.
+type ManifestV1 = DocumentIn<"manifest">
+type CiReportV1 = DocumentIn<"ci-report">
+type FindingV1 = DocumentIn<"finding">
+type RunIndexV1 = DocumentIn<"run-index">
 
 export type ProvenanceWarning = { id: string; message: string }
 

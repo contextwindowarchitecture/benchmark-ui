@@ -28,7 +28,7 @@ describe("a not-started domain's page", () => {
   })
 
   it("renders every not-started domain", async () => {
-    for (const id of ["d2", "d3", "d5"]) {
+    for (const id of ["d3", "d5"]) {
       const { unmount } = renderApp(`/${id}`)
       expect(await screen.findByText("not started")).toBeInTheDocument()
       unmount()

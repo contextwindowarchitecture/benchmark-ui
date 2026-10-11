@@ -12,12 +12,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useResultsSource } from "@/data/queries"
-import type { RunIndexV1 } from "@/data/schema/generated"
+import type { DocumentIn } from "@/data/kinds"
 import { fileRows } from "@/features/d1/model/run"
 import { formatCount } from "@/lib/format"
 
 /** The run's file list from index.json, with kind, schema, rows and a download link. */
-export function RunFiles({ runId, index }: { runId: string; index: RunIndexV1 }) {
+export function RunFiles({ runId, index }: { runId: string; index: DocumentIn<"run-index"> }) {
   const source = useResultsSource()
   const rows = fileRows(index)
   return (

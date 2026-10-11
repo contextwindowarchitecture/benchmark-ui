@@ -11,22 +11,27 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useRunsIndex } from "@/data/queries"
+import { useDomainRunsIndex, useResultsDomain } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import { profilesOf } from "@/features/d1/model/runs"
 import { filterRuns, sortRuns } from "@/features/d1/model/runs-table"
 import { RUN_STATUS_VALUES, runsListParams } from "@/features/d1/model/url"
+import { DOMAIN_PAGES } from "@/lib/domains"
 import { useUrlState } from "@/lib/url-state"
 
 import { RunsTable } from "./runs-table"
 
 const ALL = "all"
 
-/** Every run of Domain 1 from the runs index (ui-plan.md 8.2): sortable, filterable, shareable. */
+/**
+ * Every run of a domain from its runs index (ui-plan.md 8.2): sortable, filterable, shareable.
+ * The route's domain decides which index; every domain writes it in the same shape.
+ */
 export function RunsPage() {
-  const index = useRunsIndex()
+  const domain = useResultsDomain()
+  const index = useDomainRunsIndex(domain)
   const [state, setState] = useUrlState(runsListParams)
-  const region = regionOfDocument(index, "d1/index.json", "the runs index")
+  const region = regionOfDocument(index, `${domain}/index.json`, "the runs index")
   const sort = state.sort ?? "started"
   const dir = state.dir ?? (sort === "started" ? "desc" : "asc")
   const profiles = index.data?.ok ? profilesOf(index.data.document) : []
@@ -34,7 +39,7 @@ export function RunsPage() {
   return (
     <DashboardPage
       title="Runs"
-      description="Every run of Domain 1 the results root holds, newest first. A run is immutable once it finishes; the index is what changes."
+      description={`Every run of ${DOMAIN_PAGES[domain].label} the results root holds, newest first. A run is immutable once it finishes; the index is what changes.`}
       width="wide"
       actions={
         <Button

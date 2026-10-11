@@ -86,9 +86,27 @@ export function formatExponent(value: number, standardError?: number | null): st
     : `${base} ± ${twoDecimals.format(standardError)}`
 }
 
+/**
+ * The units a metric is measured in: Domain 1's rates, counts, milliseconds and exponents, and
+ * Domain 2's tokens and points (a percentile score out of 100, the study's A90 and U90−10).
+ */
+export type MetricUnit = "rate" | "count" | "ms" | "exponent" | "tokens" | "points"
+
+/** A token count, which a mean makes fractional: grouped, whole: 4,691 tokens. */
+export function formatTokens(value: number): string {
+  if (!Number.isFinite(value)) return "not available"
+  return `${integer.format(value)} tokens`
+}
+
+/** Points out of 100, with one decimal: 6.8 points. */
+export function formatPoints(value: number): string {
+  if (!Number.isFinite(value)) return "not available"
+  return `${oneDecimal.format(value)} points`
+}
+
 /** A metric's value in its unit, for cards and tables (DESIGN.md 4.4). */
 export function formatMetricValue(
-  unit: "rate" | "count" | "ms" | "exponent",
+  unit: MetricUnit,
   value: number | null,
   numerator?: number | null,
   denominator?: number | null,
@@ -103,14 +121,15 @@ export function formatMetricValue(
       return formatMs(value)
     case "exponent":
       return formatExponent(value)
+    case "tokens":
+      return formatTokens(value)
+    case "points":
+      return formatPoints(value)
   }
 }
 
 /** A target in a metric's unit: "≥ 99%" for a rate floor, "≤ 0" for a count ceiling. */
-export function formatTarget(
-  unit: "rate" | "count" | "ms" | "exponent",
-  target: number | null,
-): string {
+export function formatTarget(unit: MetricUnit, target: number | null): string {
   if (target === null) return "ungated"
   switch (unit) {
     case "rate":
@@ -121,7 +140,30 @@ export function formatTarget(
       return formatMs(target)
     case "exponent":
       return formatExponent(target)
+    case "tokens":
+      return formatTokens(target)
+    case "points":
+      return formatPoints(target)
   }
+}
+
+/**
+ * An interval's bounds in the metric's unit, low to high: "71.8% to 94.3%" for a rate, where the
+ * value beside it is a percentage too; points and the other units in their own form.
+ */
+export function formatInterval(unit: MetricUnit, low: number, high: number): string {
+  if (unit === "rate") return `${formatPercent(low)} to ${formatPercent(high)}`
+  if (unit === "points") return `${oneDecimal.format(low)} to ${oneDecimal.format(high)} points`
+  return `${formatMetricValue(unit, low)} to ${formatMetricValue(unit, high)}`
+}
+
+/** A signed difference of two rates in percentage points, one decimal: +16.6 pp, −2.5 pp. */
+export function formatPointsDifference(value: number): string {
+  if (!Number.isFinite(value)) return "not available"
+  const points = value * 100
+  const text = oneDecimal.format(Math.abs(points))
+  if (text === oneDecimal.format(0)) return `±${text} pp`
+  return `${points > 0 ? "+" : "−"}${text} pp`
 }
 
 /** The first seven hex characters of a digest, with or without a `sha256:` prefix. */

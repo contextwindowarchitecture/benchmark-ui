@@ -51,6 +51,18 @@
   --status-new: var(--info);
   --status-killed: var(--success);
   --status-survived: var(--warning);
+  /* Domain 2's grades and outcomes: a stale or distractor answer is a near miss, not a wrong one. */
+  --status-correct: var(--success);
+  --status-stale: var(--warning);
+  --status-distractor: var(--warning);
+  --status-wrong: var(--failure);
+  --status-unparsed: var(--muted-foreground);
+  --status-overflow: var(--muted-foreground);
+  --status-refused: var(--muted-foreground);
+  --status-fits: var(--success);
+  --status-answered: var(--success);
+  --status-gate-failed: var(--failure);
+  --status-call-failed: var(--failure);
 
   /*
    * The four adapters, in their fixed order: Python, TypeScript, Go, Rust. Each takes one chart

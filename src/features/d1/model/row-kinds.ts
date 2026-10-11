@@ -4,6 +4,7 @@
 // promise, and the worker imports it too, so the main thread and the worker agree on what a filter
 // means.
 
+import type { RowFields } from "@/data/row-fields"
 import type { DocumentByKind } from "@/data/schema/generated"
 
 export const ROW_KINDS = [
@@ -27,28 +28,7 @@ export function isRowKind(kind: string): kind is RowKind {
   return (ROW_KINDS as readonly string[]).includes(kind)
 }
 
-/** The fields the filters, the facets, the search and the explorer link key on. */
-export type RowFields = {
-  /** The case the row judges, for the search and the answer explorer's address. */
-  caseId: string
-  /** What the search matches besides the case id: a relation, an operator, a check, a cell. */
-  searchText: string
-  /** The adapters the row names: one for a per-adapter row, every answering adapter otherwise. */
-  adapters: string[]
-  /** The row's judgment, as its kind calls it: a verdict, a status or a drift kind. */
-  verdict: string
-  /** The outcomes the row records, one per answer, de-duplicated. */
-  outcomes: string[]
-  tags: string[]
-  /** A snapshot, payload or trace blob is referenced, so the answer explorer has something to show. */
-  hasBlobs: boolean
-  /** The findings the row names. */
-  findings: string[]
-  /** The suite the row belongs to; null for the blob index. */
-  suite: string | null
-  /** A finding's oracle; null for every other kind. */
-  oracle: string | null
-}
+export type { RowFields } from "@/data/row-fields"
 
 /** What a kind calls its judgment column. */
 export const VERDICT_LABELS: Record<RowKind, string> = {
@@ -63,6 +43,9 @@ export const VERDICT_LABELS: Record<RowKind, string> = {
   finding: "Severity",
   blob: "Media type",
 }
+
+/** Domain 1's rows are per adapter, never per arm, family or tier. */
+const NO_ARM = { arm: null, family: null, tier: null } as const
 
 const isBlobRef = (value: string | null | undefined): boolean =>
   typeof value === "string" && value.startsWith("sha256:")
@@ -98,6 +81,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.finding ? [r.finding] : [],
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "determinism-row": {
@@ -115,6 +99,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.finding ? [r.finding] : [],
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "relation-row": {
@@ -134,6 +119,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.findings,
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "fuzz-row": {
@@ -150,6 +136,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.findings,
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "scale-row": {
@@ -166,6 +153,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.findings,
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "summarizer-row": {
@@ -182,6 +170,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.findings,
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "drift-row": {
@@ -197,6 +186,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: r.finding ? [r.finding] : [],
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "self-check": {
@@ -212,6 +202,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: [],
         suite: r.suite,
         oracle: null,
+        ...NO_ARM,
       }
     }
     case "finding": {
@@ -227,6 +218,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: [r.finding_id],
         suite: r.suite,
         oracle: r.oracle,
+        ...NO_ARM,
       }
     }
     case "blob": {
@@ -242,6 +234,7 @@ export function rowFields(kind: RowKind, row: RowOf<RowKind>): RowFields {
         findings: [],
         suite: null,
         oracle: null,
+        ...NO_ARM,
       }
     }
   }

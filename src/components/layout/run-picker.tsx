@@ -1,6 +1,7 @@
 import { useLocation, useNavigate, useParams } from "react-router"
 
-import { useRunsIndex } from "@/data/queries"
+import { useDomainRunsIndex, useResultsDomain } from "@/data/queries"
+import { DOMAIN_PAGES } from "@/lib/domains"
 import { profilesOf, runsOfProfile } from "@/features/d1/model/runs"
 import {
   Select,
@@ -19,10 +20,12 @@ const NONE = "none"
 
 /**
  * Profile, then run id (ui-plan.md 6.1): a view of the URL. The run is the `:runId` segment; the
- * profile filter is the runs list's `?profile=` parameter, or the current run's profile.
+ * profile filter is the runs list's `?profile=` parameter, or the current run's profile. It picks
+ * among the runs of the domain the page belongs to.
  */
 export function RunPicker() {
-  const index = useRunsIndex()
+  const domain = useResultsDomain()
+  const index = useDomainRunsIndex(domain)
   const params = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -70,7 +73,9 @@ export function RunPicker() {
       </Select>
       <Select
         value={currentRunId && runs.some((run) => run.run_id === currentRunId) ? currentRunId : ""}
-        onValueChange={(runId) => navigate(runScopedPath(location.pathname, currentRunId, runId))}
+        onValueChange={(runId) =>
+          navigate(runScopedPath(location.pathname, currentRunId, runId, DOMAIN_PAGES[domain].base))
+        }
       >
         <SelectTrigger size="sm" aria-label="Run" className="w-64 font-mono text-xs">
           <SelectValue placeholder="Pick a run" />

@@ -5,7 +5,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import type { RowKind } from "@/features/d1/model/row-kinds"
+import type { AnyRowKind as RowKind } from "./row-kinds"
 
 import { MAIN_THREAD_ROW_BUDGET, WORKER_ROW_BUDGET } from "./budgets"
 import { queryKeys, useResultsSource, useRunRows } from "./queries"

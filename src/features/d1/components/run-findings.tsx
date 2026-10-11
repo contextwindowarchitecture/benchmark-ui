@@ -17,28 +17,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useRunRows, type RowsState } from "@/data/queries"
-import type { FindingV1, RunIndexV1 } from "@/data/schema/generated"
+import { kindIn, type DocumentIn, type KindIn } from "@/data/kinds"
+import { useResultsDomain, useRunRows, type RowsState } from "@/data/queries"
+import type { SchemaDomain } from "@/data/schema/generated"
 import type { SourceError } from "@/data/source"
 import type { ParseResultOf } from "@/data/validate"
 import { groupFindings } from "@/features/d1/model/run"
 import { compareSuites } from "@/features/d1/model/runs"
+import { useDomainPages } from "@/lib/domains"
 import { formatCount } from "@/lib/format"
+
+type FindingV1 = DocumentIn<"finding">
 
 export type RunFindingsProps = {
   runId: string
-  summary: UseQueryResult<ParseResultOf<"summary">, SourceError>
+  summary: UseQueryResult<ParseResultOf<KindIn<SchemaDomain, "summary">>, SourceError>
   /** The findings file as the run index lists it; undefined when the run has none. */
-  findingsFile: RunIndexV1["files"][number] | undefined
+  findingsFile: DocumentIn<"run-index">["files"][number] | undefined
 }
 
 /** Findings by suite and severity, from the summary's totals and findings.jsonl (ui-plan.md 8.3). */
 export function RunFindings({ runId, summary, findingsFile }: RunFindingsProps) {
   const totals = summary.data?.ok ? summary.data.document.findings : null
-  const rows = useRunRows(runId, findingsFile?.path ?? "findings.jsonl", "finding", {
-    enabled: findingsFile !== undefined && (totals === null || totals.total > 0),
-    expectedRows: findingsFile?.rows,
-  })
+  const rows = useRunRows(
+    runId,
+    findingsFile?.path ?? "findings.jsonl",
+    kindIn(useResultsDomain(), "finding"),
+    {
+      enabled: findingsFile !== undefined && (totals === null || totals.total > 0),
+      expectedRows: findingsFile?.rows,
+    },
+  )
 
   if (summary.isPending) return <Skeleton className="h-24 w-full" aria-label="Loading findings" />
   if (totals !== null && totals.total === 0) {
@@ -62,7 +71,7 @@ export function RunFindings({ runId, summary, findingsFile }: RunFindingsProps) 
     )
   }
 
-  const region: RegionState<RowsState<"finding">> = rows.isPending
+  const region: RegionState<RowsState<KindIn<SchemaDomain, "finding">>> = rows.isPending
     ? { status: "loading" }
     : rows.isError
       ? rows.error.kind === "not-found"
@@ -177,6 +186,7 @@ function GroupRows({
   runId: string
   group: ReturnType<typeof groupFindings>[number]
 }) {
+  const pages = useDomainPages()
   return (
     <>
       <TableRow className="border-t-2 hover:bg-transparent">
@@ -220,12 +230,16 @@ function GroupRows({
             ) : null}
           </TableCell>
           <TableCell className="max-w-md align-top text-sm">
-            <Link
-              to={`/d1/runs/${runId}/findings/${finding.finding_id}`}
-              className="underline-offset-3 hover:underline"
-            >
-              {finding.summary}
-            </Link>
+            {pages.findingPages ? (
+              <Link
+                to={`${pages.base}/runs/${runId}/findings/${finding.finding_id}`}
+                className="underline-offset-3 hover:underline"
+              >
+                {finding.summary}
+              </Link>
+            ) : (
+              finding.summary
+            )}
             <div className="mt-0.5 font-mono text-xs text-muted-foreground">
               {finding.finding_id} · {finding.case_id}
             </div>
