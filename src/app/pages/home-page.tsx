@@ -1,8 +1,9 @@
 // The home page (ui-plan.md 8.11; DESIGN.md 4.5): what CWA is, what the benchmark tests, and how
-// to read the results. Words from the content files, every number from the runs index and the
-// composite's two summaries.
+// to read the results. Words from the content files, every number from the runs indexes, Domain
+// 1's composite's two summaries and Domain 2's latest run's.
 
 import { ArrowRight } from "lucide-react"
+import type { ReactNode } from "react"
 import { Link } from "react-router"
 
 import { DashboardPage, PageSection } from "@/components/dashboard/dashboard-page"
@@ -12,7 +13,12 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DOMAINS, HOW_TO_READ, sourceUrl, WHAT_CWA_IS, type DomainContent } from "@/content"
-import { useRunDocument, useRunsIndex } from "@/data/queries"
+import {
+  ResultsDomainContext,
+  useDomainRunsIndex,
+  useRunDocument,
+  useRunsIndex,
+} from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { RunsIndexV1 } from "@/data/schema/generated"
 import { ModelDiagram } from "@/features/d1/components/diagrams/model-diagram"
@@ -58,7 +64,7 @@ export function HomePage() {
       <PageSection
         id="domains"
         title="What the benchmark tests"
-        description="Five domains, each designed to establish one thing about CWA. Only the first has results so far."
+        description="Five domains, each designed to establish one thing about CWA. The first two have results so far."
       >
         <DataRegion
           state={region}
@@ -107,21 +113,30 @@ function DomainCards({ index }: { index: RunsIndexV1 }) {
   return (
     <ul className="grid gap-3 md:grid-cols-2">
       {DOMAINS.map((domain) => (
-        <li key={domain.id} className={domain.id === "d1" ? "md:col-span-2" : undefined}>
-          <DomainCard domain={domain} composite={domain.id === "d1" ? composite : undefined} />
+        <li
+          key={domain.id}
+          className={domain.id === "d1" || domain.id === "d2" ? "md:col-span-2" : undefined}
+        >
+          <DomainCard
+            domain={domain}
+            headline={
+              domain.id === "d1" ? (
+                <Domain1Headline composite={composite} />
+              ) : domain.id === "d2" ? (
+                // The home page is no domain's: this card reads Domain 2's results.
+                <ResultsDomainContext.Provider value="d2">
+                  <Domain2Headline />
+                </ResultsDomainContext.Provider>
+              ) : null
+            }
+          />
         </li>
       ))}
     </ul>
   )
 }
 
-function DomainCard({
-  domain,
-  composite,
-}: {
-  domain: DomainContent
-  composite: Composite | undefined
-}) {
+function DomainCard({ domain, headline }: { domain: DomainContent; headline: ReactNode }) {
   return (
     <Card className="h-full" data-domain={domain.id}>
       <CardHeader>
@@ -129,18 +144,18 @@ function DomainCard({
           <Link to={`/${domain.id}`} className="underline-offset-3 hover:underline">
             Domain {domain.number} · {domain.title}
           </Link>
-          {composite ? null : <Badge variant="outline">not started</Badge>}
+          {headline ? null : <Badge variant="outline">not started</Badge>}
         </CardTitle>
         <CardDescription>{domain.claim}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        {composite ? <Domain1Headline composite={composite} /> : null}
+        {headline}
         <p>
           <Link
             to={`/${domain.id}`}
             className="inline-flex items-center gap-1 underline underline-offset-3"
           >
-            {composite ? "The overview" : "The domain's design"}{" "}
+            {headline ? "The overview" : "The domain's design"}{" "}
             <ArrowRight aria-hidden="true" className="size-3.5" />
           </Link>
         </p>
@@ -193,6 +208,57 @@ function Domain1Headline({ composite }: { composite: Composite }) {
     <div className="space-y-1">
       {line("Nightly", nightly, nightlySummary)}
       {line("S7", s7, s7Summary)}
+    </div>
+  )
+}
+
+/** Domain 2's latest run from its own index: its status and how many suites pass. */
+function Domain2Headline() {
+  const index = useDomainRunsIndex("d2")
+  const latest = index.data?.ok ? resolveAlias(index.data.document, "latest") : undefined
+  const summary = useRunDocument(latest?.run_id, "summary.json", "d2/summary")
+  if (index.isPending) return <Skeleton className="h-5 w-72" aria-label="Loading Domain 2's runs" />
+  if (!index.data?.ok) {
+    return (
+      <p className="text-muted-foreground" data-state="unreadable">
+        Domain 2's runs index could not be read.
+      </p>
+    )
+  }
+  if (!latest) {
+    return (
+      <p className="text-muted-foreground" data-state="empty">
+        No finished run yet.{" "}
+        <Link to="/d2/runs" className="underline underline-offset-3">
+          The runs list
+        </Link>{" "}
+        shows what exists.
+      </p>
+    )
+  }
+  const passing = summary.data?.ok
+    ? {
+        passed: summary.data.document.suites.filter((suite) => suite.status === "pass").length,
+        total: summary.data.document.suites.length,
+      }
+    : null
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1" data-run={latest.run_id}>
+      <span className="text-muted-foreground">Latest</span>
+      <Link to={`/d2/runs/${latest.run_id}`} className="font-mono underline underline-offset-3">
+        {latest.run_id}
+      </Link>
+      <StatusBadge status={latest.status} />
+      <time dateTime={isoUtc(latest.started_at)} className="text-muted-foreground">
+        {formatUtc(latest.started_at)}
+      </time>
+      {passing ? (
+        <span className="tabular">
+          {formatCount(passing.passed)} of {formatCount(passing.total)} suites pass
+        </span>
+      ) : summary.isPending ? (
+        <Skeleton className="h-4 w-28" aria-label="Loading the suites" />
+      ) : null}
     </div>
   )
 }

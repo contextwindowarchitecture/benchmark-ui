@@ -6,6 +6,15 @@ import { DOMAIN_2_WRITE_UP, type Citation } from "../source"
 
 export type Note = { id: string; title: string; text: string }
 
+/** The one question the domain asks, and what it holds equal to ask it. */
+export const QUESTION = {
+  question:
+    "Over a long multi-turn task, does a model given CWA-assembled context keep doing the task where a model given conventionally assembled context degrades, with everything else held equal?",
+  heldEqual:
+    "The model, its settings, the facts, the user's turns, the budget, the token counter and the grader are the same in every arm; only the way the payload is built changes.",
+  citation: { file: DOMAIN_2_WRITE_UP } satisfies Citation,
+} as const
+
 /**
  * What the write-up concludes, for the run it reports. The panels beside these show the records
  * of whichever runs the page reads, which may not be that run.

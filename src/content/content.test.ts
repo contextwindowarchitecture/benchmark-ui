@@ -22,6 +22,7 @@ import {
   CONCLUSIONS as D2_CONCLUSIONS,
   CORRECTIONS as D2_CORRECTIONS,
   JUDGING as D2_JUDGING,
+  QUESTION as D2_QUESTION,
   SCOPE as D2_SCOPE,
   TRUST as D2_TRUST,
 } from "./d2/trust"
@@ -196,6 +197,8 @@ describe("the content files", () => {
         (note) => `${note.title} ${note.text}`,
       ),
       D2_CONCLUSION,
+      D2_QUESTION.question,
+      D2_QUESTION.heldEqual,
       ...D2_SCOPE.measures,
       ...D2_SCOPE.doesNot,
     ]

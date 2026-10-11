@@ -3,6 +3,12 @@
 
 import { lazy } from "react"
 
+export const D2OverviewPage = lazy(() =>
+  import("@/features/d2/components/overview/overview-page").then((module) => ({
+    default: module.D2OverviewPage,
+  })),
+)
+
 export const OverviewPage = lazy(() =>
   import("@/features/d1/components/overview/overview-page").then((module) => ({
     default: module.OverviewPage,

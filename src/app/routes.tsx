@@ -22,7 +22,7 @@ import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
 import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
-import { OverviewPage } from "./pages/lazy-pages"
+import { D2OverviewPage, OverviewPage } from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
 import { RouteErrorPage } from "./pages/route-error-page"
 import type { RouteHandle } from "./route-meta"
@@ -223,11 +223,16 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: (
-                  <NotBuiltYet
-                    title="Domain 2 · Long-horizon multi-turn stability"
-                    phase="UI-D2"
-                    note="The claim, the evidence and how far to trust it."
-                  />
+                  <Suspense
+                    fallback={
+                      <PageFallback
+                        title="Domain 2 · Long-horizon multi-turn stability and context drift"
+                        width="wide"
+                      />
+                    }
+                  >
+                    <D2OverviewPage />
+                  </Suspense>
                 ),
                 handle: handle({ title: () => "Domain 2 overview" }),
               },

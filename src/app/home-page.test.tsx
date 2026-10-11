@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 describe("home page", () => {
@@ -31,7 +31,15 @@ describe("home page", () => {
     expect(within(d1).getByText("1 of 1 suites pass")).toBeInTheDocument()
     expect(within(d1).getByRole("link", { name: /The overview/ })).toHaveAttribute("href", "/d1")
 
-    expect(screen.getAllByText("not started")).toHaveLength(4)
+    const d2 = document.querySelector('[data-domain="d2"]') as HTMLElement
+    expect(await within(d2).findByRole("link", { name: D2_FIXTURE_RUNS.nightly })).toHaveAttribute(
+      "href",
+      `/d2/runs/${D2_FIXTURE_RUNS.nightly}`,
+    )
+    await waitFor(() => expect(within(d2).getByText("8 of 8 suites pass")).toBeInTheDocument())
+    expect(within(d2).getByRole("link", { name: /The overview/ })).toHaveAttribute("href", "/d2")
+
+    expect(screen.getAllByText("not started")).toHaveLength(3)
     expect(screen.getByRole("link", { name: /Domain 5 · Instruction hierarchy/ })).toHaveAttribute(
       "href",
       "/d5",
@@ -44,6 +52,10 @@ describe("home page", () => {
     expect(screen.getByRole("link", { name: "The Domain 1 write-up" })).toHaveAttribute(
       "href",
       expect.stringContaining("/blob/091eb9fbaa736e6fece66932360f20b678dcb2b8/docs/domain1.md"),
+    )
+    expect(screen.getByRole("link", { name: "The Domain 2 write-up" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("/docs/domain2.md"),
     )
   })
 

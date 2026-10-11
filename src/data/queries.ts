@@ -78,10 +78,10 @@ async function parseAs<K extends SchemaKind>(json: unknown, kind: K): Promise<Pa
 /** The kind of a domain's runs index. */
 export type RunsIndexKind = "runs-index" | "d2/runs-index"
 
-const RUNS_INDEX_KIND: Record<ResultsDomain, RunsIndexKind> = {
+const RUNS_INDEX_KIND = {
   d1: "runs-index",
   d2: "d2/runs-index",
-}
+} as const satisfies Record<ResultsDomain, RunsIndexKind>
 
 /** The query for a domain's runs index, shared by useRunsIndex and useDomainRunsIndex. */
 function runsIndexOptions<K extends RunsIndexKind>(source: ResultsSource, kind: K) {
@@ -157,6 +157,17 @@ export function useRunDocuments<K extends SchemaKind>(
       ...runDocumentOptions(source, runId ?? "", path, kind),
       enabled: runId !== undefined,
     })),
+  }) as UseQueryResult<ParseResultOf<K>, SourceError>[]
+}
+
+/** Documents of one kind from several runs at once (an overview's composite), each its own query. */
+export function useDocumentsOfRuns<K extends SchemaKind>(
+  documents: readonly { runId: string; path: string }[],
+  kind: K,
+): UseQueryResult<ParseResultOf<K>, SourceError>[] {
+  const source = useResultsSource()
+  return useQueries({
+    queries: documents.map(({ runId, path }) => runDocumentOptions(source, runId, path, kind)),
   }) as UseQueryResult<ParseResultOf<K>, SourceError>[]
 }
 

@@ -6,6 +6,7 @@ import { expect, test, type Page } from "@playwright/test"
 
 const NIGHTLY = "20261008T133453Z-691b414"
 const FAILING = "20261008T004213Z-e824f1b"
+const D2_NIGHTLY = "20261011T161204Z-9c870cd"
 
 // The preview server sends the production Content Security Policy; a violation is a console error
 // in Chromium, and one anywhere on these pages fails the test.
@@ -186,4 +187,47 @@ test("the overview respects reduced motion: no playback, the final state shown",
   await expect(page.getByRole("button", { name: "Play" })).toHaveCount(0)
   await expect(page.locator('[data-walk-step="41"]')).toBeVisible()
   await expect(page.getByRole("img", { name: /Shedding curve/ })).toBeVisible()
+})
+
+test("Domain 2's overview, runs, run page and a suite page render from its fixture", async ({
+  page,
+}) => {
+  await page.goto("/d2")
+  await expect(page).toHaveTitle("Domain 2 overview · CWA benchmark")
+  await expect(page.getByRole("region", { name: "Runs read" })).toBeVisible()
+  await expect(
+    page.getByRole("img", { name: /^Correct answers per arm at 8,192 tokens/ }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("img", { name: /^Prompt tokens per correct answer at 8,192 tokens/ }),
+  ).toBeVisible()
+  await expect(page.locator("[data-chart=tier-lines] [data-panel=cwa-ranked]")).toBeVisible()
+  await expect(page.locator('[data-metric="s1.agreement"]')).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  await page.getByRole("link", { name: "Runs", exact: true }).nth(1).click()
+  await expect(page).toHaveURL(/\/d2\/runs$/)
+  await expect(page.locator(`tr[data-run="${D2_NIGHTLY}"]`).getByText("changed")).toBeVisible()
+  await expectAccessible(page)
+
+  await page.locator(`tr[data-run="${D2_NIGHTLY}"]`).getByRole("link", { name: D2_NIGHTLY }).click()
+  await expect(page.getByRole("heading", { level: 1, name: D2_NIGHTLY })).toBeFocused()
+  await expect(page.getByText("459 metrics")).toBeVisible()
+  await expect(page.getByRole("link", { name: "Download summary.json" })).toHaveAttribute(
+    "href",
+    `/results/d2/${D2_NIGHTLY}/summary.json`,
+  )
+  await expectNoOverflow(page)
+  await expectAccessible(page)
+
+  await page.getByRole("link", { name: /S2 · Scripted conversations/ }).click()
+  await expect(
+    page.getByRole("heading", { level: 1, name: "S2 · Scripted conversations" }),
+  ).toBeFocused()
+  await expect(page.getByRole("region", { name: "Correct answers by arm and tier" })).toBeVisible()
+  await page.getByRole("button", { name: "Load the rows" }).click()
+  await expect(page.getByText("12 rows")).toBeVisible()
+  await expectNoOverflow(page)
+  await expectAccessible(page)
 })
