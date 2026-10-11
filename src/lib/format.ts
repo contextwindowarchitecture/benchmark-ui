@@ -98,6 +98,12 @@ export function formatTokens(value: number): string {
   return `${integer.format(value)} tokens`
 }
 
+/** A mean token count, with one decimal: 5.2 tokens. */
+export function formatMeanTokens(value: number): string {
+  if (!Number.isFinite(value)) return "not available"
+  return `${oneDecimal.format(value)} tokens`
+}
+
 /** Points out of 100, with one decimal: 6.8 points. */
 export function formatPoints(value: number): string {
   if (!Number.isFinite(value)) return "not available"
@@ -164,6 +170,16 @@ export function formatPointsDifference(value: number): string {
   const text = oneDecimal.format(Math.abs(points))
   if (text === oneDecimal.format(0)) return `±${text} pp`
   return `${points > 0 ? "+" : "−"}${text} pp`
+}
+
+/** An interval of a difference of rates, in percentage points: −29.0 to −9.6 pp. */
+export function formatPointsDifferenceInterval(low: number, high: number): string {
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return "not available"
+  const signed = (value: number) => {
+    const text = oneDecimal.format(Math.abs(value * 100))
+    return text === oneDecimal.format(0) ? text : `${value * 100 > 0 ? "+" : "−"}${text}`
+  }
+  return `${signed(low)} to ${signed(high)} pp`
 }
 
 /** The first seven hex characters of a digest, with or without a `sha256:` prefix. */

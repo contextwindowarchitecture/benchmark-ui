@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { d2Document } from "@/test/d2-fixture"
 import { D2_FIXTURE_RUNS } from "@/test/fixture-fetch"
 
-import { openBlocksOf, suiteRowFiles } from "./suite"
+import { suiteRowFiles } from "./suite"
 
 const run = D2_FIXTURE_RUNS.nightly
 const index = () => d2Document(`${run}/index.json`, "d2/run-index")
@@ -30,18 +30,5 @@ describe("a suite's row files", () => {
     ])
     expect(suiteRowFiles(index(), "S5")).toEqual([])
     expect(suiteRowFiles(index(), "S2")[0]?.rows).toBe(12)
-  })
-
-  it("name the summary's open blocks", () => {
-    expect(openBlocksOf(d2Document(`${run}/suites/S2/summary.json`, "d2/suite-summary"))).toEqual([
-      "model",
-      "by_arm",
-    ])
-    expect(openBlocksOf(d2Document(`${run}/suites/S5/summary.json`, "d2/suite-summary"))).toEqual([
-      "cost",
-    ])
-    expect(openBlocksOf(d2Document(`${run}/suites/S0/summary.json`, "d2/suite-summary"))).toEqual(
-      [],
-    )
   })
 })

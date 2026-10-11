@@ -1,8 +1,8 @@
 // Pure selectors for a Domain 2 suite page (the UI-D2 plan): which of the run's row files belong
-// to the suite, as the run index lists them with their kind and row count, and which of the suite
-// summary's blocks this viewer does not read yet.
+// to the suite, as the run index lists them with their kind and row count, and which script
+// indexes a run lists. The suite summary's typed blocks are read in blocks.ts.
 
-import type { D2RunIndexV1, D2SuiteSummaryV1 } from "@/data/schema/generated"
+import type { D2RunIndexV1 } from "@/data/schema/generated"
 import { parseSchemaString } from "@/data/validate"
 
 import { isD2RowKind, type D2RowKind } from "./row-kinds"
@@ -39,13 +39,6 @@ export function suiteRowFiles(
       return [{ path: file.path, kind: ref.kind, rows: file.rows, description: file.description }]
     })
     .sort((a, b) => rank(a.path) - rank(b.path) || a.path.localeCompare(b.path))
-}
-
-/** The suite summary's blocks the schema leaves open, which this viewer does not read. */
-export const OPEN_BLOCKS = ["model", "by_arm", "cost"] as const
-
-export function openBlocksOf(summary: D2SuiteSummaryV1): string[] {
-  return OPEN_BLOCKS.filter((block) => summary[block] !== undefined)
 }
 
 /** The scripts and corpora a run's index lists, by the kind it names them with. */

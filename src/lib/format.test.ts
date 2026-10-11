@@ -7,11 +7,13 @@ import {
   formatDuration,
   formatExponent,
   formatInterval,
+  formatMeanTokens,
   formatMetricValue,
   formatMs,
   formatPercent,
   formatPoints,
   formatPointsDifference,
+  formatPointsDifferenceInterval,
   formatRate,
   formatTarget,
   formatTokens,
@@ -120,5 +122,19 @@ describe("Domain 2's units", () => {
     expect(formatPointsDifference(-0.025)).toBe("−2.5 pp")
     expect(formatPointsDifference(0.0001)).toBe("±0.0 pp")
     expect(formatPointsDifference(Number.POSITIVE_INFINITY)).toBe("not available")
+  })
+
+  it("keeps one decimal of a mean token count", () => {
+    expect(formatMeanTokens(5.2)).toBe("5.2 tokens")
+    expect(formatMeanTokens(9.75)).toBe("9.8 tokens")
+    expect(formatMeanTokens(Number.NaN)).toBe("not available")
+  })
+
+  it("signs both bounds of a difference's interval, zero unsigned", () => {
+    expect(formatPointsDifferenceInterval(-0.289524, -0.095588)).toBe("−29.0 to −9.6 pp")
+    expect(formatPointsDifferenceInterval(0.051051, 0.279835)).toBe("+5.1 to +28.0 pp")
+    expect(formatPointsDifferenceInterval(0, 0)).toBe("0.0 to 0.0 pp")
+    expect(formatPointsDifferenceInterval(-0.02069, 0.011905)).toBe("−2.1 to +1.2 pp")
+    expect(formatPointsDifferenceInterval(Number.NaN, 0)).toBe("not available")
   })
 })

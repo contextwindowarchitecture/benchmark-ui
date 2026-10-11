@@ -13,8 +13,12 @@ export const d2RunPageParams = {
   q: z.string().max(200),
 }
 
-/** A suite page's rows: the file, and each filter a value the file's facets offer. */
+/**
+ * A suite page's rows (the file, and each filter a value the file's facets offer) and, as `at`,
+ * the tier its breakdowns by family, turn count, rule, kind and format are read at.
+ */
 export const d2SuitePageParams = {
+  at: NAME,
   file: z.string().min(1).max(200),
   arm: NAME,
   family: NAME,
