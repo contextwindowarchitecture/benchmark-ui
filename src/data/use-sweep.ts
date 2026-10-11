@@ -1,11 +1,13 @@
 // A sweep's compact summary for a page (ui-plan.md 9.1): loaded whole in a worker under the
 // whole-file budget, so the frames' item lists stay there; on the main thread where no Worker
 // exists (jsdom), through the source like any document. One worker per sweep for the session,
-// like the query cache: a run is immutable.
+// like the query cache: a run is immutable. The viewer also asks the same worker for each frame's
+// item states (useSweepFrames), which it builds from the document it kept.
 
 import { useQuery } from "@tanstack/react-query"
 
 import { summarizeSweep, type SweepSummary } from "@/features/d1/model/sweep-curve"
+import { sweepFrames, type SweepFrames } from "@/features/d1/model/sweep-frames"
 
 import { WHOLE_FILE_BYTES } from "./budgets"
 import { queryKeys, useResultsSource } from "./queries"
@@ -25,7 +27,12 @@ export type SweepHandle =
 
 const hasWorker = () => typeof Worker === "function"
 
-type WorkerStore = { loaded: Promise<SweepLoadResult>; dispose(): void }
+type WorkerStore = {
+  loaded: Promise<SweepLoadResult>
+  /** The frames' item states; null when the sweep did not load. */
+  frames(): Promise<SweepFrames | null>
+  dispose(): void
+}
 
 const stores = new Map<string, WorkerStore>()
 
@@ -37,10 +44,19 @@ function workerStore(key: string, url: string): WorkerStore {
   const loaded = new Promise<SweepLoadResult>((resolve) => {
     settle = resolve
   })
+  const pending = new Map<number, (frames: SweepFrames | null) => void>()
+  let nextId = 1
   worker.onmessage = (event: MessageEvent<SweepResponse>) => {
-    if (event.data.type === "loaded") settle(event.data.result)
+    const message = event.data
+    if (message.type === "loaded") settle(message.result)
+    else {
+      pending.get(message.id)?.(message.frames)
+      pending.delete(message.id)
+    }
   }
-  worker.onerror = (event) =>
+  worker.onerror = (event) => {
+    for (const resolve of pending.values()) resolve(null)
+    pending.clear()
     settle({
       ok: false,
       reason: "error",
@@ -51,10 +67,21 @@ function workerStore(key: string, url: string): WorkerStore {
         status: null,
       },
     })
+  }
   const request: SweepRequest = { type: "load", url, budget: WHOLE_FILE_BYTES }
   worker.postMessage(request)
   const store: WorkerStore = {
     loaded,
+    async frames() {
+      const result = await loaded
+      if (!result.ok) return null
+      const id = nextId++
+      return new Promise<SweepFrames | null>((resolve) => {
+        pending.set(id, resolve)
+        const ask: SweepRequest = { type: "frames", id }
+        worker.postMessage(ask)
+      })
+    },
     dispose() {
       worker.terminate()
       stores.delete(key)
@@ -144,4 +171,47 @@ export function useSweep(
       }
     }
   }
+}
+
+export type SweepFramesHandle =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error"; error: SourceError | null; retry: () => void }
+  | { status: "ready"; frames: SweepFrames }
+
+/**
+ * Each frame's item states for the viewer's item strip, from the worker that holds the sweep, or on
+ * the main thread where no Worker exists. Asked only once the sweep's summary has loaded, so every
+ * failure of the file itself is the summary's state; this one says only that the frames are missing.
+ */
+export function useSweepFrames(
+  runId: string | undefined,
+  path: string | undefined,
+  options: { enabled?: boolean } = {},
+): SweepFramesHandle {
+  const source = useResultsSource()
+  const enabled = (options.enabled ?? true) && runId !== undefined && path !== undefined
+  const key = `${source.root}|${source.domain}|${runId ?? ""}|${path ?? ""}`
+  const url = runId && path ? source.url(runId, path) : ""
+  const viaWorker = hasWorker()
+  const query = useQuery<SweepFrames | null, SourceError>({
+    queryKey: [...queryKeys.document(source, runId ?? "", path ?? ""), "sweep-frames"],
+    queryFn: async ({ signal }) => {
+      if (viaWorker) return workerStore(key, url).frames()
+      const parsed = parseDocumentAs(
+        await source.document(runId ?? "", path ?? "", signal),
+        "sweep",
+      )
+      return parsed.ok ? sweepFrames(parsed.document) : null
+    },
+    enabled,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  })
+  if (!enabled) return { status: "idle" }
+  if (query.isPending) return { status: "loading" }
+  if (query.isError)
+    return { status: "error", error: query.error, retry: () => void query.refetch() }
+  if (!query.data) return { status: "error", error: null, retry: () => void query.refetch() }
+  return { status: "ready", frames: query.data }
 }

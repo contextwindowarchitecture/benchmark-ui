@@ -1,17 +1,19 @@
 // The worker's half of a budget sweep (ui-plan.md 5.4, 9.1): fetch one sweep file whole, under the
 // whole-file budget, validate it, and answer the compact summary (one point per frame, the shedding
 // list), so the 4 to 20 MB of item lists never cross into the main thread. The document stays here
-// for the shedding viewer's frame queries (UI-P4). Free of the Worker API, so a test drives it with
-// a fake postMessage; sweep.worker.ts wires it to `self`.
+// for the shedding viewer's frames query: each frame's item states, one byte per item. Free of the
+// Worker API, so a test drives it with a fake postMessage; sweep.worker.ts wires it to `self`.
 
 import { summarizeSweep, type SweepSummary } from "@/features/d1/model/sweep-curve"
+import { sweepFrames, type SweepFrames } from "@/features/d1/model/sweep-frames"
 
 import { errorMessage } from "./config"
 import type { SerializedSourceError } from "./rows-worker-core"
 import type { SweepV1 } from "./schema/generated"
 import { parseDocumentAs, schemaStringOf, type ValidationIssue } from "./validate"
 
-export type SweepRequest = { type: "load"; url: string; budget: number }
+export type SweepRequest =
+  { type: "load"; url: string; budget: number } | { type: "frames"; id: number }
 
 export type SweepLoadResult =
   | { ok: true; summary: SweepSummary; bytes: number }
@@ -20,7 +22,10 @@ export type SweepLoadResult =
   | { ok: false; reason: "invalid"; issues: ValidationIssue[] }
   | { ok: false; reason: "error"; error: SerializedSourceError }
 
-export type SweepResponse = { type: "loaded"; result: SweepLoadResult }
+/** The frames of the loaded sweep; null when no sweep loaded (the load's own result says why). */
+export type SweepResponse =
+  | { type: "loaded"; result: SweepLoadResult }
+  | { type: "frames"; id: number; frames: SweepFrames | null }
 
 type Fetched = { result: SweepLoadResult; document: SweepV1 | null }
 
@@ -90,15 +95,21 @@ export function createSweepWorkerCore(
   post: (response: SweepResponse) => void,
   fetchFn: typeof fetch = fetch,
 ): (request: SweepRequest) => Promise<void> {
-  // The whole document, kept for the viewer's frame queries once UI-P4 adds them.
+  // The whole document, kept for the viewer's frames query; the frames are built once, on asking.
   let document: SweepV1 | null = null
+  let frames: SweepFrames | null = null
   return async (request) => {
     switch (request.type) {
       case "load": {
         const fetched = await fetchSweep(request.url, request.budget, fetchFn)
         document = fetched.document
-        void document
+        frames = null
         post({ type: "loaded", result: fetched.result })
+        return
+      }
+      case "frames": {
+        if (document && !frames) frames = sweepFrames(document)
+        post({ type: "frames", id: request.id, frames })
         return
       }
     }

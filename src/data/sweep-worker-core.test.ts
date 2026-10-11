@@ -15,13 +15,35 @@ describe("the sweep worker core", () => {
     const handle = createSweepWorkerCore((response) => posted.push(response), fixtureFetch())
     await handle({ type: "load", url, budget: WHOLE_FILE_BYTES })
     expect(posted).toHaveLength(1)
-    const result = posted[0]!.result
+    const response = posted[0]!
+    if (response.type !== "loaded") throw new Error(response.type)
+    const result = response.result
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(result.bytes).toBeGreaterThan(10_000)
     expect(result.summary.full).toBe(2104)
     expect(result.summary.curves).toHaveLength(4)
     expect(result.summary.curves[0]!.points).toHaveLength(16)
+  })
+
+  it("answers each frame's item states once the sweep is loaded, and null before", async () => {
+    const posted: SweepResponse[] = []
+    const handle = createSweepWorkerCore((response) => posted.push(response), fixtureFetch())
+    await handle({ type: "frames", id: 1 })
+    expect(posted[0]).toEqual({ type: "frames", id: 1, frames: null })
+    await handle({ type: "load", url, budget: WHOLE_FILE_BYTES })
+    await handle({ type: "frames", id: 2 })
+    const response = posted[2]!
+    if (response.type !== "frames" || !response.frames) throw new Error("no frames")
+    expect(response.id).toBe(2)
+    expect(response.frames.items).toHaveLength(42)
+    expect(response.frames.adapters.map((a) => a.adapter)).toEqual([
+      "python",
+      "typescript",
+      "go",
+      "rust",
+    ])
+    expect(response.frames.adapters[0]!.states).toHaveLength(16 * 42)
   })
 
   it("stops at the whole-file budget", async () => {
