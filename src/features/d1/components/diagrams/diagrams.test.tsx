@@ -12,6 +12,7 @@ import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
 import { EnvironmentDiagram } from "./environment-diagram"
 import { environmentLayout } from "./environment-geometry"
 import { ModelDiagram } from "./model-diagram"
+import { modelLayout } from "./model-geometry"
 import { OraclesDiagram } from "./oracles-diagram"
 import { ANSWER, BOX_HEIGHT, oraclesLayout } from "./oracles-geometry"
 import { PipelineDiagram } from "./pipeline-diagram"
@@ -121,6 +122,53 @@ describe("the diagrams on a narrow screen", () => {
     const wider = environmentLayout(groups, 330)
     expect(wider.columns.map((column) => column.y)).toEqual([1, 1, wider.columns[2]!.y])
     expect(wider.width * 0.85).toBeLessThanOrEqual(330)
+  })
+
+  it("keep the four planes side by side on a laptop and pair them on a phone", async () => {
+    const contract = await document("contract.json", "contract")
+    const slots = planeGroups(contract).map((group) => group.slots.length)
+    expect(slots).toEqual([4, 2, 2, 3])
+    const unmeasured = modelLayout(slots, 0)
+    expect(unmeasured).toMatchObject({ width: 758, height: 252, banded: false })
+    expect(unmeasured.columns.map((column) => column.y)).toEqual([1, 1, 1, 1])
+    // A 1280 px laptop's frame (547 px) still holds all four, shrunk.
+    expect(modelLayout(slots, 547)).toEqual(unmeasured)
+    // Room for three goes two and two rather than three and one.
+    const three = modelLayout(slots, 450)
+    expect(three.columns.map((column) => column.x)).toEqual([1, 193, 1, 193])
+    // A 375 px phone's frame pairs them, each band as tall as its fullest plane.
+    const phone = modelLayout(slots, 311)
+    expect(phone).toMatchObject({ width: 374, banded: true })
+    expect(phone.width * 0.7).toBeLessThanOrEqual(311)
+    expect(phone.columns.map((column) => [column.x, column.y, column.height])).toEqual([
+      [1, 1, 250],
+      [193, 1, 250],
+      [1, 265, 202],
+      [193, 265, 202],
+    ])
+    expect(phone.height).toBe(468)
+    // A 320 px phone's frame takes them one under another, at full size.
+    const narrow = modelLayout(slots, 256)
+    expect(narrow.width).toBeLessThanOrEqual(256)
+    expect(narrow.columns.map((column) => column.x)).toEqual([1, 1, 1, 1])
+  })
+
+  it("draw the planes in bands when the frame measures a phone's width", async () => {
+    const contract = await document("contract.json", "contract")
+    const measure = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({ width: 311 } as DOMRect)
+    try {
+      render(<ModelDiagram contract={contract} runId={FIXTURE_RUNS.nightly} />)
+      const figure = screen.getByRole("figure", { name: /The model: four planes/ })
+      expect(figure.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 374 468")
+      expect(figure.querySelector('[data-plane="evidence"]')?.getAttribute("transform")).toBe(
+        "translate(1,265)",
+      )
+      expect(figure.querySelectorAll("[data-slot]")).toHaveLength(11)
+    } finally {
+      measure.mockRestore()
+    }
   })
 
   it("stack the oracles on a spine from the answer where the radial picture would not read", () => {

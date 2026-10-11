@@ -3,8 +3,10 @@ import { useState } from "react"
 import { VOCABULARY_CITATION, type PlaneId } from "@/content"
 import type { ContractV1 } from "@/data/schema/generated"
 import { planeGroups, slotName } from "@/features/d1/model/contract"
+import { useMeasure } from "@/hooks/use-measure"
 
 import { DiagramFrame } from "./diagram-frame"
+import { COLUMN, HEADER, modelLayout, SLOT, SLOT_GAP } from "./model-geometry"
 
 const PLANE_FILL: Record<PlaneId, string> = {
   governance: "fill-plane-governance",
@@ -29,12 +31,6 @@ const PLANE_TEXT: Record<PlaneId, string> = {
 
 const isPlaneId = (id: string): id is PlaneId => id in PLANE_FILL
 
-const COLUMN = 180
-const GAP = 12
-const HEADER = 52
-const SLOT = 40
-const SLOT_GAP = 8
-
 /**
  * The model (ui-plan.md 7.3): the planes and the slots they hold, from the run's contract, with
  * each slot's rule on hover and in the text. Tiers wait for the harness to type slot defaults.
@@ -42,9 +38,11 @@ const SLOT_GAP = 8
 export function ModelDiagram({ contract, runId }: { contract: ContractV1; runId: string }) {
   const groups = planeGroups(contract)
   const [active, setActive] = useState<string | null>(null)
-  const maxSlots = Math.max(1, ...groups.map((group) => group.slots.length))
-  const width = groups.length * COLUMN + (groups.length - 1) * GAP + 2
-  const height = HEADER + maxSlots * (SLOT + SLOT_GAP) + 8
+  const { ref, width: available } = useMeasure<HTMLDivElement>()
+  const { width, height, banded, columns } = modelLayout(
+    groups.map((group) => group.slots.length),
+    available,
+  )
   const activeSlot = contract.slots.find((slot) => slot.id === active)
   return (
     <DiagramFrame
@@ -57,26 +55,31 @@ export function ModelDiagram({ contract, runId }: { contract: ContractV1; runId:
         </>
       }
       figure={
-        <div className="space-y-2">
+        <div ref={ref} className="w-full space-y-2">
           <svg
             viewBox={`0 0 ${width} ${height}`}
-            className="block h-auto w-full max-w-[52rem] text-foreground"
-            style={{ minWidth: Math.min(width, 560) }}
+            width={width}
+            height={height}
+            className={
+              banded
+                ? "block h-auto max-w-full text-foreground"
+                : "block h-auto w-full max-w-[52rem] text-foreground"
+            }
           >
-            {groups.map((group, column) => {
-              const x = column * (COLUMN + GAP) + 1
+            {groups.map((group, index) => {
+              const { x, y, height: columnHeight } = columns[index]!
               const plane = isPlaneId(group.id) ? group.id : null
               return (
-                <g key={group.id} transform={`translate(${x},1)`} data-plane={group.id}>
+                <g key={group.id} transform={`translate(${x},${y})`} data-plane={group.id}>
                   <rect
                     width={COLUMN}
-                    height={height - 2}
+                    height={columnHeight}
                     rx={10}
                     className={`${plane ? PLANE_FILL[plane] : "fill-muted-foreground"} opacity-[0.08]`}
                   />
                   <rect
                     width={COLUMN}
-                    height={height - 2}
+                    height={columnHeight}
                     rx={10}
                     className={`fill-none ${plane ? PLANE_STROKE[plane] : "stroke-muted-foreground"}`}
                   />

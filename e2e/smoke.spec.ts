@@ -191,8 +191,12 @@ test("the Domain 1 overview, About, a domain page and compare render", async ({ 
   await expectAccessible(page)
 })
 
-test("the Domain 1 overview, the S2 suite page and coverage fit a phone", async ({ page }) => {
+test("the home page, the Domain 1 overview, S2 and coverage fit a phone", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto("/")
+  await expect(page.getByRole("figure", { name: /The model: four planes/ })).toBeVisible()
+  await expectFitsThePhone(page)
+
   await page.goto("/d1")
   await expect(page.locator("[data-walk]")).toBeVisible()
   await expect(page.getByRole("figure", { name: /what S2 changes/ })).toBeVisible()
