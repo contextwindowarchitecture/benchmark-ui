@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { CONTENT_SOURCE } from "@/content"
 import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
@@ -51,7 +52,7 @@ describe("home page", () => {
     )
     expect(screen.getByRole("link", { name: "The Domain 1 write-up" })).toHaveAttribute(
       "href",
-      expect.stringContaining("/blob/091eb9fbaa736e6fece66932360f20b678dcb2b8/docs/domain1.md"),
+      expect.stringContaining(`/blob/${CONTENT_SOURCE.commit}/docs/domain1.md`),
     )
     expect(screen.getByRole("link", { name: "The Domain 2 write-up" })).toHaveAttribute(
       "href",

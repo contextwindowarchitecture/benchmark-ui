@@ -52,13 +52,7 @@ export interface D2SuiteSummaryV1 {
     /**
      * An interval for the value, when one is computed (S2: a cluster bootstrap over conversations)
      */
-    interval?: {
-      low: number
-      high: number
-      level: number
-      method: string
-      resamples: number
-    } | null
+    interval?: Interval | null
   }[]
   files: {
     results: string
@@ -110,21 +104,342 @@ export interface D2SuiteSummaryV1 {
     }
   }
   /**
-   * S2: the model, its mode and cache, and the calls made
+   * S2, S3, S4 and S6: the model, its mode and cache, and the calls made
    */
   model?: {
-    [k: string]: unknown | undefined
+    /**
+     * The configured model name
+     */
+    model: string
+    endpoint_host: string
+    /**
+     * Whether the run called the endpoint or replayed the cache
+     */
+    mode: "llm" | "replay"
+    /**
+     * Every request's parameters but its messages; part of the cache key
+     */
+    params: {
+      temperature: number
+      max_tokens: number
+      seed?: number
+      /**
+       * The request body's extra fields, as configured ([model].extra_body); the server's own vocabulary
+       */
+      extra_body: {
+        [k: string]: unknown | undefined
+      }
+    }
+    /**
+     * The model cache's path on the machine that ran
+     */
+    cache: string
+    cache_entries: number
+    context_limit: number | null
+    server: {
+      [k: string]: unknown | undefined
+    } | null
+    /**
+     * Calls in flight at once
+     */
+    concurrency: number
+    /**
+     * Distinct requests and samples the suite asked for
+     */
+    calls: number
+    /**
+     * Calls that reached the endpoint; 0 in replay mode
+     */
+    endpoint_calls: number
+    cache_hits: number
+    /**
+     * S2, S3 and S4: probes left out per arm because S1's gate failed the arm
+     */
+    excluded_by_gate?: {
+      [k: string]: number | undefined
+    }
+    /**
+     * S6: the chains run and how they ended
+     */
+    chains?: {
+      total: number
+      /**
+       * Chains by how they ended: `completed`, or the error class that halted them
+       */
+      by_end: {
+        [k: string]: number | undefined
+      }
+      probes_left_out: number
+    }
   }
   /**
-   * S2: grades by arm and tier, with intervals and paired differences
+   * S2, S3, S4 and S6: grades by arm and tier, with intervals and paired differences; the shape is the suite's (S3 shares S2's)
    */
-  by_arm?: {
-    [k: string]: unknown | undefined
-  }[]
+  by_arm?: (ScriptedArm | LqArm | LoopArm)[]
   /**
-   * S5: tokens, latency and the estimator's error by arm and tier
+   * S5: tokens, latency and the estimator's error by suite, arm and tier
    */
   cost?: {
-    [k: string]: unknown | undefined
+    /**
+     * The margin every budget charged over the payload's own token count ([budgets].margin_percent)
+     */
+    margin_percent: number
+    undercount_max: number | null
+    /**
+     * Calls whose server prompt tokens exceeded their budget (R-16)
+     */
+    budget_overruns: number
+    /**
+     * The under-count by the server's prompt size, with the margin each band would need
+     */
+    undercount_by_size: {
+      /**
+       * The band's bounds in the server's prompt tokens: from the first, below the second; the second is null for no upper bound
+       *
+       * @minItems 2
+       * @maxItems 2
+       */
+      server_tokens: [number | null, number | null]
+      calls: number
+      undercount_max: number | null
+      margin_needed: number | null
+    }[]
+    /**
+     * Per suite, arm and tier, from S2's records and, when it ran, S4's
+     *
+     * Items: Per suite, arm and tier, from S2's records and, when it ran, S4's; the estimator's error is (own count − server prompt tokens) ÷ server prompt tokens, per call
+     */
+    by_arm: {
+      suite: string
+      arm: string
+      tier: string
+      /**
+       * Grades with a reply
+       */
+      answered: number
+      correct: number
+      prompt_tokens: Percentiles
+      completion_tokens: Percentiles
+      prompt_tokens_per_correct: number | null
+      latency_ms: Percentiles
+      estimator_error: Percentiles
+      /**
+       * Prefix-cache hits the server reported, summed
+       */
+      cached_tokens: number
+      /**
+       * Completion tokens by the conversation's turn count (S2's grades)
+       */
+      answer_length_by_turns: {
+        [k: string]: Percentiles | undefined
+      }
+    }[]
   }
+}
+/**
+ * A percentile interval for a rate or a difference: a seeded cluster bootstrap over conversations or corpora (domain-2-plan.md, 9)
+ */
+export interface Interval {
+  low: number
+  high: number
+  level: number
+  method: string
+  resamples: number
+}
+/**
+ * S2 and S3: one arm at one budget tier (`control` for the two controls)
+ */
+export interface ScriptedArm {
+  /**
+   * The arm (domain-2-plan.md, 7)
+   */
+  arm: string
+  tier: string
+  /**
+   * Grades: probes × samples
+   */
+  n: number
+  verdicts: ScriptedVerdicts
+  /**
+   * The share correct (s2.aptitude)
+   */
+  aptitude: number
+  interval: Interval
+  given: Given
+  /**
+   * By the conversation's turn count
+   */
+  by_turns: {
+    [k: string]: Tally | undefined
+  }
+  /**
+   * By task family (domain-2-plan.md, 6)
+   */
+  by_family: {
+    [k: string]:
+      | {
+          n: number
+          correct: number
+          stale: number
+        }
+      | undefined
+  }
+  persistence: {
+    n: number
+    compliant: number
+    /**
+     * By the IP rule
+     */
+    by_rule: {
+      [k: string]:
+        | {
+            n: number
+            compliant: number
+          }
+        | undefined
+    }
+    /**
+     * By the conversation's turn count
+     */
+    by_turns: {
+      [k: string]:
+        | {
+            n: number
+            compliant: number
+          }
+        | undefined
+    }
+  } | null
+  paired: Paired | null
+}
+/**
+ * How many grades took each verdict (grading/__init__.py), with the overflows that reached no model
+ */
+export interface ScriptedVerdicts {
+  correct: number
+  stale: number
+  distractor: number
+  wrong: number
+  unparsed: number
+  overflow: number
+}
+/**
+ * The grades split by whether the needed facts were in the payload sent
+ */
+export interface Given {
+  present: Tally
+  absent: Tally
+}
+/**
+ * Observations and how many were graded correct
+ */
+export interface Tally {
+  n: number
+  correct: number
+}
+/**
+ * The arm less the reference arm on the same probes and samples: the mean per-observation difference in the share correct, with its interval; null for the reference arm, a control tier, or no shared observations
+ */
+export interface Paired {
+  reference: string
+  n: number
+  difference: number
+  interval: Interval
+}
+/**
+ * S4: one arm at one corpus tier (the ratio of the corpus to the budget)
+ */
+export interface LqArm {
+  /**
+   * The arm (domain-2-plan.md, 7)
+   */
+  arm: string
+  tier: string
+  /**
+   * Grades: probes × samples
+   */
+  n: number
+  verdicts: LqVerdicts
+  /**
+   * The share correct (s4.accuracy)
+   */
+  accuracy: number
+  interval: Interval
+  given: Given
+  /**
+   * By the question's kind: one site, a comparison of two, or a value no document gives
+   */
+  by_kind: {
+    [k: string]: Tally | undefined
+  }
+  /**
+   * By the question's format
+   */
+  by_format: {
+    [k: string]: Tally | undefined
+  }
+  /**
+   * Answerable questions, and how many were answered NOT FOUND
+   */
+  abstained: {
+    n: number
+    count: number
+  }
+  input_tokens_mean: number | null
+  paired: Paired | null
+}
+/**
+ * How many grades took each verdict; `refused` is an answerable question answered NOT FOUND
+ */
+export interface LqVerdicts {
+  correct: number
+  distractor: number
+  wrong: number
+  unparsed: number
+  overflow: number
+  refused: number
+}
+/**
+ * S6: one arm at the loop's budget tier
+ */
+export interface LoopArm {
+  /**
+   * The arm (domain-2-plan.md, 7)
+   */
+  arm: string
+  tier: string
+  /**
+   * Grades: probes × samples
+   */
+  n: number
+  verdicts: ScriptedVerdicts
+  /**
+   * The share correct (s6.aptitude)
+   */
+  aptitude: number
+  interval: Interval
+  given: Given
+  paired: Paired | null
+  against_scripted: {
+    suite: string
+    probes: number
+    difference: number
+    interval: Interval
+  } | null
+  /**
+   * The mean completion tokens of the model's own turns, by the first turn of each ten (1, 11, 21, …)
+   */
+  reply_tokens_by_turn: {
+    [k: string]: number | undefined
+  }
+}
+/**
+ * p50, p95 and max by nearest rank, plus the total, over `count` values; null with none
+ */
+export interface Percentiles {
+  count: number
+  p50: number | null
+  p95: number | null
+  max: number | null
+  total: number | null
 }

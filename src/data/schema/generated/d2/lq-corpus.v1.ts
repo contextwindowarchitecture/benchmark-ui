@@ -78,9 +78,29 @@ export interface D2LqCorpusV1 {
       twin: string | null
       question: string
       query: string
+      /**
+       * How a reply is graded (grading/__init__.py): a number, a text key, or an option letter
+       */
       answer: {
         kind: "number" | "text" | "choice"
-        [k: string]: unknown | undefined
+        /**
+         * The right answer as text: the number's digits, the text key, or the letter
+         */
+        expected: string
+        /**
+         * Other texts graded correct
+         */
+        alternatives?: string[]
+        /**
+         * The twin site's value, which grades `distractor`
+         */
+        distractors?: string[]
+        /**
+         * choice: the letters offered
+         *
+         * @minItems 2
+         */
+        options?: [string, string, ...string[]]
       }
       /**
        * @maxItems 2
@@ -106,9 +126,29 @@ export interface D2LqCorpusV1 {
       twin: string | null
       question: string
       query: string
+      /**
+       * How a reply is graded (grading/__init__.py): a number, a text key, or an option letter
+       */
       answer: {
         kind: "number" | "text" | "choice"
-        [k: string]: unknown | undefined
+        /**
+         * The right answer as text: the number's digits, the text key, or the letter
+         */
+        expected: string
+        /**
+         * Other texts graded correct
+         */
+        alternatives?: string[]
+        /**
+         * The twin site's value, which grades `distractor`
+         */
+        distractors?: string[]
+        /**
+         * choice: the letters offered
+         *
+         * @minItems 2
+         */
+        options?: [string, string, ...string[]]
       }
       /**
        * @maxItems 2

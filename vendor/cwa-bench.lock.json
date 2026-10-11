@@ -1,6 +1,6 @@
 {
   "repository": "contextwindowarchitecture/benchmark",
-  "commit": "091eb9fbaa736e6fece66932360f20b678dcb2b8",
+  "commit": "58ef771565c7f0df7ecd872853353eff8d0a6e4e",
   "dirty": false,
   "files": {
     "docs/benchmarking_cwa_viability.md": "8d50d8f8e5a5f29191f7e3f7625736b7227e62a1ceab57c02edda036583db842",
@@ -840,7 +840,7 @@
     "domain2/schemas/goldens.v1.schema.json": "cee8aff6f958d37d09fe6812be0539281bc21d4dd5fc275a3a252f456b95ff35",
     "domain2/schemas/grade-row.v1.schema.json": "3475df461ec60d1ca9ea0558ab99af94076e27dffd5e5334e244deb60ceb817a",
     "domain2/schemas/lq-baseline-row.v1.schema.json": "aaed0da68f76f4bddf151a2ac574ce29edb5d998f4c8727a46e0562ba836bd0e",
-    "domain2/schemas/lq-corpus.v1.schema.json": "ae382ba308c3508b818bfad10b7beff785727f70f2c985aa460a80cbf85df57c",
+    "domain2/schemas/lq-corpus.v1.schema.json": "d37eee527f3c76c84b312400effb6ca72438e599f5af24b3c1450d7e15d4b00d",
     "domain2/schemas/lq-gate-row.v1.schema.json": "8136fd59f5c12fdd64948106e692f58c42dcad328c4efea9d4474e60d6af2843",
     "domain2/schemas/lq-grade-row.v1.schema.json": "adf4a398c1cf618de82e409864ade515060c7756e298edf298c720d0b6dbce73",
     "domain2/schemas/lq-index.v1.schema.json": "659d7e3f3dbc1e26c902248ded4e0cc0904621ca4741d80f510f02f003eca748",
@@ -849,7 +849,7 @@
     "domain2/schemas/run-index.v1.schema.json": "057607e833af35ed37cab30bd5791fc3698a9dc7ea5d0b330b57d47fe907d199",
     "domain2/schemas/runs-index.v1.schema.json": "1c1e6b09f72b223d7bc944bc2cd8ed92f00a770b6a2cb27eacda3e036ac9c3e8",
     "domain2/schemas/self-check.v1.schema.json": "59768c758b1e6f485ab1aff6eed5d5cc592d57c2705527ff223987de579cbf45",
-    "domain2/schemas/suite-summary.v1.schema.json": "7c4ee2b1c49ab2277644360c4d1b84d8bcb090b23d69a793634151a1d8026957",
+    "domain2/schemas/suite-summary.v1.schema.json": "d1f9fbe7c9b292b16487f10d4cd235554103f351a188b73c4edc1751ca7334b6",
     "domain2/schemas/summary.v1.schema.json": "a01ed67d8a856638b43876db37f98f9242085aee9b22fd7499a8aa6d630120fe",
     "domain2/schemas/timeline.v1.schema.json": "016d7ee06baee5b31dcaca16cde0913bba158c1201f440149bb18e9a1884757c",
     "domain2/schemas/turn-row.v1.schema.json": "c8f49229d7810a8aec4293f34687fb66ef3b04901fbe8663c61109f93f109970",
