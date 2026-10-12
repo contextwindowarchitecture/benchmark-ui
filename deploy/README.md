@@ -54,7 +54,7 @@ public, so the cluster needs no pull secret.
 ```sh
 oc apply -k deploy/overlays/prod          # the Route is refused until its certificate exists: see DNS and TLS
 oc -n cwa-benchmark rollout status deployment/benchmark-ui
-deploy/publish.sh ../benchmark/domain1/results d1 20261008T133453Z-691b414 20261008T073129Z-a1d69f8
+deploy/publish.sh ../benchmark/domain1/results d1 20261012T084246Z-c5ce648 20261012T090317Z-c5ce648
 ```
 
 Until DNS propagates, reach the Route through the router directly:
@@ -125,7 +125,7 @@ its `domain2/results/d2/` to a local directory first, then publish every run its
 show (an index names runs the volume may not hold, and those show as pruned):
 
 ```sh
-deploy/publish.sh <local copy of domain2/results> d2 <run-id> <run-id>
+deploy/publish.sh <local copy of domain2/results> d2 20261012T052348Z-4a0ea5d 20261012T042632Z-4a0ea5d
 ```
 
 The Domain 2 overview reads each suite from the newest finished run outside a CI profile that has it, and a CI
