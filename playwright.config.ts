@@ -7,6 +7,8 @@ const port = 4173
 
 export default defineConfig({
   testDir: "./e2e",
+  // The performance budgets are their own run (playwright.perf.config.ts), over the real results.
+  testIgnore: "perf/**",
   fullyParallel: true,
   forbidOnly: !!process.env["CI"],
   retries: 0,
