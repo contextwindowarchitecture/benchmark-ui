@@ -112,8 +112,14 @@ runs the harness in the cluster.
 
 A run is copied in batches of about 64 MB (`PIECE_MB`), each a tar stream through `oc exec` retried up to three times
 (`RETRIES`), and its own `index.json` after the rest of it: a dropped connection to the API server costs one batch, not
-the run (a recorded Domain 2 run is 1.1 GB in 20,000 files). If a batch fails every attempt the script stops, copies
-no index, and can simply be run again.
+the run (a recorded Domain 2 run is 1.1 GB in 20,000 files). Each attempt finds the publisher's running pod again,
+scaling it back up if it is gone, so a replaced pod costs one attempt. If a batch fails every attempt the script stops,
+copies no index, and can simply be run again.
+
+One publish runs at a time. Every run shares the one publisher and scales it down when it ends, so a second run started
+before the first ended had its pod scaled away mid-copy. The script now holds the ConfigMap `results-publish-lock`
+while it runs and refuses to start while another holds it, naming the holder. A lock left by a run that was killed
+stays until removed, once that run is surely gone: `oc -n cwa-benchmark delete configmap results-publish-lock`.
 
 The claim's storage class reclaims with `Delete`: deleting the `benchmark-results` claim deletes its volume and every
 run on it, and the next `oc apply` creates an empty one. After that, publish the runs `keep.txt` names again, each
