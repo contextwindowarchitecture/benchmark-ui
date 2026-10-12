@@ -124,6 +124,7 @@ test("the failing run's findings list and a finding render with the minimized dr
 }) => {
   await page.goto(`/d1/runs/${FAILING}/findings`)
   await expect(page.getByText("19 rows")).toBeVisible()
+  await expectAccessible(page)
   await page
     .getByRole("link", { name: /breaks MR4/ })
     .first()
@@ -155,6 +156,7 @@ test("a run the server no longer holds is shown as pruned, not as a 404", async 
   ).toBeVisible()
   await page.goto("/d1/runs/20261008T004213Z-e824f1b")
   await expect(page.getByText("Run 20261008T004213Z-e824f1b is not on the server")).toBeVisible()
+  await expectAccessible(page)
 })
 
 test("the Domain 1 overview, About, a domain page and compare render", async ({ page }) => {
@@ -391,4 +393,92 @@ test("the shedding viewer respects reduced motion: no playback, the last frame f
   await expect(page.getByRole("button", { name: "Play" })).toHaveCount(0)
   await page.getByRole("button", { name: "To the first frame" }).click()
   await expect(page.locator("[data-viewer]")).toHaveAttribute("data-frame", "0")
+})
+
+test("the glossary, a missing page and the viewer's items pass axe", async ({ page }) => {
+  await page.goto("/glossary")
+  await expect(page.getByRole("heading", { level: 1, name: "Glossary" })).toBeVisible()
+  await expectAccessible(page)
+
+  await page.goto("/d1/nowhere")
+  await expect(page.getByText("Page not found")).toBeVisible()
+  await expectAccessible(page)
+
+  await page.goto(`/d1/runs/${S7}/sweeps/${SWEEP}?frame=3`)
+  await expect(page.getByRole("img", { name: /Items kept at each budget/ })).toBeVisible()
+  await expectAccessible(page)
+})
+
+// The dark theme (DESIGN.md 10): a page of each kind under axe, the theme following the system's.
+test("a page of each kind passes axe in the dark theme", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" })
+  const pages: [string, () => Promise<void>][] = [
+    ["/", () => expect(page.getByText("11 of 11 suites pass")).toBeVisible()],
+    ["/d1", () => expect(page.getByRole("img", { name: /Shedding curve/ })).toBeVisible()],
+    [`/d1/runs/${NIGHTLY}`, () => expect(page.getByText("No findings in this run")).toBeVisible()],
+    [
+      `/d1/runs/${NIGHTLY}/suites/S2`,
+      () => expect(page.getByRole("region", { name: "Environment matrix" }).first()).toBeVisible(),
+    ],
+    [
+      `/d1/runs/${NIGHTLY}/coverage`,
+      () => expect(page.getByText("418 tags, every one exercised.")).toBeVisible(),
+    ],
+    [`/d1/runs/${FAILING}/findings`, () => expect(page.getByText("19 rows")).toBeVisible()],
+    [
+      `/d1/runs/${S7}/sweeps/${SWEEP}?frame=3`,
+      () => expect(page.getByRole("img", { name: /Items kept at each budget/ })).toBeVisible(),
+    ],
+    [`/d1/runs/${S7}/perf`, () => expect(page.locator("[data-fit-line]")).toHaveCount(4)],
+    [
+      `/d1/compare?from=${FAILING}&to=${NIGHTLY}`,
+      () => expect(page.getByRole("region", { name: "Metrics that moved table" })).toBeVisible(),
+    ],
+    [
+      "/d2",
+      () =>
+        expect(
+          page.getByRole("img", { name: /^Correct answers per arm at 8,192 tokens/ }),
+        ).toBeVisible(),
+    ],
+    [
+      `/d2/runs/${D2_NIGHTLY}/suites/S2`,
+      () =>
+        expect(page.getByRole("region", { name: "Correct answers by arm and tier" })).toBeVisible(),
+    ],
+  ]
+  for (const [path, ready] of pages) {
+    await page.goto(path)
+    await expect(page.locator("html")).toHaveClass(/dark/)
+    await ready()
+    await expectAccessible(page)
+  }
+})
+
+// Reflow (WCAG 1.4.10): at 320 px, what 400% zoom of a 1280 px screen leaves, nothing scrolls sideways
+// outside a table region.
+test("the densest pages reflow at 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  const pages: [string, () => Promise<void>][] = [
+    ["/", () => expect(page.getByText("11 of 11 suites pass")).toBeVisible()],
+    ["/d1", () => expect(page.getByRole("img", { name: /Shedding curve/ })).toBeVisible()],
+    [`/d1/runs/${NIGHTLY}`, () => expect(page.getByText("No findings in this run")).toBeVisible()],
+    [
+      `/d1/runs/${S7}/sweeps/${SWEEP}`,
+      () => expect(page.getByRole("img", { name: /Shedding curve/ })).toBeVisible(),
+    ],
+    [`/d1/runs/${S7}/perf`, () => expect(page.locator("[data-fit-line]")).toHaveCount(4)],
+    [
+      "/d2",
+      () =>
+        expect(
+          page.getByRole("img", { name: /^Correct answers per arm at 8,192 tokens/ }),
+        ).toBeVisible(),
+    ],
+  ]
+  for (const [path, ready] of pages) {
+    await page.goto(path)
+    await ready()
+    await expectFitsThePhone(page)
+  }
 })
