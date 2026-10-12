@@ -26,6 +26,7 @@ import {
   SCOPE as D2_SCOPE,
   TRUST as D2_TRUST,
 } from "./d2/trust"
+import { QUESTIONS } from "./d2/questions"
 import {
   armGroup,
   ARMS,
@@ -203,5 +204,30 @@ describe("the content files", () => {
       ...D2_SCOPE.doesNot,
     ]
     for (const text of words) expect(text.replace(identifiers, ""), text).not.toMatch(/\d/)
+  })
+
+  it("cite vendored files on Domain 2's question pages, link papers over https, and hold no values", async () => {
+    expect(QUESTIONS.length).toBeGreaterThan(0)
+    expect(new Set(QUESTIONS.map((words) => words.id)).size).toBe(QUESTIONS.length)
+    const identifiers = /\b(?:Domain |S|R-)\d+\b/g
+    for (const words of QUESTIONS) {
+      for (const file of [words.viability.citation.file, words.writeUp.citation.file]) {
+        await expect(
+          readFile(resolve(root, "vendor/cwa-bench", file), "utf8"),
+        ).resolves.toBeTruthy()
+      }
+      if (words.paper) expect(words.paper.url).toMatch(/^https:\/\/arxiv\.org\/abs\//)
+      const texts = [
+        words.title,
+        words.question,
+        words.viability.metric,
+        words.viability.baseline,
+        words.viability.expected,
+        ...(words.paper ? [words.paper.title, words.paper.text] : []),
+        ...words.measured,
+        ...words.writeUp.text,
+      ]
+      for (const text of texts) expect(text.replace(identifiers, ""), text).not.toMatch(/\d/)
+    }
   })
 })

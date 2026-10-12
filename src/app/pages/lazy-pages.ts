@@ -26,3 +26,9 @@ export const PerfPage = lazy(() =>
     default: module.PerfPage,
   })),
 )
+
+export const D2TrackingPage = lazy(() =>
+  import("@/features/d2/components/questions/tracking-page").then((module) => ({
+    default: module.TrackingPage,
+  })),
+)

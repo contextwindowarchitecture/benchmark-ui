@@ -33,3 +33,10 @@ export const d2SuitePageParams = {
 export const d2OverviewParams = {
   run: RUN_ID_PARAM,
 }
+
+/** Variable tracking (UI-D2c): the pinned run, the budget the shares are read at, the family. */
+export const d2TrackingParams = {
+  run: RUN_ID_PARAM,
+  at: NAME,
+  family: NAME,
+}

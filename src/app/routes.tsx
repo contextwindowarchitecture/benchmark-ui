@@ -21,7 +21,13 @@ import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
 import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
-import { D2OverviewPage, OverviewPage, PerfPage, ViewerPage } from "./pages/lazy-pages"
+import {
+  D2OverviewPage,
+  D2TrackingPage,
+  OverviewPage,
+  PerfPage,
+  ViewerPage,
+} from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
 import { RouteErrorPage } from "./pages/route-error-page"
 import type { RouteHandle } from "./route-meta"
@@ -226,6 +232,20 @@ export const routes: RouteObject[] = [
                   </Suspense>
                 ),
                 handle: handle({ title: () => "Domain 2 overview" }),
+              },
+              {
+                path: "tracking",
+                element: (
+                  <Suspense
+                    fallback={<PageFallback title="Variable tracking (RULER)" width="wide" />}
+                  >
+                    <D2TrackingPage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Variable tracking",
+                  crumb: () => ({ label: "Variable tracking" }),
+                }),
               },
               {
                 path: "runs",

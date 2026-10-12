@@ -12,6 +12,7 @@ import {
   ListChecks,
   Search,
   SlidersHorizontal,
+  Variable,
   type LucideIcon,
 } from "lucide-react"
 import { matchPath } from "react-router"
@@ -56,6 +57,13 @@ const domain2: NavGroup = {
       icon: ListChecks,
       href: () => "/d2/runs",
       patterns: ["/d2/runs", "/d2/runs/:runId", "/d2/runs/:runId/suites/*"],
+    },
+    {
+      id: "d2-tracking",
+      label: "Variable tracking (RULER)",
+      icon: Variable,
+      href: () => "/d2/tracking",
+      patterns: ["/d2/tracking"],
     },
   ],
 }
