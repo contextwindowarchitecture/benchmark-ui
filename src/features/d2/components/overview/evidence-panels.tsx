@@ -1,9 +1,7 @@
 // The overview's evidence (the UI-D2 plan): each panel one suite's typed metrics from the run the
 // composite reads it from, as a picture with its summary and its table. Every panel names its run.
 
-import { Link } from "react-router"
-
-import { ArmPlot, type ArmTone } from "@/components/charts/arm-plot"
+import { ArmPlot } from "@/components/charts/arm-plot"
 import { TierLines } from "@/components/charts/tier-lines"
 import { TableRegion } from "@/components/dashboard/table-region"
 import {
@@ -15,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ARM_GROUPS, type ArmGroup } from "@/content/d2/vocabulary"
 import {
   byArmAndTier,
   pairedReference,
@@ -46,56 +43,12 @@ import {
 } from "@/lib/format"
 
 import { ArmLabel } from "../arm-label"
+import { GROUPS, percentTick } from "../evidence/arm-groups"
+import { SourceNote } from "../evidence/evidence-states"
+import type { PanelSource } from "../evidence/use-evidence"
 import { GroupedArmTable, ShareCell } from "../grouped-arm-table"
 import { MetricValue } from "../metric-value"
 import { PairedTable } from "../paired-table"
-
-const TONES: Record<ArmGroup, ArmTone> = {
-  control: "outline",
-  conventional: "muted",
-  cwa: "accent",
-}
-
-const GROUPS = ARM_GROUPS.map((group) => ({ ...group, tone: TONES[group.id] }))
-
-const percentTick = (value: number) => `${Math.round(value * 100)}%`
-
-/** Where a panel's numbers come from: its run, linked, and the scripts' size. */
-export type PanelSource = {
-  runId: string
-  suite: string
-  size: string | null
-  /** The run the rule would read, passed over because the volume no longer holds it. */
-  insteadOf?: string
-}
-
-export function SourceNote({ source }: { source: PanelSource }) {
-  return (
-    <p className="text-xs text-muted-foreground" data-source={source.suite}>
-      {source.suite} of run{" "}
-      <Link
-        to={`/d2/runs/${source.runId}/suites/${source.suite}`}
-        className="font-mono underline underline-offset-3"
-      >
-        {source.runId}
-      </Link>
-      {source.size ? `, ${source.size} size` : ""}
-      {source.insteadOf ? (
-        <>
-          , read instead of{" "}
-          <Link
-            to={`/d2/runs/${source.insteadOf}`}
-            className="font-mono underline underline-offset-3"
-          >
-            {source.insteadOf}
-          </Link>
-          , which the index lists but the volume no longer holds
-        </>
-      ) : null}
-      .
-    </p>
-  )
-}
 
 function RowsTable({
   rows,
