@@ -97,3 +97,16 @@ export function suiteNumber(suite: string): number {
   const n = Number(suite.replace(/^S/, ""))
   return Number.isNaN(n) ? Number.MAX_SAFE_INTEGER : n
 }
+
+/**
+ * The run to read a document every run carries from (the contract): `latest`, else the newest
+ * finished run, passing over the runs found gone from the volume (pruned, or never published).
+ */
+export function newestPresentRun(
+  index: RunsIndexV1,
+  gone: ReadonlySet<string>,
+): RunEntry | undefined {
+  const latest = resolveAlias(index, "latest")
+  if (latest && !gone.has(latest.run_id)) return latest
+  return index.runs.find((run) => isFinished(run) && !gone.has(run.run_id))
+}

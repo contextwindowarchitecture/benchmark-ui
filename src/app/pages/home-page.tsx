@@ -1,9 +1,10 @@
 // The home page (ui-plan.md 8.11; DESIGN.md 4.5): what CWA is, what the benchmark tests, and how
 // to read the results. Words from the content files, every number from the runs indexes, Domain
-// 1's composite's two summaries and Domain 2's latest run's.
+// 1's composite's two summaries and Domain 2's latest run's. The model diagram draws the latest
+// run's contract, or, when the volume no longer holds that run, the newest run's that it does.
 
 import { ArrowRight } from "lucide-react"
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { Link } from "react-router"
 
 import { DashboardPage, PageSection } from "@/components/dashboard/dashboard-page"
@@ -24,7 +25,7 @@ import type { RunsIndexV1 } from "@/data/schema/generated"
 import { ModelDiagram } from "@/features/d1/components/diagrams/model-diagram"
 import { resolveComposite, type Composite } from "@/features/d1/model/composite"
 import { suitesPassing } from "@/features/d1/model/overview"
-import { resolveAlias } from "@/features/d1/model/runs"
+import { newestPresentRun, resolveAlias } from "@/features/d1/model/runs"
 import { formatCount, formatUtc, isoUtc } from "@/lib/format"
 
 export function HomePage() {
@@ -32,7 +33,14 @@ export function HomePage() {
   const region = regionOfDocument(index, "d1/index.json", "the runs index")
   const document = index.data?.ok ? index.data.document : undefined
   const latest = document ? resolveAlias(document, "latest") : undefined
-  const contract = useRunDocument(latest?.run_id, "contract.json", "contract")
+  // The runs whose contract was found gone: the set only grows, so the diagram settles on the
+  // newest run the volume holds. Another failure is shown as it is, not read past.
+  const [gone, setGone] = useState<ReadonlySet<string>>(() => new Set())
+  const drawn = document ? newestPresentRun(document, gone) : undefined
+  const contract = useRunDocument(drawn?.run_id, "contract.json", "contract")
+  if (drawn && contract.isError && contract.error.kind === "not-found" && !gone.has(drawn.run_id)) {
+    setGone(new Set([...gone, drawn.run_id]))
+  }
   return (
     <DashboardPage
       title="CWA benchmark"
@@ -44,19 +52,30 @@ export function HomePage() {
             <p key={sentence}>{sentence}</p>
           ))}
         </div>
-        {latest ? (
-          <DataRegion
-            state={regionOfDocument(contract, `${latest.run_id}/contract.json`, "the contract")}
-            label="the contract"
-            skeleton={<Skeleton className="h-72 w-full" />}
-          >
-            {(doc) => <ModelDiagram contract={doc} runId={latest.run_id} />}
-          </DataRegion>
+        {drawn ? (
+          <>
+            {latest && latest.run_id !== drawn.run_id ? (
+              <p className="text-sm text-muted-foreground" data-state="read-past">
+                The latest run, <span className="font-mono">{latest.run_id}</span>, is not on the
+                server; the diagram draws from the contract of{" "}
+                <span className="font-mono">{drawn.run_id}</span>.
+              </p>
+            ) : null}
+            <DataRegion
+              state={regionOfDocument(contract, `${drawn.run_id}/contract.json`, "the contract")}
+              label="the contract"
+              skeleton={<Skeleton className="h-72 w-full" />}
+            >
+              {(doc) => <ModelDiagram contract={doc} runId={drawn.run_id} />}
+            </DataRegion>
+          </>
         ) : index.isPending ? (
           <Skeleton className="h-72 w-full" />
         ) : (
           <p className="text-sm text-muted-foreground" data-state="empty">
-            The model diagram draws from a run's contract; there is no finished run yet.
+            {gone.size > 0
+              ? "The model diagram draws from a run's contract; none of the runs the index lists is on the server."
+              : "The model diagram draws from a run's contract; there is no finished run yet."}
           </p>
         )}
       </PageSection>

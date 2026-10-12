@@ -10,6 +10,7 @@ import { FIXTURE_RUNS, FIXTURES_DIR } from "@/test/fixture-fetch"
 
 import {
   compareSuites,
+  newestPresentRun,
   newestRunWithSuite,
   parseRunId,
   profilesOf,
@@ -116,5 +117,24 @@ describe("compareSuites", () => {
       "S10",
       "S12",
     ])
+  })
+})
+
+describe("the newest run the volume holds", () => {
+  it("is latest, else the newest finished run not found gone", async () => {
+    const document = await index()
+    expect(newestPresentRun(document, new Set())?.run_id).toBe(FIXTURE_RUNS.nightly)
+    expect(newestPresentRun(document, new Set([FIXTURE_RUNS.nightly]))?.run_id).toBe(
+      FIXTURE_RUNS.s7,
+    )
+    expect(
+      newestPresentRun(document, new Set([FIXTURE_RUNS.nightly, FIXTURE_RUNS.s7]))?.run_id,
+    ).toBe(FIXTURE_RUNS.failing)
+    expect(
+      newestPresentRun(
+        document,
+        new Set([FIXTURE_RUNS.nightly, FIXTURE_RUNS.s7, FIXTURE_RUNS.failing]),
+      ),
+    ).toBeUndefined()
   })
 })
