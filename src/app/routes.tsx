@@ -23,6 +23,7 @@ import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
 import {
   D2InstructionsPage,
+  D2LongContextPage,
   D2OverviewPage,
   D2TrackingPage,
   OverviewPage,
@@ -260,6 +261,20 @@ export const routes: RouteObject[] = [
                 handle: handle({
                   title: () => "Instruction persistence",
                   crumb: () => ({ label: "Instruction persistence" }),
+                }),
+              },
+              {
+                path: "long-context",
+                element: (
+                  <Suspense
+                    fallback={<PageFallback title="Long context (LongBench v2)" width="wide" />}
+                  >
+                    <D2LongContextPage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Long context",
+                  crumb: () => ({ label: "Long context" }),
                 }),
               },
               {

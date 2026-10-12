@@ -38,3 +38,9 @@ export const D2InstructionsPage = lazy(() =>
     default: module.InstructionsPage,
   })),
 )
+
+export const D2LongContextPage = lazy(() =>
+  import("@/features/d2/components/questions/long-context-page").then((module) => ({
+    default: module.LongContextPage,
+  })),
+)

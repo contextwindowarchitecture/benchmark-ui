@@ -11,6 +11,7 @@ import {
   familiesOf,
   familyCorrect,
   familyStale,
+  lqSeries,
   persistenceSeries,
   ruleCompliant,
   rulesOf,
@@ -100,5 +101,26 @@ describe("the question pages' selectors", () => {
     expect(truncate?.points[2]?.value).toBeCloseTo(30 / 90)
     expect(tallies.get("control-full")?.get("100")).toEqual({ n: 90, k: 60 })
     expect(series[0]?.id).toBe("control-full")
+  })
+})
+
+describe("S4's series over corpus size", () => {
+  const lq = armBlocks(d2Document(`${run}/suites/S4/summary.json`, "d2/suite-summary")).lq
+
+  it("counts every question, one kind or one format, per arm and corpus tier", () => {
+    const all = lqSeries(lq, { by: "all" })
+    expect(all.tiers).toEqual(["x0.25", "x1", "x4", "x16"])
+    expect(all.series.map((s) => s.id)[0]).toBe("control-full")
+    expect(all.tallies.get("control-full")?.get("x1")).toEqual({ n: 36, k: 33 })
+    expect(all.series[0]?.points.map((p) => p.size)).toEqual([0.25, 1, 4, 16])
+
+    const single = lqSeries(lq, { by: "kind", key: "single" })
+    expect(single.tallies.get("truncate-pinned")?.get("x4")).toEqual({ n: 12, k: 0 })
+    const mcq = lqSeries(lq, { by: "format", key: "mcq" })
+    expect(mcq.tallies.get("control-full")?.get("x0.25")).toEqual({ n: 18, k: 15 })
+  })
+
+  it("leaves out a kind no entry carries", () => {
+    expect(lqSeries(lq, { by: "kind", key: "nope" }).series).toEqual([])
   })
 })

@@ -6,7 +6,7 @@
 
 import { DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "../source"
 
-export type QuestionId = "tracking" | "instructions"
+export type QuestionId = "tracking" | "instructions" | "long-context"
 
 export type QuestionWords = {
   id: QuestionId
@@ -103,5 +103,40 @@ export const INSTRUCTIONS: QuestionWords = {
   },
 }
 
+export const LONG_CONTEXT: QuestionWords = {
+  id: "long-context",
+  title: "Long context (LongBench v2)",
+  question:
+    "When the documents behind a question outgrow the budget many times over, does the model still find the answer?",
+  viability: {
+    where: "A row of its Domain 2 table",
+    metric: "Long-Context Q&A (LongBench v2)",
+    baseline:
+      "Severe degradation in the longest tier, as facts in the middle of a long context are lost.",
+    expected:
+      "High retrieval accuracy: the evidence plane ranks the chunks and injects only the ones the question needs.",
+    citation: VIABILITY_D2,
+  },
+  paper: {
+    title:
+      "LongBench v2: Towards Deeper Understanding and Reasoning on Realistic Long-context Multitasks",
+    authors: "Bai et al., 2024",
+    url: "https://arxiv.org/abs/2412.15204",
+    text: "LongBench v2 tests understanding and reasoning over real-world tasks (questions on one document or many, code repositories, structured data) in short, medium and long tiers, the longest running to millions of words. The viability document proposes adapting it.",
+  },
+  measured: [
+    "Domain 2 does not run LongBench v2. Its LQ family is its own: corpora of fictional site documents, chunked, each with one question of each kind: a single site's fact, a comparison of two sites, or a fact the documents never state. Every corpus is generated with its answers, so nothing is contaminated and every answer is known.",
+    "The corpora run from a fraction of the budget to many times it, far short of LongBench v2's longest tier: the budget is kept well below the model's context window, so the pressure is real. The retrieval arms draw on the same retriever's best chunks; truncate-pinned sends the tail of the corpus that fits.",
+  ],
+  writeUp: {
+    text: [
+      "The whole corpus degrades as it grows, and truncation loses the answer.",
+      "The first CWA arms trailed retrieval although every chunk an answer needed was in their payloads. The cause was order: the specification renders a placement's items in id order, and these arms gave each chunk its corpus id, so their evidence read in document order. cwa-ranked, the same evidence with each id led by the retriever's rank, matched retrieval.",
+      "So under CWA the order evidence reads in is the application's to choose, through the ids it gives. Letting a route render in the order the slot already ranks by would remove the trap: a question for the specification, not yet raised there.",
+    ],
+    citation: { file: DOMAIN_2_WRITE_UP, section: "Long context (S4)" },
+  },
+}
+
 /** Every question page's words, in the sidebar's order. */
-export const QUESTIONS: readonly QuestionWords[] = [TRACKING, INSTRUCTIONS]
+export const QUESTIONS: readonly QuestionWords[] = [TRACKING, INSTRUCTIONS, LONG_CONTEXT]

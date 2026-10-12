@@ -9,6 +9,7 @@ import {
   GitCompare,
   House,
   Layers,
+  Library,
   ListChecks,
   ScrollText,
   Search,
@@ -72,6 +73,13 @@ const domain2: NavGroup = {
       icon: ScrollText,
       href: () => "/d2/instructions",
       patterns: ["/d2/instructions"],
+    },
+    {
+      id: "d2-long-context",
+      label: "Long context (LongBench v2)",
+      icon: Library,
+      href: () => "/d2/long-context",
+      patterns: ["/d2/long-context"],
     },
   ],
 }

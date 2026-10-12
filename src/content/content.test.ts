@@ -209,7 +209,8 @@ describe("the content files", () => {
   it("cite vendored files on Domain 2's question pages, link papers over https, and hold no values", async () => {
     expect(QUESTIONS.length).toBeGreaterThan(0)
     expect(new Set(QUESTIONS.map((words) => words.id)).size).toBe(QUESTIONS.length)
-    const identifiers = /\b(?:Domain |S|R-)\d+\b/g
+    // Names, not values: a suite, a domain, a requirement, the paper's own version.
+    const identifiers = /\b(?:Domain |S|R-)\d+\b|\bLongBench v2\b/g
     for (const words of QUESTIONS) {
       for (const file of [words.viability.citation.file, words.writeUp.citation.file]) {
         await expect(

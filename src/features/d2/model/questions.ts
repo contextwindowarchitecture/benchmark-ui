@@ -8,7 +8,7 @@ import type { ArmRow } from "@/components/charts/arm-plot-geometry"
 import type { TierSeries } from "@/components/charts/tier-lines-geometry"
 import { compareArms, type ArmGroup } from "@/content/d2/vocabulary"
 
-import { byArmAndTier, share, type BreakdownCell, type ScriptedArm } from "./blocks"
+import { byArmAndTier, share, type BreakdownCell, type LqArm, type ScriptedArm } from "./blocks"
 import { compareTiers, parseTier } from "./metrics"
 
 /** A share per arm, for an arm plot, with the tally it is read from. */
@@ -156,4 +156,51 @@ export function persistenceSeries(
     }),
   }))
   return { series, turns, tallies }
+}
+
+/** Which of S4's questions a series counts: every one, one kind, or one format. */
+export type QuestionFilter =
+  { by: "all" } | { by: "kind"; key: string } | { by: "format"; key: string }
+
+/** An S4 entry's correct answers among the questions a filter counts. */
+export function lqTally(entry: LqArm, filter: QuestionFilter): BreakdownCell | undefined {
+  if (filter.by === "all") return { n: entry.n, k: entry.verdicts.correct }
+  const tally = filter.by === "kind" ? entry.by_kind[filter.key] : entry.by_format[filter.key]
+  return tally ? { n: tally.n, k: tally.correct } : undefined
+}
+
+/**
+ * S4's correct answers over corpus size, one series per arm in the write-up's order, the
+ * corpus's size as a multiple of the budget; a tier whose tally is missing or empty is a gap.
+ */
+export function lqSeries(
+  entries: readonly LqArm[],
+  filter: QuestionFilter,
+): { series: TierSeries[]; tiers: string[]; tallies: Map<string, Map<string, BreakdownCell>> } {
+  const layout = byArmAndTier(entries)
+  const tiers = layout.tiers.filter((tier) => parseTier(tier).kind === "corpus")
+  const tallies = new Map<string, Map<string, BreakdownCell>>()
+  for (const arm of layout.arms) {
+    const cells = new Map<string, BreakdownCell>()
+    for (const tier of tiers) {
+      const entry = layout.at(arm.id, tier)
+      const tally = entry ? lqTally(entry, filter) : undefined
+      if (tally) cells.set(tier, tally)
+    }
+    if (cells.size > 0) tallies.set(arm.id, cells)
+  }
+  const series = layout.arms
+    .filter((arm) => tallies.has(arm.id))
+    .map((arm) => ({
+      id: arm.id,
+      points: tiers.map((tier) => {
+        const tally = tallies.get(arm.id)?.get(tier)
+        return {
+          tier,
+          size: parseTier(tier).value ?? 0,
+          value: tally ? share(tally.n, tally.k) : null,
+        }
+      }),
+    }))
+  return { series, tiers, tallies }
 }

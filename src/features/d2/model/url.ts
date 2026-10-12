@@ -46,3 +46,9 @@ export const d2InstructionsParams = {
   run: RUN_ID_PARAM,
   at: NAME,
 }
+
+/** Long context (UI-D2c): the pinned run and the questions the curves count. */
+export const d2LongContextParams = {
+  run: RUN_ID_PARAM,
+  questions: NAME,
+}
