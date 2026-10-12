@@ -271,9 +271,10 @@ export function SheddingCurve({
                   className="stroke-failure"
                   strokeDasharray="4 3"
                 />
+                {/* Under the refused region's label, clear of the coarse-step ticks on the axis. */}
                 <text
                   x={layout.thresholdX - 4}
-                  y={layout.height - layout.margin.bottom - 6}
+                  y={layout.margin.top + 30}
                   textAnchor="end"
                   className="fill-failure text-[11px]"
                 >

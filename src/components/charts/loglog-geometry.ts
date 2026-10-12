@@ -7,7 +7,7 @@ import { scaleLog, type ScaleLogarithmic } from "d3-scale"
 
 import type { Margin } from "./shedding-geometry"
 
-export const LOGLOG_MARGIN: Margin = { top: 10, right: 12, bottom: 30, left: 48 }
+export const LOGLOG_MARGIN: Margin = { top: 10, right: 12, bottom: 30, left: 60 }
 
 export type LogDomains = { x: [number, number]; y: [number, number] }
 
