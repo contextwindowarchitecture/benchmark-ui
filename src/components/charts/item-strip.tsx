@@ -260,8 +260,14 @@ export function ItemStrip({ items, frames, full, frame, adapterLabel }: ItemStri
           </li>
         ))}
         <li className="flex items-center gap-1.5">
+          {/* A neutral hatch: the legend names the pattern, the planes name the hues. */}
           <svg width={12} height={12} aria-hidden="true">
-            <rect width={12} height={12} fill={`url(#${id}-hatch-${planes[0] ?? OTHER})`} />
+            <rect width={12} height={12} className="fill-muted-foreground" opacity={0.25} />
+            <path
+              d="M-3,3 l6,-6 M0,12 l12,-12 M9,15 l6,-6"
+              strokeWidth={2}
+              className="stroke-muted-foreground"
+            />
           </svg>
           hatched: included as a variant (compressed)
         </li>
