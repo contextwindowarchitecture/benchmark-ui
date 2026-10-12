@@ -137,13 +137,29 @@ test("the failing run's findings list and a finding render with the minimized dr
   await expectAccessible(page)
 })
 
-/** The page never overflows horizontally (DESIGN.md 4.2). */
+/**
+ * The page never overflows horizontally (DESIGN.md 4.2), and nothing spills out of a table cell over
+ * the next one: the generated cells do not wrap, so long words need a cell that does.
+ */
 async function expectNoOverflow(page: Page) {
   const widths = await page.evaluate(() => [
     document.documentElement.scrollWidth,
     window.innerWidth,
   ])
   expect(widths[0]).toBeLessThanOrEqual(widths[1]!)
+  const spilled = await page.evaluate(() =>
+    [...document.querySelectorAll("main td, main th")].flatMap((cell) => {
+      const edge = cell.getBoundingClientRect().right
+      const over = [...cell.querySelectorAll("*")].find((el) => {
+        const box = el.getBoundingClientRect()
+        return !(el instanceof SVGElement) && box.width > 0 && box.right > edge + 2
+      })
+      return over
+        ? [`${over.tagName.toLowerCase()} "${(over.textContent ?? "").slice(0, 40)}"`]
+        : []
+    }),
+  )
+  expect(spilled, "content spilling out of a table cell").toEqual([])
 }
 
 test("a run the server no longer holds is shown as pruned, not as a 404", async ({ page }) => {
