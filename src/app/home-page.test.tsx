@@ -27,7 +27,7 @@ describe("home page", () => {
       `/d1/runs/${FIXTURE_RUNS.s7}`,
     )
     expect(within(d1).getAllByText("pass")).toHaveLength(2)
-    expect(within(d1).getByText("2026-10-08 13:34:53 UTC")).toBeInTheDocument()
+    expect(within(d1).getByText("2026-10-12 08:42:46 UTC")).toBeInTheDocument()
     await waitFor(() => expect(within(d1).getByText("11 of 11 suites pass")).toBeInTheDocument())
     expect(within(d1).getByText("1 of 1 suites pass")).toBeInTheDocument()
     expect(within(d1).getByRole("link", { name: /The overview/ })).toHaveAttribute("href", "/d1")
@@ -100,14 +100,14 @@ describe("home page", () => {
 
   it("draws the model from the newest run the volume holds when the latest is gone", async () => {
     renderApp("/", {
-      overrides: { [`/results/d1/${FIXTURE_RUNS.nightly}/contract.json`]: { status: 404 } },
+      overrides: { [`/results/d1/${FIXTURE_RUNS.s7}/contract.json`]: { status: 404 } },
     })
     expect(
       await screen.findByRole("figure", { name: /The model: four planes, eleven slots/ }),
     ).toBeInTheDocument()
     const note = document.querySelector('[data-state="read-past"]') as HTMLElement
     expect(note).toHaveTextContent(
-      `The latest run, ${FIXTURE_RUNS.nightly}, is not on the server; the diagram draws from the contract of ${FIXTURE_RUNS.s7}.`,
+      `The latest run, ${FIXTURE_RUNS.s7}, is not on the server; the diagram draws from the contract of ${FIXTURE_RUNS.nightly}.`,
     )
     expect(screen.queryByText(/the contract is not on the server/)).toBeNull()
   })
@@ -115,7 +115,7 @@ describe("home page", () => {
   it("shows a contract it cannot read as it is, without reading past it", async () => {
     renderApp("/", {
       overrides: {
-        [`/results/d1/${FIXTURE_RUNS.nightly}/contract.json`]: {
+        [`/results/d1/${FIXTURE_RUNS.s7}/contract.json`]: {
           status: 200,
           body: '{"$schema":"cwa-bench-d1/contract/v9"}',
           contentType: "application/json",

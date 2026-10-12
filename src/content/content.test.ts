@@ -172,7 +172,7 @@ describe("the content files", () => {
   })
 
   it("name every arm, family and suite Domain 2's fixture records, in words without values", async () => {
-    const run = resolve(root, "vendor/cwa-bench/domain2/fixtures/runs", "20261011T161204Z-9c870cd")
+    const run = resolve(root, "vendor/cwa-bench/domain2/fixtures/runs", "20261012T135118Z-f2fee09")
     const summary = JSON.parse(await readFile(resolve(run, "summary.json"), "utf8")) as {
       suites: { id: string }[]
       metrics: { arm: string | null; family: string | null }[]

@@ -8,7 +8,7 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Repository: `contextwindowarchitecture/benchmark-ui`, vendoring the benchmark by copy at a pinned commit (the
   plan's 3.1): `vendor/cwa-bench/` holds each domain's v1 schemas (29 of Domain 1, 27 of Domain 2), fixture runs
   (Domain 1's three, Domain 2's one) and write-up, and the viability document; the lock
-  `vendor/cwa-bench.lock.json` pins commit `73c4757` of `contextwindowarchitecture/benchmark`. `pnpm vendor
+  `vendor/cwa-bench.lock.json` pins commit `04db5a7` of `contextwindowarchitecture/benchmark`. `pnpm vendor
   ../benchmark` re-vendors; `pnpm vendor:check` fails on drift between the lock, the copy and the checkout at the
   locked commit. Never edit a vendored file; move the pin in one commit with the regenerated types.
 - Application type and primary user tasks: a public, read-only results site for the benchmark; the plan's section 1.
@@ -259,6 +259,12 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     means no reveal, never a replay.
   - The real S7 run predates the harness's compact `curve[]` (ask 2), so its sweeps' curves are derived from the
     frames in the worker; the harness's curve is preferred wherever a file carries one of the frames' length.
+  - The failing Domain 1 run of 2026-10-08 is kept as the development-time record of the defects (made on a
+    development machine at an older contract, reporting nothing): its run, findings and finding pages and the
+    overview's defects table say so, in the words of `src/content/d1/defects.ts`, keyed by the run id that file names.
+  - Where every adapter and cell of a perf summary records the same peak resident memory (the reported S7 run's
+    Linux host recorded one figure for all), the performance page says the figure is not the adapters' own, as the
+    write-up does, and still shows it as recorded; the viewer infers nothing else from it.
   - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
     well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.

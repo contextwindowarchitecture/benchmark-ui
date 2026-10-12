@@ -80,11 +80,7 @@ describe("the diagrams", () => {
   it("draws the environment cells grouped by platform, with every cell in the table", async () => {
     const s2 = await document("suites/S2/summary.json", "suite-summary")
     const groups = environmentCells(s2.cells ?? [])
-    expect(groups.map((group) => group.platform)).toEqual([
-      "darwin/arm64",
-      "linux/arm64",
-      "linux/amd64",
-    ])
+    expect(groups.map((group) => group.platform)).toEqual(["linux/x86_64", "linux/amd64"])
     expect(groups.flatMap((group) => group.cells)).toHaveLength(25)
     render(<EnvironmentDiagram cells={s2.cells ?? []} runId={FIXTURE_RUNS.nightly} />)
     const figure = screen.getByRole("figure", { name: /what S2 changes/ })
@@ -107,21 +103,29 @@ describe("the diagrams on a narrow screen", () => {
     const s2 = await document("suites/S2/summary.json", "suite-summary")
     const groups = environmentCells(s2.cells ?? [])
     const unmeasured = environmentLayout(groups, 0)
-    expect(unmeasured.columns.map((column) => column.y)).toEqual([1, 1, 1])
-    expect(unmeasured.width).toBe(562)
-    // A frame a little narrower than three columns shrinks the picture rather than banding it.
-    expect(environmentLayout(groups, 547)).toEqual(unmeasured)
+    expect(unmeasured.columns.map((column) => column.y)).toEqual([1, 1])
+    expect(unmeasured.width).toBe(370)
+    // A frame a little narrower than two columns shrinks the picture rather than banding it.
+    expect(environmentLayout(groups, 355)).toEqual(unmeasured)
     // A 375 px phone's frame holds one platform per band, at full size.
     const phone = environmentLayout(groups, 311)
     expect(phone.width).toBeLessThanOrEqual(311)
-    expect(phone.columns.map((column) => column.x)).toEqual([1, 1, 1])
+    expect(phone.columns.map((column) => column.x)).toEqual([1, 1])
     const tops = phone.columns.map((column) => column.y)
     expect(tops).toEqual([...tops].sort((a, b) => a - b))
-    expect(new Set(tops).size).toBe(3)
-    // A wider phone holds two, shrunk by no more than 15%.
+    expect(new Set(tops).size).toBe(2)
+    // A wider phone holds both, shrunk by no more than 15%.
     const wider = environmentLayout(groups, 330)
-    expect(wider.columns.map((column) => column.y)).toEqual([1, 1, wider.columns[2]!.y])
+    expect(wider.columns.map((column) => column.y)).toEqual([1, 1])
     expect(wider.width * 0.85).toBeLessThanOrEqual(330)
+    // With a third platform (the fixture's host group again, under another name), a wider phone
+    // holds two to a band and puts the third below.
+    const three = [...groups, { ...groups[0]!, platform: "darwin/arm64" }]
+    expect(environmentLayout(three, 0).width).toBe(562)
+    const banded = environmentLayout(three, 330)
+    expect(banded.columns.map((column) => column.y)).toEqual([1, 1, banded.columns[2]!.y])
+    expect(banded.columns[2]!.y).toBeGreaterThan(1)
+    expect(banded.width * 0.85).toBeLessThanOrEqual(330)
   })
 
   it("break only the subtitle too long for its plane, where its lines come out even", async () => {

@@ -36,7 +36,7 @@ describe("runs index selectors", () => {
       profiles: {},
       runs: (await index()).runs.map((run, i) => ({
         ...run,
-        ci_profile: i === 1 ? "weekly" : run.ci_profile,
+        ci_profile: i === 2 ? "weekly" : run.ci_profile,
       })),
     }
     expect(profilesOf(withLegacy)).toEqual(["nightly", "weekly"])
@@ -44,7 +44,7 @@ describe("runs index selectors", () => {
 
   it("resolves latest and a profile from the index, never from a path", async () => {
     const idx = await index()
-    expect(resolveAlias(idx, "latest")?.run_id).toBe(FIXTURE_RUNS.nightly)
+    expect(resolveAlias(idx, "latest")?.run_id).toBe(FIXTURE_RUNS.s7)
     expect(resolveAlias(idx, "nightly")?.run_id).toBe(FIXTURE_RUNS.nightly)
     expect(resolveAlias(idx, "weekly")).toBeUndefined()
     expect(resolveAlias({ ...idx, latest: null }, "latest")).toBeUndefined()
@@ -87,7 +87,7 @@ describe("runs index selectors", () => {
   it("computes a duration from the timestamps", async () => {
     const idx = await index()
     expect(runDurationMs(idx.runs[0]!)).toBe(
-      Date.parse("2026-10-08T13:53:08.532Z") - Date.parse("2026-10-08T13:34:53.817Z"),
+      Date.parse("2026-10-12T10:52:41.746Z") - Date.parse("2026-10-12T09:03:17.091Z"),
     )
     expect(runDurationMs({ started_at: "2026-10-08T13:34:53.817Z", finished_at: null })).toBeNull()
   })
@@ -123,9 +123,9 @@ describe("compareSuites", () => {
 describe("the newest run the volume holds", () => {
   it("is latest, else the newest finished run not found gone", async () => {
     const document = await index()
-    expect(newestPresentRun(document, new Set())?.run_id).toBe(FIXTURE_RUNS.nightly)
-    expect(newestPresentRun(document, new Set([FIXTURE_RUNS.nightly]))?.run_id).toBe(
-      FIXTURE_RUNS.s7,
+    expect(newestPresentRun(document, new Set())?.run_id).toBe(FIXTURE_RUNS.s7)
+    expect(newestPresentRun(document, new Set([FIXTURE_RUNS.s7]))?.run_id).toBe(
+      FIXTURE_RUNS.nightly,
     )
     expect(
       newestPresentRun(document, new Set([FIXTURE_RUNS.nightly, FIXTURE_RUNS.s7]))?.run_id,

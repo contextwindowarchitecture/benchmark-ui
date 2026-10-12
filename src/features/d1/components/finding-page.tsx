@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { isDevelopmentRun } from "@/content"
 import { documentOf, useResultsSource, useRunDocument, useRunRaw } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { FindingV1, MinimizationV1, RunIndexV1 } from "@/data/schema/generated"
@@ -38,6 +39,7 @@ import { formatCount } from "@/lib/format"
 import { prettyJson } from "@/lib/line-diff"
 
 import { BlobView } from "./blob-view"
+import { DevelopmentRunNotice } from "./development-run-notice"
 
 /** One finding (ui-plan.md 8.6): what failed, the reproducer, the minimization and its draft. */
 export function FindingPage() {
@@ -88,6 +90,7 @@ export function FindingPage() {
           </span>
         ) : undefined
       }
+      status={isDevelopmentRun(runId) ? <DevelopmentRunNotice runId={runId} /> : undefined}
     >
       <DataRegion
         state={indexRegion}

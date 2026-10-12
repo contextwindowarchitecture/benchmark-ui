@@ -120,11 +120,25 @@ describe("findings and drift", () => {
 
   it("summarizes the drift report", async () => {
     const ci = await doc(FIXTURE_RUNS.nightly, "ci.json", "ci-report")
-    const drift = driftSummary(ci)
+    // The fixture's report is its profile's baseline: no previous run, nothing changed.
+    const baseline = driftSummary(ci)
+    expect(baseline.verdict).toBe("baseline")
+    expect(baseline.previous).toBeNull()
+    expect(baseline.changedSuites).toEqual([])
+    expect(baseline.goldens?.drift).toEqual({ match: 5408 })
+    // Against a previous run, only the suites whose status moved count as changed.
+    const drift = driftSummary({
+      ...ci,
+      verdict: "changed",
+      previous: { run_id: FIXTURE_RUNS.failing, status: "fail", started_at: null },
+      suites: [
+        { id: "S0", status: "pass", previous: "pass" },
+        { id: "S4", status: "pass", previous: "fail" },
+      ],
+    })
     expect(drift.verdict).toBe("changed")
-    expect(drift.previous?.run_id).toBe("20261008T131247Z-691b414")
-    expect(drift.changedSuites.map((s) => s.id)).toEqual(["S2"])
-    expect(drift.findings.resolved).toHaveLength(1)
+    expect(drift.previous?.run_id).toBe(FIXTURE_RUNS.failing)
+    expect(drift.changedSuites.map((s) => s.id)).toEqual(["S4"])
   })
 
   it("marks which files this build reads", async () => {

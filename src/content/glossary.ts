@@ -287,7 +287,7 @@ const ARCHITECTURE: readonly Omit<GlossaryEntry, "group">[] = [
   {
     id: "determinism",
     term: "Determinism",
-    text: "The same frozen snapshot gives the same payload bytes and the same decision, across repeated runs, processes, environments, platforms, toolchains and implementations (R-23). The clock and the policy are part of the snapshot.",
+    text: "The same frozen snapshot gives the same payload bytes and the same decision, across repeated runs, processes, environments, containers, toolchains and implementations (R-23). The clock and the policy are part of the snapshot.",
     see: ["snapshot", "purity", "repeatability"],
     citation: writeUp("What it proves, and what it does not"),
   },
@@ -474,7 +474,7 @@ const BENCHMARK: readonly Omit<GlossaryEntry, "group">[] = [
     id: "repeatability",
     term: "Repeatability",
     also: ["environment cell", "platform variant", "toolchain variant"],
-    text: "Running the same snapshots again and comparing every answer with a baseline: repeated on the host, across environment cells (time zones, locales, threads, an empty environment, a concurrent burst), with the clock shifted, and across platform and toolchain variants down to each assembler's declared minimum.",
+    text: "Running the same snapshots again and comparing every answer with a baseline: repeated on the host, across environment cells (time zones, locales, threads, an empty environment, no HOME, an empty working directory, a concurrent burst), in a Linux container with the clock shifted, and across platform and toolchain variants down to each assembler's declared minimum.",
     see: ["determinism"],
     citation: writeUp("Platforms and toolchains"),
   },

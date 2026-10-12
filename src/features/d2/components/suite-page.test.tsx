@@ -28,7 +28,7 @@ describe("a Domain 2 suite page", () => {
     const arms = await loaded("arms")
     const aptitude = arms.getByRole("region", { name: "Correct answers by arm and tier" })
     const cell = within(aptitude).getByRole("cell", {
-      name: /^truncate-pinned, 8,192 tokens: 84\.3% \(364 \/ 432\), 95% interval 71\.8% to 94\.3%$/,
+      name: /^truncate-pinned, 8,192 tokens: 84\.0% \(363 \/ 432\), 95% interval 72\.1% to 93\.9%$/,
     })
     expect(cell).toBeInTheDocument()
     expect(
@@ -58,7 +58,7 @@ describe("a Domain 2 suite page", () => {
     const attribution = await loaded("attribution")
     expect(
       attribution.getByRole("cell", {
-        name: "truncate-pinned, 8,192 tokens: with the facts sent 91.9% (364 / 396); not sent 0% (0 / 36)",
+        name: "truncate-pinned, 8,192 tokens: with the facts sent 91.7% (363 / 396); not sent 0% (0 / 36)",
       }),
     ).toBeInTheDocument()
 
@@ -69,7 +69,7 @@ describe("a Domain 2 suite page", () => {
     const family = breakdowns.getByRole("region", { name: "By task family at 8,192 tokens" })
     expect(
       within(family).getByRole("cell", {
-        name: "cwa-state, VT · Variable tracking: 97.9% (94 / 96)",
+        name: "cwa-state, VT · Variable tracking: 94.8% (91 / 96)",
       }),
     ).toBeInTheDocument()
     expect(
@@ -81,7 +81,7 @@ describe("a Domain 2 suite page", () => {
       name: "Instruction persistence by rule at 8,192 tokens",
     })
     expect(
-      within(rule).getByRole("cell", { name: "cwa-state, capital letters: 85.4% (41 / 48)" }),
+      within(rule).getByRole("cell", { name: "cwa-state, capital letters: 87.5% (42 / 48)" }),
     ).toBeInTheDocument()
 
     const model = await loaded("model")
@@ -108,7 +108,7 @@ describe("a Domain 2 suite page", () => {
       name: "By conversation length at 16,384 tokens",
     })
     expect(
-      within(turns).getByRole("cell", { name: "cwa-state, 100 turns: 97.0% (262 / 270)" }),
+      within(turns).getByRole("cell", { name: "cwa-state, 100 turns: 96.7% (261 / 270)" }),
     ).toBeInTheDocument()
   })
 
@@ -119,12 +119,12 @@ describe("a Domain 2 suite page", () => {
       name: "By question kind at 0.25 × the budget",
     })
     expect(
-      within(kind).getByRole("cell", { name: "rag, a comparison of two: 83.3% (10 / 12)" }),
+      within(kind).getByRole("cell", { name: "rag, a comparison of two: 91.7% (11 / 12)" }),
     ).toBeInTheDocument()
     const paired = await loaded("paired")
     expect(
       paired.getByRole("cell", {
-        name: "cwa-ranked, 0.25 × the budget: +5.6 pp, 95% interval 0.0 to +11.1 pp, over 36 pairs",
+        name: "cwa-ranked, 0.25 × the budget: −5.6 pp, 95% interval −11.1 to 0.0 pp, over 36 pairs",
       }),
     ).toBeInTheDocument()
     const questions = await loaded("questions")
@@ -139,12 +139,12 @@ describe("a Domain 2 suite page", () => {
     const against = await loop.findByRole("region", { name: "Against the scripted result" })
     expect(
       within(against).getByRole("cell", {
-        name: "window, Less S3's: +2.5 pp against S3, 95% interval 0.0 to +5.2 pp, over 32 probes",
+        name: "window, Less S3's: +1.3 pp against S3, 95% interval −5.2 to +7.1 pp, over 32 probes",
       }),
     ).toBeInTheDocument()
     const replies = loop.getByRole("region", { name: "Reply length by turn" })
     expect(
-      within(replies).getByRole("cell", { name: "cwa-memory, turn 11: 9.7 tokens" }),
+      within(replies).getByRole("cell", { name: "cwa-memory, turn 11: 5.0 tokens" }),
     ).toBeInTheDocument()
   })
 
@@ -155,7 +155,7 @@ describe("a Domain 2 suite page", () => {
     expect(cost.getAllByText("25.6%").length).toBeGreaterThan(0)
     const bands = cost.getByRole("region", { name: "Under-count by prompt size" })
     const band = within(bands).getByRole("row", { name: /500 to 1,999/ })
-    expect(within(band).getByText("5,448")).toBeInTheDocument()
+    expect(within(band).getByText("5,478")).toBeInTheDocument()
     const byArm = cost.getByRole("region", { name: "Cost by suite, arm and tier" })
     expect(
       within(byArm).getByRole("cell", {
@@ -164,7 +164,7 @@ describe("a Domain 2 suite page", () => {
     ).toBeInTheDocument()
     expect(
       within(byArm).getByRole("cell", {
-        name: "concat, 8,192 tokens, Per correct answer: 3,292 tokens",
+        name: "concat, 8,192 tokens, Per correct answer: 3,304 tokens",
       }),
     ).toBeInTheDocument()
     // Correct of the answers given, not the arm's accuracy; an overflow gave no answer.
@@ -184,8 +184,48 @@ describe("a Domain 2 suite page", () => {
     ).toBeInTheDocument()
   })
 
-  it("flags an arm whose overflows its attribution files under facts sent", async () => {
-    renderApp(`/d2/runs/${run}/suites/S2`)
+  it("files overflows as not sent, and flags an arm whose attribution files them under facts sent", async () => {
+    // The fixture's harness files every overflow as not sent: concat's 135 overflows are its
+    // "not sent" tally, and nothing is flagged.
+    const { unmount } = renderApp(`/d2/runs/${run}/suites/S2`)
+    const fixed = await loaded("attribution")
+    expect(
+      await fixed.findByRole("cell", {
+        name: "concat, 8,192 tokens: with the facts sent 92.6% (275 / 297); not sent 0% (0 / 135)",
+      }),
+    ).toBeInTheDocument()
+    expect(fixed.queryByText(/An overflow or a refusal reaches no model/)).toBeNull()
+    unmount()
+
+    // A harness before the fix filed those overflows under facts sent: the same block, so filed.
+    const summary = JSON.parse(
+      readFileSync(join(D2_FIXTURES_DIR, run, "suites/S2/summary.json"), "utf8"),
+    ) as {
+      by_arm: {
+        arm: string
+        tier: string
+        given: { present: { n: number; correct: number }; absent: { n: number; correct: number } }
+      }[]
+    }
+    for (const entry of summary.by_arm) {
+      if (entry.arm !== "concat" || entry.tier !== "8192") continue
+      entry.given = {
+        present: {
+          n: entry.given.present.n + entry.given.absent.n,
+          correct: entry.given.present.correct + entry.given.absent.correct,
+        },
+        absent: { n: 0, correct: 0 },
+      }
+    }
+    renderApp(`/d2/runs/${run}/suites/S2`, {
+      overrides: {
+        [`/results/d2/${run}/suites/S2/summary.json`]: {
+          status: 200,
+          body: JSON.stringify(summary),
+          contentType: "application/json",
+        },
+      },
+    })
     const attribution = await loaded("attribution")
     expect(
       await attribution.findByRole("cell", {

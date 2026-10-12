@@ -21,14 +21,14 @@ export const D2_FIXTURES_DIR = resolve(
 export const FIXTURE_ROOT = "/results"
 
 export const FIXTURE_RUNS = {
-  nightly: "20261008T133453Z-691b414",
-  s7: "20261008T073129Z-a1d69f8",
+  nightly: "20261012T084246Z-c5ce648",
+  s7: "20261012T090317Z-c5ce648",
   failing: "20261008T004213Z-e824f1b",
 } as const
 
 /** Domain 2's fixture: a nightly run of every suite at pilot size, trimmed by `cwabench fixture`. */
 export const D2_FIXTURE_RUNS = {
-  nightly: "20261011T161204Z-9c870cd",
+  nightly: "20261012T135118Z-f2fee09",
 } as const
 
 export type FixtureFetchOptions = {

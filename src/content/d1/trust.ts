@@ -32,9 +32,14 @@ export const TRUST: readonly TrustNote[] = [
     text: "Only the labeled generators and the auditor can catch a decision every implementation gets wrong the same way, which is why their own tests come first.",
   },
   {
-    id: "emulated",
-    title: "x86_64 is emulated",
-    text: "The x86_64 cells test the binaries under emulation, not on native hardware, and the Rust adapter there is cross-compiled because rustc does not run under the emulator. A run on a native x86_64 host is the stronger evidence.",
+    id: "one-architecture",
+    title: "One architecture",
+    text: "Every reported answer comes from x86_64 Linux. S2's platform variant is native on the benchmark host and uses the same image as its container baseline, so no reported run checks arm64.",
+  },
+  {
+    id: "go-clock",
+    title: "Go's clock is not shifted",
+    text: "libfaketime does not reach Go's runtime, so S2's clock-shift cells say nothing about Go's clock reads, and S10 does not judge clock reads at all.",
   },
   {
     id: "fidelity",
@@ -49,3 +54,16 @@ export const TRUST: readonly TrustNote[] = [
 ]
 
 export const TRUST_CITATION: Citation = { file: DOMAIN_1_WRITE_UP, section: "How far to trust it" }
+
+/**
+ * Said on the performance page when every adapter and cell records the same peak memory: the
+ * write-up leaves peak memory out of its S7 results for that reason.
+ */
+export const PEAK_MEMORY_NOTE = {
+  title: "Peak memory is not the adapters' own",
+  text: "Every adapter and every cell of this run records the same peak resident memory, which is not the assembler's own, so the Domain 1 write-up leaves peak memory out. The column shows the figure as recorded; do not compare adapters by it.",
+  citation: {
+    file: DOMAIN_1_WRITE_UP,
+    section: "Budget pressure at scale (S7)",
+  } satisfies Citation,
+} as const

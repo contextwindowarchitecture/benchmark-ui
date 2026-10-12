@@ -32,7 +32,7 @@ describe("vendor-benchmark --check", () => {
     expect(result.stderr).toBe("")
     expect(result.status).toBe(0)
     expect(result.stdout).toMatch(
-      /851 files match contextwindowarchitecture\/benchmark at [0-9a-f]{7}/,
+      /862 files match contextwindowarchitecture\/benchmark at [0-9a-f]{7}/,
     )
   })
 

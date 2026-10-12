@@ -17,6 +17,10 @@ describe("the performance page", () => {
     const startup = await screen.findByRole("region", { name: "Startup table" })
     await screen.findByRole("heading", { level: 2, name: "Scaling" })
     expect(within(startup).getAllByRole("row")).toHaveLength(5)
+    // The run records one peak memory for every adapter and cell: the page says it is not theirs.
+    const peak = document.querySelector('[data-state="uniform-peak-memory"]') as HTMLElement
+    expect(within(peak).getByText("Peak memory is not the adapters' own")).toBeInTheDocument()
+    expect(peak).toHaveTextContent(/do not compare adapters by it/)
     expect(document.getElementById("exponents")).not.toBeNull()
     const scaling = document.getElementById("scaling") as HTMLElement
     const panel = within(scaling).getByRole("img", { name: /^compressible-v0/ })

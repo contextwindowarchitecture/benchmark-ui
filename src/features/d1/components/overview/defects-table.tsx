@@ -11,13 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { DEFECTS, DEFECTS_CITATION, DEFECTS_NOTE, sourceUrl } from "@/content"
+import {
+  DEFECTS,
+  DEFECTS_CITATION,
+  DEFECTS_NOTE,
+  DEVELOPMENT_RUN_NOTE,
+  FAILING_RUN,
+  sourceUrl,
+} from "@/content"
 
 /** The defects the benchmark found (ui-plan.md 8.1, item 4): content, each linking to the record. */
 export function DefectsTable() {
   return (
     <div className="space-y-2">
       <p className="text-sm text-muted-foreground">{DEFECTS_NOTE}</p>
+      <p className="text-sm text-muted-foreground" data-development-run>
+        The findings below link to run{" "}
+        <Link to={`/d1/runs/${FAILING_RUN}`} className="font-mono underline underline-offset-3">
+          {FAILING_RUN}
+        </Link>
+        . {DEVELOPMENT_RUN_NOTE.title}: {DEVELOPMENT_RUN_NOTE.text}
+      </p>
       <TableRegion label="Defects table">
         <Table>
           <TableCaption className="sr-only">
@@ -55,7 +69,7 @@ export function DefectsTable() {
                 </TableCell>
                 <TableCell className="align-top text-xs">
                   {defect.findings.length === 0 ? (
-                    <span className="text-muted-foreground">no finding in a published run</span>
+                    <span className="text-muted-foreground">not among its findings</span>
                   ) : (
                     <ul className="space-y-1">
                       {defect.findings.map((pointer) => (

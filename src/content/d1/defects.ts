@@ -2,7 +2,9 @@
 // the upstream issue and, where the failing run of 2026-10-08 recorded the defect as findings,
 // the run and finding ids, so a reader can walk from the sentence to the reproducer. The ids are
 // identifiers copied from that run's findings.jsonl (their `upstream.url` names the same issue),
-// not measurements.
+// not measurements. That run is the development-time record of the defects, made on a
+// development machine at an older contract, not a reported result; DEVELOPMENT_RUN_NOTE says so
+// wherever the site shows the defects or the run.
 
 import { DOMAIN_1_WRITE_UP, type Citation } from "../source"
 
@@ -17,7 +19,13 @@ export type Defect = {
   findings: readonly DefectPointer[]
 }
 
-const FAILING_RUN = "20261008T004213Z-e824f1b"
+/** The failing run that recorded the assembler defects while the benchmark was being developed. */
+export const FAILING_RUN = "20261008T004213Z-e824f1b"
+
+/** Whether a run is that development-time record rather than a reported run. */
+export function isDevelopmentRun(runId: string): boolean {
+  return runId === FAILING_RUN
+}
 
 const inFailingRun = (...ids: string[]): DefectPointer[] =>
   ids.map((finding) => ({ run: FAILING_RUN, finding }))
@@ -86,6 +94,15 @@ export const DEFECTS: readonly Defect[] = [
 ]
 
 export const DEFECTS_NOTE =
-  "Each defect was minimized automatically to a one- or two-item reproducer, reported, fixed upstream, and adopted by the specification as a conformance case."
+  "These defects were found during the benchmark's development, not in the reported runs, which have no correctness finding. Each was minimized automatically to a one- or two-item reproducer, reported, fixed upstream, and adopted by the specification as a conformance case."
+
+/**
+ * What the failing run is, said wherever the site shows it or its findings: the write-up's
+ * "Defects it found", as words.
+ */
+export const DEVELOPMENT_RUN_NOTE = {
+  title: "A development-time record, not a reported result",
+  text: "This failing run recorded the assembler defects while the benchmark was being developed, and is kept as a committed fixture. It was made on a development machine (macOS arm64), at an older contract commit and older assembler commits, and reports nothing: every reported result comes from the runs on the one benchmark host. The adapter and tooling defects are not among its findings.",
+} as const
 
 export const DEFECTS_CITATION: Citation = { file: DOMAIN_1_WRITE_UP, section: "Defects it found" }

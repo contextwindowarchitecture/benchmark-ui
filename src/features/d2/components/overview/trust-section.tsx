@@ -10,6 +10,7 @@ import { sourceUrl, type Citation } from "@/content"
 import {
   CORRECTIONS,
   CORRECTIONS_CITATION,
+  CORRECTIONS_INTRO,
   JUDGING,
   JUDGING_CITATION,
   SCOPE,
@@ -129,6 +130,7 @@ export function TrustNotes() {
         <h3 id="corrections-heading" className="text-sm font-medium">
           What the run corrected along the way
         </h3>
+        <p className="text-sm text-muted-foreground">{CORRECTIONS_INTRO}</p>
         <Notes notes={CORRECTIONS} label="What the run corrected along the way" />
         <Cited citation={CORRECTIONS_CITATION} />
       </section>

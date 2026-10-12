@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { PEAK_MEMORY_NOTE, sourceUrl } from "@/content"
 import { documentOf, useResultsSource, useRunDocument, useRunsIndex } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { PerfSummaryV1, RunIndexV1 } from "@/data/schema/generated"
@@ -47,6 +48,7 @@ import {
   type FitMethod,
   type FitSeries,
   type PerfCell,
+  uniformPeakMemory,
 } from "@/features/d1/model/perf"
 import { newestRunWithSuite, parseRunId } from "@/features/d1/model/runs"
 import { runHasSuite } from "@/features/d1/model/suite"
@@ -178,6 +180,7 @@ function PerfBody({ runId, run, perf }: { runId: string; run: RunIndexV1; perf: 
         description="A minimal snapshot per adapter: the cost of starting the adapter, which the net times subtract."
       >
         <StartupTable perf={perf} />
+        <PeakMemoryNote perf={perf} />
       </PageSection>
       {reliable ? (
         <PageSection
@@ -260,6 +263,31 @@ function Bar({ value, max }: { value: number; max: number }) {
     <div className="h-2 w-full min-w-16 rounded-sm bg-muted" aria-hidden="true">
       <div className="h-2 rounded-sm bg-primary" style={{ width: `${width}%` }} />
     </div>
+  )
+}
+
+/** The write-up's reason for leaving peak memory out, when the run records one peak for all. */
+function PeakMemoryNote({ perf }: { perf: PerfSummaryV1 }) {
+  const peak = uniformPeakMemory(perf)
+  if (peak === null) return null
+  return (
+    <Alert data-state="uniform-peak-memory" className="mt-3">
+      <TriangleAlert />
+      <AlertTitle>{PEAK_MEMORY_NOTE.title}</AlertTitle>
+      <AlertDescription>
+        <p>
+          {PEAK_MEMORY_NOTE.text} The recorded figure is {formatBytes(peak)}. Words from{" "}
+          <a
+            href={sourceUrl(PEAK_MEMORY_NOTE.citation.file)}
+            rel="noreferrer"
+            className="underline underline-offset-3"
+          >
+            {PEAK_MEMORY_NOTE.citation.file}
+          </a>
+          , {PEAK_MEMORY_NOTE.citation.section}.
+        </p>
+      </AlertDescription>
+    </Alert>
   )
 }
 

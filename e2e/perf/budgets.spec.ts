@@ -4,8 +4,8 @@
 
 import { expect, test, type Page } from "@playwright/test"
 
-const NIGHTLY_FIXTURE = "20261008T133453Z-691b414"
-const S7_RUN = "20261008T073129Z-a1d69f8"
+const NIGHTLY_FIXTURE = "20261012T084246Z-c5ce648"
+const S7_RUN = "20261012T090317Z-c5ce648"
 /** The real run's largest sweep (compressible-v3, 737 frames per adapter, 20 MB). */
 const LARGE_SWEEP = "f0886121fc90a2680d9e5f5bf4c9030f20a5db3551177755ca6f4e93ea416682"
 

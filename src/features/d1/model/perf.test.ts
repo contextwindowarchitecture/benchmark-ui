@@ -16,6 +16,7 @@ import {
   fitPoints,
   scalingPanels,
   seriesSizes,
+  uniformPeakMemory,
 } from "./perf"
 
 async function perf(): Promise<PerfSummaryV1> {
@@ -43,6 +44,21 @@ function slope(points: { x: number; y: number }[]): number {
 }
 
 describe("the performance summary", () => {
+  it("says when every adapter and cell records the same peak memory", async () => {
+    const summary = await perf()
+    // The S7 run's Linux host recorded one peak for every adapter and cell, not the adapters' own.
+    expect(uniformPeakMemory(summary)).toBe(1_130_352_640)
+    const startup = summary.startup.map((entry, i) => ({
+      ...entry,
+      rss_peak_bytes: 20_000_000 + i,
+    }))
+    expect(uniformPeakMemory({ ...summary, startup })).toBeNull()
+    expect(uniformPeakMemory({ ...summary, startup: [], cells: [] })).toBeNull()
+    const one = summary.startup.filter((entry) => entry.adapter === "python")
+    const cells = summary.cells.filter((cell) => cell.adapter === "python")
+    expect(uniformPeakMemory({ ...summary, startup: one, cells })).toBeNull()
+  })
+
   it("names each series' sizes from the typed series parameters", async () => {
     const { series } = await perf()
     expect(seriesSizes(series, "candidates")).toEqual([

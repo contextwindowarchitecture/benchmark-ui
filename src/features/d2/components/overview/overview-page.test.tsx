@@ -1,7 +1,10 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
 import { screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { D2_FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, D2_FIXTURES_DIR } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 const run = D2_FIXTURE_RUNS.nightly
@@ -40,8 +43,8 @@ describe("Domain 2's overview", () => {
     expect(aptitude).toBeInTheDocument()
     const table = evidence.getByRole("region", { name: "Correct answers per arm at 8,192 tokens" })
     const pinned = within(table).getByText("truncate-pinned").closest("tr") as HTMLElement
-    expect(within(pinned).getByText("84.3%")).toBeInTheDocument()
-    expect(within(pinned).getByText("71.8% to 94.3%")).toBeInTheDocument()
+    expect(within(pinned).getByText("84.0%")).toBeInTheDocument()
+    expect(within(pinned).getByText("72.1% to 93.9%")).toBeInTheDocument()
     expect(within(pinned).getByText("91.7%")).toBeInTheDocument()
     const upper = within(table).getByText("control-full").closest("tr") as HTMLElement
     expect(within(upper).getByText("no budget")).toBeInTheDocument()
@@ -69,7 +72,7 @@ describe("Domain 2's overview", () => {
     })
     expect(
       within(paired).getByRole("cell", {
-        name: "cwa-state, 8,192 tokens: +15.3 pp, 95% interval +5.1 to +28.0 pp, over 432 pairs",
+        name: "cwa-state, 8,192 tokens: +14.6 pp, 95% interval +4.1 to +26.9 pp, over 432 pairs",
       }),
     ).toBeInTheDocument()
     const attribution = evidence.getByRole("region", {
@@ -83,19 +86,14 @@ describe("Domain 2's overview", () => {
         name: "control-full, Facts not sent: no probe counted here",
       }),
     ).toBeInTheDocument()
-    // concat overflowed on 135 probes, which this run's S2 filed under "facts sent" although
-    // nothing was sent: the cell says so rather than claiming every probe had its facts sent.
+    // concat overflowed on 135 probes, which this run's harness files as not sent: nothing to flag.
     expect(
-      within(attribution).getByRole("cell", {
-        name: /^concat, Facts sent: .*; 135 of these reached no model$/,
-      }),
+      within(attribution).getByRole("cell", { name: "concat, Facts sent: 92.6% (275 / 297)" }),
     ).toBeInTheDocument()
     expect(
-      within(attribution).getByRole("cell", {
-        name: "concat, Facts not sent: no probe counted here",
-      }),
+      within(attribution).getByRole("cell", { name: "concat, Facts not sent: 0% (0 / 135)" }),
     ).toBeInTheDocument()
-    expect(evidence.getByText(/An overflow or a refusal reaches no model/)).toBeInTheDocument()
+    expect(evidence.queryByText(/An overflow or a refusal reaches no model/)).toBeNull()
     // The upper bounds have no budget, so the paired table cut to the budget says so.
     expect(
       within(paired).getByRole("cell", {
@@ -107,12 +105,12 @@ describe("Domain 2's overview", () => {
     })
     expect(
       within(documents).getByRole("cell", {
-        name: "cwa-ranked, 0.25 × the budget: +5.6 pp, 95% interval 0.0 to +11.1 pp, over 36 pairs",
+        name: "cwa-ranked, 0.25 × the budget: −5.6 pp, 95% interval −11.1 to 0.0 pp, over 36 pairs",
       }),
     ).toBeInTheDocument()
     expect(
       await within(loop).findByRole("cell", {
-        name: "window, less truncate-pinned: −24.0 pp, 95% interval −33.3 to −3.7 pp, over 96 pairs",
+        name: "window, less truncate-pinned: −22.9 pp, 95% interval −31.9 to −3.7 pp, over 96 pairs",
       }),
     ).toBeInTheDocument()
     expect(evidence.queryByText("What this page does not show yet")).toBeNull()
@@ -134,6 +132,54 @@ describe("Domain 2's overview", () => {
     expect(drill.getByRole("link", { name: "Every run" })).toHaveAttribute("href", "/d2/runs")
   })
 
+  it("flags overflows a harness before the fix filed under facts sent", async () => {
+    // The fixture's harness files overflows as not sent; this is its S2 summary as one before the
+    // fix would have written concat's attribution, the 135 overflows counted as facts sent.
+    const summary = JSON.parse(
+      readFileSync(join(D2_FIXTURES_DIR, run, "suites/S2/summary.json"), "utf8"),
+    ) as {
+      by_arm: {
+        arm: string
+        tier: string
+        given: { present: { n: number; correct: number }; absent: { n: number; correct: number } }
+      }[]
+    }
+    for (const entry of summary.by_arm) {
+      if (entry.arm !== "concat" || entry.tier !== "8192") continue
+      const { present, absent } = entry.given
+      entry.given = {
+        present: { n: present.n + absent.n, correct: present.correct + absent.correct },
+        absent: { n: 0, correct: 0 },
+      }
+    }
+    renderApp("/d2", {
+      overrides: {
+        [`/results/d2/${run}/suites/S2/summary.json`]: {
+          status: 200,
+          body: JSON.stringify(summary),
+          contentType: "application/json",
+        },
+      },
+    })
+    const evidence = await section("evidence")
+    const attribution = await evidence.findByRole(
+      "region",
+      { name: "Correct answers by whether the facts were sent at 8,192 tokens" },
+      { timeout: 5000 },
+    )
+    expect(
+      within(attribution).getByRole("cell", {
+        name: /^concat, Facts sent: .*; 135 of these reached no model$/,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(attribution).getByRole("cell", {
+        name: "concat, Facts not sent: no probe counted here",
+      }),
+    ).toBeInTheDocument()
+    expect(evidence.getByText(/An overflow or a refusal reaches no model/)).toBeInTheDocument()
+  })
+
   it("names a pinned run the index does not list and reads the rule's runs instead", async () => {
     renderApp("/d2?run=20260101T000000Z-0000000")
     expect(
@@ -145,12 +191,12 @@ describe("Domain 2's overview", () => {
   it("reads past a run the index lists but the volume no longer holds, and says so", async () => {
     // A newer reported run of every suite that is not served: its summary is not found, so each
     // suite is read from the nightly fixture instead, and the page names the run it stands in for.
-    const gone = "20261012T000000Z-aaaaaaa"
+    const gone = "20261013T000000Z-aaaaaaa"
     const nightly = {
       run_id: run,
       status: "pass",
-      started_at: "2026-10-11T16:12:04.005Z",
-      finished_at: "2026-10-11T16:22:37.987Z",
+      started_at: "2026-10-12T13:51:18.369Z",
+      finished_at: "2026-10-12T14:01:37.156Z",
       path: run,
       suites: ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"],
       adapters: ["go", "python", "rust", "typescript"],
@@ -166,8 +212,8 @@ describe("Domain 2's overview", () => {
           ...nightly,
           run_id: gone,
           path: gone,
-          started_at: "2026-10-12T00:00:00.000Z",
-          finished_at: "2026-10-12T01:00:00.000Z",
+          started_at: "2026-10-13T00:00:00.000Z",
+          finished_at: "2026-10-13T01:00:00.000Z",
           ci_profile: null,
         },
         nightly,

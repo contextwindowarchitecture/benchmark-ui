@@ -4,10 +4,10 @@
 import { AxeBuilder } from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 
-const NIGHTLY = "20261008T133453Z-691b414"
+const NIGHTLY = "20261012T084246Z-c5ce648"
 const FAILING = "20261008T004213Z-e824f1b"
-const D2_NIGHTLY = "20261011T161204Z-9c870cd"
-const S7 = "20261008T073129Z-a1d69f8"
+const D2_NIGHTLY = "20261012T135118Z-f2fee09"
+const S7 = "20261012T090317Z-c5ce648"
 const SWEEP = "1da5d58f5c90cbd75466c9f99c29167a46109c483d924b4f5cc56b75994ba1a3"
 
 // The preview server sends the production Content Security Policy; a violation is a console error
@@ -64,14 +64,14 @@ test("the home page, the runs list and a run page render from the fixtures", asy
   await expect(page).toHaveTitle("Runs · CWA benchmark")
   await expect(page.getByText("3 runs")).toBeVisible()
   await expect(page.locator("tbody tr")).toHaveCount(3)
-  await expect(page.locator(`tr[data-run="${NIGHTLY}"]`).getByText("changed")).toBeVisible()
+  await expect(page.locator(`tr[data-run="${NIGHTLY}"]`).getByText("baseline")).toBeVisible()
   await expect(page.getByRole("button", { name: "Refresh" })).toBeEnabled()
   await expectAccessible(page)
 
   await page.locator(`tr[data-run="${NIGHTLY}"]`).getByRole("link", { name: NIGHTLY }).click()
   await expect(page).toHaveTitle(`Run · ${NIGHTLY} · CWA benchmark`)
   await expect(page.getByRole("heading", { level: 1, name: NIGHTLY })).toBeFocused()
-  await expect(page.getByText("cwa-bench-d1 0.1.0 · Python 3.14.7")).toBeVisible()
+  await expect(page.getByText("cwa-bench-d1 0.1.0 · Python 3.14.4")).toBeVisible()
   await expect(page.getByRole("link", { name: /^S1 python: pass, 65 \/ 65 cases/ })).toBeVisible()
   await expect(page.getByText("No findings in this run")).toBeVisible()
   await expect(page.getByRole("link", { name: "Download summary.json" })).toHaveAttribute(
@@ -189,7 +189,10 @@ test("the Domain 1 overview, About, a domain page and compare render", async ({ 
   await expect(page.getByRole("region", { name: "Suite by adapter matrix" })).toBeVisible()
   await expect(page.getByRole("region", { name: "Pressure exponents table" })).toBeVisible()
   await expect(page.getByRole("figure", { name: /four judges of one answer/ })).toBeVisible()
-  await expect(page.getByText("33 findings in the S7 run")).toBeVisible()
+  await expect(page.getByText("34 findings in the S7 run")).toBeVisible()
+  await expect(page.locator("[data-development-run]")).toContainText(
+    "A development-time record, not a reported result",
+  )
   await expectNoOverflow(page)
   await expectAccessible(page)
 
@@ -300,7 +303,7 @@ test("Domain 2's overview, runs, run page and a suite page render from its fixtu
 
   await page.getByRole("link", { name: "Runs", exact: true }).nth(1).click()
   await expect(page).toHaveURL(/\/d2\/runs$/)
-  await expect(page.locator(`tr[data-run="${D2_NIGHTLY}"]`).getByText("changed")).toBeVisible()
+  await expect(page.locator(`tr[data-run="${D2_NIGHTLY}"]`).getByText("baseline")).toBeVisible()
   await expect(page.getByRole("button", { name: "Refresh" })).toBeEnabled()
   await expectAccessible(page)
 

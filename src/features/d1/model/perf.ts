@@ -131,3 +131,21 @@ export function filterCells(cells: readonly PerfCell[], filter: CellFilter): Per
       (!filter.status || cell.status === filter.status),
   )
 }
+
+/**
+ * The one peak resident memory every adapter's startup and cells record, when they all record the
+ * same one across more than one adapter: then the figure is not any adapter's own (the Domain 1
+ * write-up leaves it out for that reason), and the page says so beside it. Null otherwise.
+ */
+export function uniformPeakMemory(perf: PerfSummaryV1): number | null {
+  const peaks = [
+    ...perf.startup.map((entry) => ({ adapter: entry.adapter, bytes: entry.rss_peak_bytes })),
+    ...perf.cells.map((cell) => ({ adapter: cell.adapter, bytes: cell.rss_peak_bytes })),
+  ].filter(
+    (peak): peak is { adapter: string; bytes: number } =>
+      typeof peak.bytes === "number" && typeof peak.adapter === "string",
+  )
+  const values = new Set(peaks.map((peak) => peak.bytes))
+  const adapters = new Set(peaks.map((peak) => peak.adapter))
+  return values.size === 1 && adapters.size > 1 ? peaks[0]!.bytes : null
+}

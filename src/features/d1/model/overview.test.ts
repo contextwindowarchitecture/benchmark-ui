@@ -111,12 +111,12 @@ describe("overview selectors", () => {
     // The fixture keeps one shape, so each median is that shape's exponent.
     expect(rows[0]).toEqual({
       adapter: "python",
-      noPressure: 0.9474,
-      pressure: 1.9119,
+      noPressure: 0.9382,
+      pressure: 1.9054,
       shapes: { noPressure: 1, pressure: 1 },
       fewestPoints: 4,
     })
-    expect(rows[2]!.pressure).toBe(1.5769)
+    expect(rows[2]!.pressure).toBe(1.6055)
     const empty = medianExponents({ ...perf, fits: [] })
     expect(empty).toEqual([])
   })

@@ -21,19 +21,20 @@ describe("run page", () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}`)
     expect(await screen.findByRole("heading", { name: FIXTURE_RUNS.nightly })).toBeInTheDocument()
     expect(await screen.findByText("A fixture, not a whole run")).toBeInTheDocument()
+    expect(screen.queryByText("A development-time record, not a reported result")).toBeNull()
 
     // Provenance from the manifest.
     const provenance = section("provenance")
-    expect(await provenance.findByText("cwa-bench-d1 0.1.0 · Python 3.14.7")).toBeInTheDocument()
+    expect(await provenance.findByText("cwa-bench-d1 0.1.0 · Python 3.14.4")).toBeInTheDocument()
     expect(provenance.getByRole("button", { name: "Copy source digest" })).toBeInTheDocument()
     expect(
-      provenance.getByTitle("d5d2bcd71dde133adfb5361002e052af1a496abc40bf0bd541f8b148aa8cb1b0"),
-    ).toHaveTextContent("d5d2bcd")
+      provenance.getByTitle("e1381847e60aef025821192feae643667394a1afe59f12bfed7a2884baa57381"),
+    ).toHaveTextContent("e138184")
     expect(provenance.getAllByText("16de4be")).toHaveLength(2)
     expect(provenance.queryByText(/provenance warning/)).toBeNull()
     expect(provenance.getByText("2026-10-07")).toBeInTheDocument()
-    expect(provenance.getByText("nightly profile, from mirrors")).toBeInTheDocument()
-    expect(provenance.getByText("go version go1.27.0 darwin/arm64")).toBeInTheDocument()
+    expect(provenance.getByText("nightly profile, from checkouts")).toBeInTheDocument()
+    expect(provenance.getByText("go version go1.27.0 linux/amd64")).toBeInTheDocument()
     expect(provenance.getByRole("list", { name: "Environment cells" }).children).toHaveLength(28)
     expect(provenance.getAllByRole("row")).toHaveLength(5)
 
@@ -63,15 +64,12 @@ describe("run page", () => {
     // No findings is a calm, prominent state.
     expect(section("findings").getByText("No findings in this run")).toBeInTheDocument()
 
-    // Drift from ci.json.
+    // Drift from ci.json: the nightly is its profile's baseline, compared with no run.
     const drift = section("drift")
-    expect(await drift.findByText("changed")).toBeInTheDocument()
-    expect(drift.getByRole("link", { name: "20261008T131247Z-691b414" })).toHaveAttribute(
-      "href",
-      "/d1/runs/20261008T131247Z-691b414",
-    )
-    expect(drift.getByText("0 new, 1 resolved, 0 persisting.")).toBeInTheDocument()
-    expect(drift.getAllByText("S2").length).toBeGreaterThan(0)
+    expect(await drift.findByText("baseline")).toBeInTheDocument()
+    expect(drift.getByText(/no previous run: this is the baseline/)).toBeInTheDocument()
+    expect(drift.queryByRole("link", { name: "Compare" })).toBeNull()
+    expect(drift.getByText("0 new, 0 resolved, 0 persisting.")).toBeInTheDocument()
     expect(drift.getByText(/5,408 match/)).toBeInTheDocument()
 
     // The file list with downloads.
@@ -97,6 +95,9 @@ describe("run page", () => {
   it("renders the failing fixture's findings by suite and severity, with no drift report", async () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.failing}`)
     await screen.findByRole("heading", { name: FIXTURE_RUNS.failing })
+    // The development-time record of the defects, said plainly: not a reported result.
+    expect(screen.getByText("A development-time record, not a reported result")).toBeInTheDocument()
+    expect(screen.getByText(/made on a development machine \(macOS arm64\)/)).toBeInTheDocument()
     const findings = await loaded("findings")
     expect(await findings.findByText(/19 findings: S4 7, S5 12/)).toBeInTheDocument()
     await waitFor(() => expect(findings.getAllByRole("row").length).toBeGreaterThan(19))

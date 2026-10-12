@@ -23,7 +23,7 @@ describe("Domain 2's runs list", () => {
     const link = await screen.findByRole("link", { name: run })
     expect(link).toHaveAttribute("href", `/d2/runs/${run}`)
     const row = link.closest("tr") as HTMLElement
-    expect(await within(row).findByText("changed")).toBeInTheDocument()
+    expect(await within(row).findByText("baseline")).toBeInTheDocument()
     expect(within(row).getByText("nightly")).toBeInTheDocument()
   })
 })
@@ -57,27 +57,51 @@ describe("Domain 2's run page", () => {
       .map((node) => node.closest("tr") as HTMLElement)
       .find((row) => within(row).queryByText("8,192 tokens"))
     expect(pinned).toBeDefined()
-    expect(within(pinned as HTMLElement).getByText("84.3%")).toBeInTheDocument()
-    expect(within(pinned as HTMLElement).getByText("364 / 432")).toBeInTheDocument()
-    expect(within(pinned as HTMLElement).getByText("71.8% to 94.3%")).toBeInTheDocument()
+    expect(within(pinned as HTMLElement).getByText("84.0%")).toBeInTheDocument()
+    expect(within(pinned as HTMLElement).getByText("363 / 432")).toBeInTheDocument()
+    expect(within(pinned as HTMLElement).getByText("72.1% to 93.9%")).toBeInTheDocument()
 
     expect((await loaded("findings")).getByText("No findings in this run")).toBeInTheDocument()
 
+    // The fixture's report is its profile's baseline, compared with no run.
     const drift = await loaded("drift")
-    expect(await drift.findByText("changed")).toBeInTheDocument()
-    expect(drift.getByRole("link", { name: "20261011T142551Z-f6869af" })).toHaveAttribute(
-      "href",
-      "/d2/runs/20261011T142551Z-f6869af",
-    )
-    // Domain 2 has no compare page: the report does not link to one.
-    expect(drift.queryByRole("link", { name: "Compare" })).toBeNull()
-    expect(drift.getByText(/24,192 match/)).toBeInTheDocument()
+    expect(await drift.findByText("baseline")).toBeInTheDocument()
+    expect(drift.getByText(/no previous run: this is the baseline/)).toBeInTheDocument()
+    expect(drift.getByText(/21,504 match/)).toBeInTheDocument()
 
     const files = await loaded("files")
     expect(files.getByRole("link", { name: "Download summary.json" })).toHaveAttribute(
       "href",
       `/results/d2/${run}/summary.json`,
     )
+  })
+
+  it("links a report's previous run, and no compare page, which Domain 2 does not have", async () => {
+    const ci = JSON.parse(readFileSync(join(D2_FIXTURES_DIR, run, "ci.json"), "utf8")) as Record<
+      string,
+      unknown
+    >
+    const previous = "20261012T042632Z-4a0ea5d"
+    renderApp(`/d2/runs/${run}`, {
+      overrides: {
+        [`/results/d2/${run}/ci.json`]: {
+          status: 200,
+          body: JSON.stringify({
+            ...ci,
+            verdict: "changed",
+            previous: { run_id: previous, status: "pass", started_at: null },
+          }),
+          contentType: "application/json",
+        },
+      },
+    })
+    const drift = await loaded("drift")
+    expect(await drift.findByText("changed")).toBeInTheDocument()
+    expect(drift.getByRole("link", { name: previous })).toHaveAttribute(
+      "href",
+      `/d2/runs/${previous}`,
+    )
+    expect(drift.queryByRole("link", { name: "Compare" })).toBeNull()
   })
 
   it("lists a kind of many files as one row, a page at a time on request", async () => {

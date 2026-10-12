@@ -69,10 +69,10 @@ describe("a suite summary's by_arm block", () => {
     ])
     const state = entries.find((entry) => entry.arm === "cwa-state" && entry.tier === "8192")
     const [family, turns, rule] = breakdowns
-    expect(family?.cell(state as never, "vt")).toEqual({ n: 96, k: 94 })
+    expect(family?.cell(state as never, "vt")).toEqual({ n: 96, k: 91 })
     expect(family?.keyLabel("vt")).toBe("VT · Variable tracking")
-    expect(turns?.cell(state as never, "100")).toEqual({ n: 270, k: 268 })
-    expect(rule?.cell(state as never, "uppercase")).toEqual({ n: 48, k: 41 })
+    expect(turns?.cell(state as never, "100")).toEqual({ n: 270, k: 264 })
+    expect(rule?.cell(state as never, "uppercase")).toEqual({ n: 48, k: 42 })
     expect(rule?.keyLabel("uppercase")).toBe("capital letters")
     expect(rule?.measure).toBe("compliant")
     expect(scriptedBreakdowns([])).toEqual([])

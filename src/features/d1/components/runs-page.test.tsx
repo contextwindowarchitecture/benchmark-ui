@@ -22,17 +22,17 @@ describe("runs list", () => {
     const rows = document.querySelectorAll("tbody tr")
     expect(rows).toHaveLength(3)
     // Newest first by default.
-    expect(rows[0]).toHaveAttribute("data-run", FIXTURE_RUNS.nightly)
+    expect(rows[0]).toHaveAttribute("data-run", FIXTURE_RUNS.s7)
 
     const nightly = rowOf(FIXTURE_RUNS.nightly)
     expect(nightly.getByRole("link", { name: FIXTURE_RUNS.nightly })).toHaveAttribute(
       "href",
       `/d1/runs/${FIXTURE_RUNS.nightly}`,
     )
-    expect(nightly.getByText("2026-10-08 13:34:53 UTC")).toBeInTheDocument()
+    expect(nightly.getByText("2026-10-12 08:42:46 UTC")).toBeInTheDocument()
     expect(nightly.getByText("pass")).toBeInTheDocument()
     expect(nightly.getByText("nightly")).toBeInTheDocument()
-    expect(nightly.getByText("18 min 15 s")).toBeInTheDocument()
+    expect(nightly.getByText("20 min 11 s")).toBeInTheDocument()
     expect(nightly.getByText("S0 S1 S2 S4 S5 S6 S8 S9 S10 S11 S12")).toBeInTheDocument()
     expect(
       nightly.getByRole("list", { name: "Adapters: Python, TypeScript, Go, Rust" }),
@@ -42,8 +42,8 @@ describe("runs list", () => {
       "16de4be0534583f135a597171c927d42c87ee82c",
     )
     expect(nightly.getByText("contract")).toBeInTheDocument()
-    // The verdict comes from ci.json, lazily.
-    expect(await nightly.findByText("changed")).toBeInTheDocument()
+    // The verdict comes from ci.json, lazily: the nightly is the first of its profile.
+    expect(await nightly.findByText("baseline")).toBeInTheDocument()
 
     const s7 = rowOf(FIXTURE_RUNS.s7)
     expect(s7.getByText("S7")).toBeInTheDocument()

@@ -49,14 +49,35 @@ describe("the overview's rows from the by_arm blocks", () => {
     expect(rows[0]).toMatchObject({ arm: "control-full", tier: "control" })
     expect(rows.find((row) => row.arm === "window")).toMatchObject({
       tier: "8192",
-      given: { present: { n: 240, correct: 235 }, absent: { n: 192, correct: 0 } },
+      given: { present: { n: 240, correct: 231 }, absent: { n: 192, correct: 0 } },
     })
-    // concat's overflows sit under "facts sent" in this run; window sent every probe it answered.
-    expect(rows.find((row) => row.arm === "concat")?.filedAsSent).toEqual({
+    // This run's harness files every overflow as not sent: concat's 135 are its "not sent" tally.
+    const concat = rows.find((row) => row.arm === "concat")
+    expect(concat?.given.absent.n).toBe(135)
+    expect(concat?.filedAsSent).toBeNull()
+    expect(rows.find((row) => row.arm === "window")?.filedAsSent).toBeNull()
+    // A harness before the fix filed them under facts sent; the row says how many reached no model.
+    const misfiled = attributionRows(
+      blocks("S2").scripted.map((entry) =>
+        entry.arm === "concat" && entry.tier === "8192"
+          ? {
+              ...entry,
+              given: {
+                present: {
+                  n: entry.given.present.n + entry.given.absent.n,
+                  correct: entry.given.present.correct + entry.given.absent.correct,
+                },
+                absent: { n: 0, correct: 0 },
+              },
+            }
+          : entry,
+      ),
+      "8192",
+    )
+    expect(misfiled.find((row) => row.arm === "concat")?.filedAsSent).toEqual({
       count: 135,
       atLeast: false,
     })
-    expect(rows.find((row) => row.arm === "window")?.filedAsSent).toBeNull()
     expect(rows.map((row) => row.arm)).toHaveLength(13)
     expect(attributionRows([], "8192")).toEqual([])
   })

@@ -37,8 +37,15 @@ describe("comparing two runs", () => {
     )
     if (!result.ok) throw new Error(result.reason)
     const ci: CiReportV1 = result.document
-    expect(harnessCompared(ci, "20261008T131247Z-691b414")).toBe(true)
+    // The fixture's report is its profile's baseline: it compares the nightly with no run.
+    expect(ci.previous).toBeNull()
     expect(harnessCompared(ci, FIXTURE_RUNS.failing)).toBe(false)
+    const against: CiReportV1 = {
+      ...ci,
+      previous: { run_id: FIXTURE_RUNS.failing, status: "fail", started_at: null },
+    }
+    expect(harnessCompared(against, FIXTURE_RUNS.failing)).toBe(true)
+    expect(harnessCompared(against, FIXTURE_RUNS.s7)).toBe(false)
     expect(harnessCompared(undefined, FIXTURE_RUNS.failing)).toBe(false)
   })
 

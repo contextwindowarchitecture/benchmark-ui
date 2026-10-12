@@ -5,6 +5,7 @@ import { DashboardPage } from "@/components/dashboard/dashboard-page"
 import { DataRegion, type RegionState } from "@/components/dashboard/data-region"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
+import { isDevelopmentRun } from "@/content"
 import { documentOf, useRunDocument } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { RunIndexV1 } from "@/data/schema/generated"
@@ -12,6 +13,7 @@ import { findingsFile } from "@/features/d1/model/findings"
 import { parseRunId } from "@/features/d1/model/runs"
 import { formatCount } from "@/lib/format"
 
+import { DevelopmentRunNotice } from "./development-run-notice"
 import { SuiteRows } from "./suite-rows"
 
 /** Every distinct failure of a run (ui-plan.md 8.6), filterable by adapter, suite, severity and oracle. */
@@ -39,6 +41,7 @@ export function FindingsPage() {
           , errors first; a finding opens with its reproducer and its minimized draft.
         </span>
       }
+      status={isDevelopmentRun(runId) ? <DevelopmentRunNotice runId={runId} /> : undefined}
     >
       <DataRegion
         state={indexRegion}

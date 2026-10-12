@@ -91,6 +91,6 @@ export function laneWords(lane: string): LaneWords | undefined {
 }
 
 export const VOCABULARY_CITATION: Citation = {
-  file: "domain1/fixtures/runs/20261008T133453Z-691b414/contract.json",
+  file: "domain1/fixtures/runs/20261012T084246Z-c5ce648/contract.json",
   section: "planes[] and stages[]",
 }

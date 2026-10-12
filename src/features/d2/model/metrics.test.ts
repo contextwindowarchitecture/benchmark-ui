@@ -66,7 +66,7 @@ describe("Domain 2's metrics by arm and tier", () => {
     ])
     expect(table.intervals).toBe(true)
     const pinned = table.cell("truncate-pinned", "8192")
-    expect(pinned).toMatchObject({ numerator: 364, denominator: 432, unit: "rate" })
+    expect(pinned).toMatchObject({ numerator: 363, denominator: 432, unit: "rate" })
     expect(pinned?.interval).toMatchObject({
       level: 0.95,
       method: "cluster-bootstrap/conversation",

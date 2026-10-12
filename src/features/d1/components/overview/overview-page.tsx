@@ -498,7 +498,7 @@ function Overview({ composite }: { composite: Composite }) {
       <PageSection
         id="drill-down"
         title="The drill-down"
-        description="Every number behind this page, and the defects the benchmark found on the way."
+        description="Every number behind this page, and the defects the benchmark found during its development."
       >
         <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">

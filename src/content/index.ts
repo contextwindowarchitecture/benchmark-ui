@@ -1,10 +1,17 @@
 export { ABOUT, DOMAINS, domainById, HOW_TO_READ, WHAT_CWA_IS } from "./benchmark"
 export type { DomainContent, DomainId } from "./benchmark"
-export { DEFECTS, DEFECTS_CITATION, DEFECTS_NOTE } from "./d1/defects"
+export {
+  DEFECTS,
+  DEFECTS_CITATION,
+  DEFECTS_NOTE,
+  DEVELOPMENT_RUN_NOTE,
+  FAILING_RUN,
+  isDevelopmentRun,
+} from "./d1/defects"
 export { filterGlossary, GLOSSARY, glossaryEntry } from "./glossary"
 export type { GlossaryEntry, GlossaryGroup } from "./glossary"
 export type { Defect, DefectPointer } from "./d1/defects"
-export { TRUST, TRUST_CITATION } from "./d1/trust"
+export { PEAK_MEMORY_NOTE, TRUST, TRUST_CITATION } from "./d1/trust"
 export type { TrustNote } from "./d1/trust"
 export { LANES, laneWords, PLANES, planeOf, VOCABULARY_CITATION } from "./d1/vocabulary"
 export type { Lane, LaneWords, PlaneId, PlaneWords } from "./d1/vocabulary"

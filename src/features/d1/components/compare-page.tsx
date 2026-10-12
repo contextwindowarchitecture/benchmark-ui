@@ -206,6 +206,7 @@ function Comparison({ index, from, to }: { index: RunsIndexV1; from: string; to:
                             { runId: to, summary: toDoc, entry: toEntry },
                           )}
                           harnessPrevious={report?.previous?.run_id ?? null}
+                          harnessReport={report !== undefined}
                         />
                       )}
                     </DataRegion>
@@ -245,11 +246,14 @@ function Computed({
   to,
   comparison,
   harnessPrevious,
+  harnessReport,
 }: {
   from: string
   to: string
   comparison: Comparison
   harnessPrevious: string | null
+  /** Whether `to` has a drift report at all; one without a previous run is its profile's baseline. */
+  harnessReport: boolean
 }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4" data-source="computed">
@@ -267,6 +271,11 @@ function Computed({
               >
                 {harnessPrevious}
               </Link>
+            </>
+          ) : harnessReport ? (
+            <>
+              , and its report on <span className="font-mono">{to}</span> is the profile's baseline,
+              compared with no run
             </>
           ) : (
             <>

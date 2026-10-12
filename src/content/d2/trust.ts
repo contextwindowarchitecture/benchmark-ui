@@ -119,7 +119,7 @@ export const TRUST: readonly Note[] = [
   {
     id: "oracle-upper-bound",
     title: "The oracle state is an upper bound by construction",
-    text: "cwa-state, cwa-memory and cwa-pipeline take their state from ground truth, so their lead shows what good state is worth, not what an application will get. The realistic arm, cwa-state-x, depends on the extractor's prompt and the model.",
+    text: "cwa-state, cwa-memory and cwa-pipeline take their state from ground truth, so their lead shows what good state is worth, not what an application will get. The realistic arm, cwa-state-x, depends on the extractor's prompt and the model; a better state writer would move it.",
   },
   {
     id: "producers",
@@ -129,12 +129,12 @@ export const TRUST: readonly Note[] = [
   {
     id: "margin",
     title: "The estimator margin is measured, not proven",
-    text: "No payload overran its budget at the margin used, but the margin covers the text this run produced; no fixed margin bounds every text a model can write.",
+    text: "No payload overran its budget at the margin used, but the margin covers the text these runs produced; no fixed margin bounds every text a model can write.",
   },
   {
     id: "sampling",
     title: "Sampling",
-    text: "A few samples per probe, with cluster-bootstrap intervals over conversations and paired comparisons on the same probes. Many arms and metrics are compared, so an interval that barely excludes zero is weaker evidence than a large, consistent difference.",
+    text: "A few samples per probe, with cluster-bootstrap intervals over conversations and paired comparisons on the same probes. Many arms and metrics are compared, so an interval that barely excludes zero is weaker evidence than a large, consistent difference. Refilling every reply from the same server moved the small margins, such as model-written state against pinned truncation and the pilot loop's rolling summary, while the large differences held.",
   },
   {
     id: "easy-retrieval",
@@ -155,7 +155,13 @@ export const TRUST: readonly Note[] = [
 
 export const TRUST_CITATION: Citation = { file: DOMAIN_2_WRITE_UP, section: "How far to trust it" }
 
-/** What making the recorded run corrected in the harness's own work, before the results. */
+/**
+ * What making the first recorded run corrected in the harness's own work. The reported runs
+ * repeat that run with the fixes, from an empty cache.
+ */
+export const CORRECTIONS_INTRO =
+  "Making the first recorded run surfaced these problems in the harness's own work, and both were fixed before it; the reported runs repeat it with those fixes, from an empty cache."
+
 export const CORRECTIONS: readonly Note[] = [
   {
     id: "fact-oracle-disagreed",

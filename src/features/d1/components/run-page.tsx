@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/dashboard/status-badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { isDevelopmentRun } from "@/content"
 import { useRunDocument, useRunsIndex } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { RunIndexV1 } from "@/data/schema/generated"
@@ -13,6 +14,7 @@ import { fileByPath } from "@/features/d1/model/run"
 import { parseRunId, runById, runDurationMs } from "@/features/d1/model/runs"
 import { formatDuration, formatUtc, isoUtc } from "@/lib/format"
 
+import { DevelopmentRunNotice } from "./development-run-notice"
 import { RunDrift } from "./run-drift"
 import { RunFiles } from "./run-files"
 import { RunFindings } from "./run-findings"
@@ -65,15 +67,20 @@ export function RunPage() {
         </span>
       }
       status={
-        index.data?.ok && index.data.document.fixture ? (
-          <Alert>
-            <AlertTitle>A fixture, not a whole run</AlertTitle>
-            <AlertDescription>
-              Cut by <code>cwabench fixture</code> from {index.data.document.fixture.of}: every
-              document, with {index.data.document.fixture.rows} rows per file and{" "}
-              {index.data.document.fixture.frames} frames per sweep kept.
-            </AlertDescription>
-          </Alert>
+        isDevelopmentRun(runId) || (index.data?.ok && index.data.document.fixture) ? (
+          <div className="grid gap-3">
+            <DevelopmentRunNotice runId={runId} />
+            {index.data?.ok && index.data.document.fixture ? (
+              <Alert>
+                <AlertTitle>A fixture, not a whole run</AlertTitle>
+                <AlertDescription>
+                  Cut by <code>cwabench fixture</code> from {index.data.document.fixture.of}: every
+                  document, with {index.data.document.fixture.rows} rows per file and{" "}
+                  {index.data.document.fixture.frames} frames per sweep kept.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </div>
         ) : null
       }
     >

@@ -38,7 +38,7 @@ describe("the Domain 1 overview", () => {
     expect(claim.getByText(/A conforming assembler is deterministic/)).toBeInTheDocument()
     await waitFor(() => expect(claim.getByText("16de4be")).toBeInTheDocument())
     expect(claim.getByText("spec draft 2026-10-07")).toBeInTheDocument()
-    expect(claim.getByText("Python 3.14.7")).toBeInTheDocument()
+    expect(claim.getByText("Python 3.14.4")).toBeInTheDocument()
     expect(claim.getByRole("link", { name: FIXTURE_RUNS.nightly })).toHaveAttribute(
       "href",
       `/d1/runs/${FIXTURE_RUNS.nightly}`,
@@ -47,11 +47,10 @@ describe("the Domain 1 overview", () => {
       "href",
       `/d1/runs/${FIXTURE_RUNS.s7}`,
     )
-    await waitFor(() => expect(claim.getByText("changed")).toBeInTheDocument())
-    expect(claim.getByRole("link", { name: "compare" })).toHaveAttribute(
-      "href",
-      `/d1/compare?from=20261008T131247Z-691b414&to=${FIXTURE_RUNS.nightly}`,
-    )
+    // The nightly's drift report is its profile's baseline: no previous run to compare with.
+    await waitFor(() => expect(claim.getByText("baseline")).toBeInTheDocument())
+    expect(claim.getByText("the baseline: no previous run of its profile")).toBeInTheDocument()
+    expect(claim.queryByRole("link", { name: "compare" })).toBeNull()
 
     const evidence = await section("evidence")
     const determinism = await waitFor(() => {
@@ -68,7 +67,7 @@ describe("the Domain 1 overview", () => {
       within(agreement).getByText(`s7.agreement · S7 · run ${FIXTURE_RUNS.s7}`),
     ).toBeInTheDocument()
     expect(within(agreement).getByText("100%")).toBeInTheDocument()
-    expect(within(agreement).getByText("1,106 / 1,106")).toBeInTheDocument()
+    expect(within(agreement).getByText("1,063 / 1,063")).toBeInTheDocument()
     const ungated = evidence.node.querySelector('[data-headline-group="ungated"]') as HTMLElement
     expect(ungated.querySelectorAll("[data-metric]").length).toBeGreaterThanOrEqual(5)
     expect(within(ungated).getAllByText("info").length).toBeGreaterThan(0)
@@ -98,7 +97,7 @@ describe("the Domain 1 overview", () => {
     expect(within(matrix).getByText(`from run ${FIXTURE_RUNS.s7}`)).toBeInTheDocument()
     const exponents = await evidence.findByRole("region", { name: "Pressure exponents table" })
     const python = exponents.querySelector('[data-adapter="python"]') as HTMLElement
-    expect(within(python).getByText("0.95")).toBeInTheDocument()
+    expect(within(python).getByText("0.94")).toBeInTheDocument()
     expect(within(python).getByText("1.91")).toBeInTheDocument()
     expect(await evidence.findByRole("figure", { name: /what S2 changes/ })).toBeInTheDocument()
 
@@ -110,8 +109,15 @@ describe("the Domain 1 overview", () => {
 
     const drill = await section("drill-down")
     expect(await drill.findByText("No findings in the nightly run")).toBeInTheDocument()
-    expect(drill.getByText("33 findings in the S7 run")).toBeInTheDocument()
-    await waitFor(() => expect(drill.getByText("33 warning")).toBeInTheDocument())
+    expect(drill.getByText("34 findings in the S7 run")).toBeInTheDocument()
+    await waitFor(() => expect(drill.getByText("34 warning")).toBeInTheDocument())
+    const development = drill.node.querySelector("[data-development-run]") as HTMLElement
+    expect(within(development).getByRole("link", { name: FIXTURE_RUNS.failing })).toHaveAttribute(
+      "href",
+      `/d1/runs/${FIXTURE_RUNS.failing}`,
+    )
+    expect(development).toHaveTextContent(/A development-time record, not a reported result/)
+    expect(development).toHaveTextContent(/at an older contract commit/)
     const defects = drill.getByRole("region", { name: "Defects table" })
     expect(within(defects).getAllByRole("row")).toHaveLength(6)
     expect(within(defects).getByRole("link", { name: "8e03174ca742" })).toHaveAttribute(

@@ -127,7 +127,7 @@ describe("suite page", () => {
     ).toHaveLength(16)
     expect(
       panel.getAllByRole("listitem").filter((item) => item.hasAttribute("data-timeout")),
-    ).toHaveLength(33)
+    ).toHaveLength(34)
     const sweeps = panel.getByRole("region", { name: "Sweeps table" })
     expect(within(sweeps).getAllByRole("row")).toHaveLength(9)
     expect(panel.getByText(/16 cells the generator cannot build/)).toBeInTheDocument()

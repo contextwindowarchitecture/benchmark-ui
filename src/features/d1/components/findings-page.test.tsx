@@ -16,11 +16,13 @@ describe("findings pages", () => {
   it("is calm when a run has no findings", async () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}/findings`)
     expect(await screen.findByText("No findings in this run")).toBeInTheDocument()
+    expect(screen.queryByText("A development-time record, not a reported result")).toBeNull()
   })
 
   it("lists the failing run's findings with suite, severity and oracle facets", async () => {
     renderApp(`/d1/runs/${failing}/findings?suite=S4`)
     expect(await screen.findByRole("heading", { level: 1, name: "Findings" })).toBeInTheDocument()
+    expect(screen.getByText("A development-time record, not a reported result")).toBeInTheDocument()
     const table = await screen.findByRole("region", { name: "findings rows table" })
     expect(within(table).getAllByRole("row")).toHaveLength(8)
     expect(screen.getByText("7 of 19 rows match")).toBeInTheDocument()
@@ -36,6 +38,7 @@ describe("findings pages", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Finding d2cb80f84912" }),
     ).toBeInTheDocument()
+    expect(screen.getByText("A development-time record, not a reported result")).toBeInTheDocument()
     const what = await section("what")
     expect(what.getAllByText("metamorphic").length).toBeGreaterThan(0)
     expect(what.getByText("R-22")).toBeInTheDocument()
