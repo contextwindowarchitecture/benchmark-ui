@@ -73,6 +73,10 @@ jobs:
         working-directory: benchmark-ui
         run: pnpm build
 
+      - name: Bundle budgets
+        working-directory: benchmark-ui
+        run: pnpm budgets
+
       - name: Install Playwright's browser
         working-directory: benchmark-ui
         run: pnpm exec playwright install --with-deps chromium

@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "budgets": "node scripts/check-budgets.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b",
