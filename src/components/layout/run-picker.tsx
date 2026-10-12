@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
 
 import { useDomainRunsIndex, useResultsDomain } from "@/data/queries"
@@ -29,6 +30,8 @@ export function RunPicker() {
   const params = useParams()
   const location = useLocation()
   const navigate = useNavigate()
+  /** A run was chosen from the list, so the list closing must not take the route's focus back. */
+  const chose = useRef(false)
   const [urlState, setUrlState] = useUrlState(runsListParams)
   const currentRunId = typeof params["runId"] === "string" ? params["runId"] : undefined
 
@@ -73,14 +76,23 @@ export function RunPicker() {
       </Select>
       <Select
         value={currentRunId && runs.some((run) => run.run_id === currentRunId) ? currentRunId : ""}
-        onValueChange={(runId) =>
+        onValueChange={(runId) => {
+          chose.current = true
           navigate(runScopedPath(location.pathname, currentRunId, runId, DOMAIN_PAGES[domain].base))
-        }
+        }}
       >
         <SelectTrigger size="sm" aria-label="Run" className="w-64 font-mono text-xs">
           <SelectValue placeholder="Pick a run" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent
+          // Choosing a run is a route change, whose focus goes to the new page's title; returning it
+          // to this trigger as the list closes would race that. Escape still returns it here.
+          onCloseAutoFocus={(event) => {
+            if (!chose.current) return
+            chose.current = false
+            event.preventDefault()
+          }}
+        >
           {runs.length === 0 ? (
             <div className="px-2 py-1.5 text-sm text-muted-foreground">
               No runs with this profile
