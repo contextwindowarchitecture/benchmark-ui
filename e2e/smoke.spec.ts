@@ -498,3 +498,32 @@ test("the densest pages reflow at 320 px", async ({ page }) => {
     await expectFitsThePhone(page)
   }
 })
+
+// The keyboard alone (DESIGN.md 10): a matrix's scroll region takes the focus and scrolls with the
+// arrows, and the run picker opens, moves and chooses, landing focus on the new page's title.
+test("the keyboard scrolls a matrix and works the run picker", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 })
+  await page.goto(`/d1/runs/${NIGHTLY}/coverage`)
+  const matrix = page.getByRole("region", { name: "Reasons by slot matrix for Python" })
+  await expect(matrix).toBeVisible()
+  await matrix.focus()
+  await expect(matrix).toBeFocused()
+  const before = await matrix.evaluate((node) => node.scrollLeft)
+  await page.keyboard.press("ArrowRight")
+  await page.keyboard.press("ArrowRight")
+  await expect.poll(() => matrix.evaluate((node) => node.scrollLeft)).toBeGreaterThan(before)
+
+  // From the S7 run, whose profile (none) the failing run shares, to the other run by the arrows.
+  await page.goto(`/d1/runs/${S7}/coverage`)
+  await expect(page.getByRole("heading", { level: 1, name: "Coverage" })).toBeVisible()
+  const picker = page.getByRole("combobox", { name: "Run" })
+  await picker.focus()
+  await page.keyboard.press("Enter")
+  await expect(page.getByRole("option", { name: new RegExp(FAILING) })).toBeVisible()
+  // A person's pace between the keys: Radix's select ignores a choice made the instant it opens.
+  await page.waitForTimeout(300)
+  await page.keyboard.press("ArrowDown")
+  await page.keyboard.press("Enter")
+  await expect(page).toHaveURL(new RegExp(`/d1/runs/${FAILING}/coverage$`))
+  await expect(page.getByRole("heading", { level: 1, name: "Coverage" })).toBeFocused()
+})
