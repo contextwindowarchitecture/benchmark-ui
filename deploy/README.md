@@ -54,7 +54,7 @@ public, so the cluster needs no pull secret.
 ```sh
 oc apply -k deploy/overlays/prod          # the Route is refused until its certificate exists: see DNS and TLS
 oc -n cwa-benchmark rollout status deployment/benchmark-ui
-deploy/publish.sh ../benchmark/domain1/results d1 20261012T084246Z-c5ce648 20261012T090317Z-c5ce648
+deploy/publish.sh ../benchmark/domain1/results d1 20261012T084246Z-c5ce648 20261012T154357Z-a6bbb5b
 ```
 
 Until DNS propagates, reach the Route through the router directly:

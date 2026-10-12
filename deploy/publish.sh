@@ -3,7 +3,7 @@
 # first and the domain's index.json last, so the index never names a run that is not yet whole, then scale it down.
 #
 #   deploy/publish.sh <results root> <domain> <run-id>...
-#   deploy/publish.sh ../benchmark/domain1/results d1 20261012T084246Z-c5ce648 20261012T090317Z-c5ce648
+#   deploy/publish.sh ../benchmark/domain1/results d1 20261012T084246Z-c5ce648 20261012T154357Z-a6bbb5b
 #   deploy/publish.sh <local copy of domain2/results> d2 20261012T052348Z-4a0ea5d 20261012T042632Z-4a0ea5d
 #
 # NAMESPACE (default cwa-benchmark) and KEEP are read from the environment. With KEEP=N, run directories beyond the

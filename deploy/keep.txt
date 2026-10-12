@@ -1,8 +1,9 @@
 # Runs deploy/publish.sh never prunes, one id per line: the runs a write-up cites.
-# Domain 1's write-up (docs/domain1.md): the nightly and the dedicated S7 run of 2026-10-12 on the GPU host, and the
-# failing run of 2026-10-08, the development-time record of the defects it found.
+# Domain 1's write-up (docs/domain1.md): the nightly and the dedicated S7 run of 2026-10-12 on the GPU host (the S7
+# re-run after the peak-memory fix), and the failing run of 2026-10-08, the development-time record of the defects it
+# found.
 20261012T084246Z-c5ce648
-20261012T090317Z-c5ce648
+20261012T154357Z-a6bbb5b
 20261008T004213Z-e824f1b
 # Domain 2's write-up (docs/domain2.md): the recorded run and the S6 pilot it reports beside it, 2026-10-12.
 20261012T052348Z-4a0ea5d
