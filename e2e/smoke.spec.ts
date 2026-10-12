@@ -527,3 +527,36 @@ test("the keyboard scrolls a matrix and works the run picker", async ({ page }) 
   await expect(page).toHaveURL(new RegExp(`/d1/runs/${FAILING}/coverage$`))
   await expect(page.getByRole("heading", { level: 1, name: "Coverage" })).toBeFocused()
 })
+
+// The shell's preferences and focus (DESIGN.md 4.2, 10): the desktop sidebar's collapse is kept
+// across a reload, and on a phone the navigation sheet closes on Escape and gives the focus back to
+// the button that opened it.
+test("the sidebar keeps its collapse, and the phone's sheet returns the focus", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto("/about")
+  const sidebar = page.locator('[data-slot="sidebar"][data-state]').first()
+  await expect(sidebar).toHaveAttribute("data-state", "expanded")
+  await page.getByRole("button", { name: "Toggle Sidebar" }).first().click()
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed")
+  await page.reload()
+  await expect(page.locator('[data-slot="sidebar"][data-state]').first()).toHaveAttribute(
+    "data-state",
+    "collapsed",
+  )
+
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto("/about")
+  const trigger = page.getByRole("button", { name: "Toggle Sidebar" }).first()
+  await trigger.click()
+  const sheet = page.getByRole("dialog")
+  await expect(sheet).toBeVisible()
+  await page.keyboard.press("Escape")
+  await expect(sheet).toBeHidden()
+  await expect(trigger).toBeFocused()
+  // A link in the sheet changes the route: the focus goes to the new page's title, not back.
+  await trigger.click()
+  await page.getByRole("dialog").getByRole("link", { name: "Glossary" }).click()
+  await expect(page.getByRole("heading", { level: 1, name: "Glossary" })).toBeFocused()
+})
