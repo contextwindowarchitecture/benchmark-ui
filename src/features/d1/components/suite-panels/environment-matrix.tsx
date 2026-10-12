@@ -77,7 +77,9 @@ export function EnvironmentMatrix({
               <TableRow key={`${row.cell}|${row.platform}`} data-cell={row.cell}>
                 <TableCell scope="row" className="align-top">
                   <div className="font-mono text-xs">{row.cell}</div>
-                  <div className="max-w-xs text-xs text-muted-foreground">{row.description}</div>
+                  <div className="max-w-xs text-xs whitespace-normal text-muted-foreground">
+                    {row.description}
+                  </div>
                   <div className="font-mono text-[0.7rem] text-muted-foreground">
                     {row.platform}
                   </div>

@@ -38,7 +38,7 @@ function Events({
         {formatCount(eventTotal(events))}
         {harmless ? " (harmless)" : ""}
       </summary>
-      <ul className="mt-1 space-y-0.5 font-mono">
+      <ul className="mt-1 space-y-0.5 font-mono whitespace-normal">
         {events.map((event) => (
           <li key={event.event} className="break-all">
             {event.event} <span className="text-muted-foreground">×{formatCount(event.count)}</span>

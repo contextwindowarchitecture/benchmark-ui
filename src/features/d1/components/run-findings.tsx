@@ -243,11 +243,11 @@ function GroupRows({
               <div className="font-mono text-muted-foreground">{finding.checks.join(", ")}</div>
             ) : null}
           </TableCell>
-          <TableCell className="max-w-md align-top text-sm">
+          <TableCell className="max-w-md align-top text-sm whitespace-normal">
             {pages.findingPages ? (
               <Link
                 to={`${pages.base}/runs/${runId}/findings/${finding.finding_id}`}
-                className="underline-offset-3 hover:underline"
+                className="block min-h-6 py-0.5 underline-offset-3 hover:underline"
               >
                 {finding.summary}
               </Link>
