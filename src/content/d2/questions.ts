@@ -6,7 +6,7 @@
 
 import { DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "../source"
 
-export type QuestionId = "tracking"
+export type QuestionId = "tracking" | "instructions"
 
 export type QuestionWords = {
   id: QuestionId
@@ -14,8 +14,13 @@ export type QuestionWords = {
   title: string
   /** The question the page answers, in one sentence. */
   question: string
-  /** The viability document's metric: its row's name, the conventional baseline, CWA's outcome. */
+  /**
+   * The viability document's metric: where it says it, its name, the conventional baseline and
+   * CWA's expected outcome.
+   */
   viability: {
+    /** Where the document states it: a row of its table, its hypothesis. */
+    where: string
     metric: string
     baseline: string
     expected: string
@@ -40,6 +45,7 @@ export const TRACKING: QuestionWords = {
   question:
     "When a figure is reassigned or corrected over a long conversation, does the model answer with its current value, or with a stale one?",
   viability: {
+    where: "A row of its Domain 2 table",
     metric: "Variable Tracking (RULER)",
     baseline:
       "A high failure rate: assignments scattered through a long context leave conflicting temporal states, and the model falls back on guessing.",
@@ -67,5 +73,35 @@ export const TRACKING: QuestionWords = {
   },
 }
 
+export const INSTRUCTIONS: QuestionWords = {
+  id: "instructions",
+  title: "Instruction persistence",
+  question:
+    "Does a rule given in the system prompt still hold late in a long conversation, or does older context push it out?",
+  viability: {
+    where: "The hypothesis that closes its Domain 2 section, and the plane it rests on",
+    metric: "Core rules pushed out of the context window",
+    baseline:
+      "As a conversation grows, older context pushes the core rules out of the window, and the model stops following them.",
+    expected:
+      "The Governance plane holds the instructions apart from the history, fixed and authoritative, so the rules hold however long the conversation runs.",
+    citation: {
+      file: VIABILITY_DOCUMENT,
+      section: "Domain 2: Long-Horizon Multi-Turn Stability and Context Drift",
+    },
+  },
+  measured: [
+    "The IP family is VT with one rule in the system prompt: brackets around figures, a sign-off, or capital letters. Code checks the rule on every probe's reply; an overflow, which reaches no model, is left out.",
+    "truncate keeps the newest turns that fit and drops the system prompt with the oldest; truncate-pinned and every CWA arm keep it. cwa-format sends the window baseline's exact selection, rendered as CWA renders it, so it tells CWA's format apart from its selection.",
+  ],
+  writeUp: {
+    text: [
+      "Every arm that keeps the system prompt follows the sign-off rule on every probe and the bracket rule on nearly every one; dropping the prompt loses both on many probes.",
+      "The capital-letters rule is the one the model resists, even with the whole conversation. The CWA arms complied far more often than the conventional ones, and so did the format control, so CWA's rendering of the instructions is much of what helps, not only its selection.",
+    ],
+    citation: { file: DOMAIN_2_WRITE_UP, section: "Scripted conversations (S2)" },
+  },
+}
+
 /** Every question page's words, in the sidebar's order. */
-export const QUESTIONS: readonly QuestionWords[] = [TRACKING]
+export const QUESTIONS: readonly QuestionWords[] = [TRACKING, INSTRUCTIONS]

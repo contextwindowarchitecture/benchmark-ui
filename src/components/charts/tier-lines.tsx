@@ -1,5 +1,6 @@
-// Small multiples over corpus size (the UI-D2 plan; DESIGN.md 7): one panel per arm, a rate
-// against the corpus's size on a log scale, the reference arm faint in every other panel. The
+// Small multiples over a tier's size (the UI-D2 plan; DESIGN.md 7): one panel per arm, a rate
+// against the corpus's size or the conversation's turn count on a log scale, the reference arm
+// faint in every other panel. The
 // panels are pictures hidden from assistive technology; the figure's caption says what they show
 // and the table beside them holds every value.
 

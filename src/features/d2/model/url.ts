@@ -40,3 +40,9 @@ export const d2TrackingParams = {
   at: NAME,
   family: NAME,
 }
+
+/** Instruction persistence (UI-D2c): the pinned run and the budget the panels are read at. */
+export const d2InstructionsParams = {
+  run: RUN_ID_PARAM,
+  at: NAME,
+}

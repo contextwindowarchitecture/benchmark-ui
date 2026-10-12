@@ -194,7 +194,7 @@ function ViabilitySection({ words }: { words: QuestionWords }) {
     <PageSection
       id="viability"
       title="What the viability document expects"
-      description={`Its Domain 2 table's row "${viability.metric}", and how this domain measures it.`}
+      description={`${viability.where}: “${viability.metric}”, and how this domain measures it.`}
     >
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
         <dl className="grid gap-4 md:grid-cols-2" data-viability>

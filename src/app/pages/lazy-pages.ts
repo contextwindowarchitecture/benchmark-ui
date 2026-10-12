@@ -32,3 +32,9 @@ export const D2TrackingPage = lazy(() =>
     default: module.TrackingPage,
   })),
 )
+
+export const D2InstructionsPage = lazy(() =>
+  import("@/features/d2/components/questions/instructions-page").then((module) => ({
+    default: module.InstructionsPage,
+  })),
+)

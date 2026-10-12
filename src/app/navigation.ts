@@ -10,6 +10,7 @@ import {
   House,
   Layers,
   ListChecks,
+  ScrollText,
   Search,
   SlidersHorizontal,
   Variable,
@@ -64,6 +65,13 @@ const domain2: NavGroup = {
       icon: Variable,
       href: () => "/d2/tracking",
       patterns: ["/d2/tracking"],
+    },
+    {
+      id: "d2-instructions",
+      label: "Instructions",
+      icon: ScrollText,
+      href: () => "/d2/instructions",
+      patterns: ["/d2/instructions"],
     },
   ],
 }

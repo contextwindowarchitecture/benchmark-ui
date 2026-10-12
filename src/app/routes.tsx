@@ -22,6 +22,7 @@ import { DomainPage } from "./pages/domain-page"
 import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
 import {
+  D2InstructionsPage,
   D2OverviewPage,
   D2TrackingPage,
   OverviewPage,
@@ -245,6 +246,20 @@ export const routes: RouteObject[] = [
                 handle: handle({
                   title: () => "Variable tracking",
                   crumb: () => ({ label: "Variable tracking" }),
+                }),
+              },
+              {
+                path: "instructions",
+                element: (
+                  <Suspense
+                    fallback={<PageFallback title="Instruction persistence" width="wide" />}
+                  >
+                    <D2InstructionsPage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Instruction persistence",
+                  crumb: () => ({ label: "Instruction persistence" }),
                 }),
               },
               {
