@@ -7,7 +7,7 @@ import { expect, test, type Page } from "@playwright/test"
 const NIGHTLY = "20261012T084246Z-c5ce648"
 const FAILING = "20261008T004213Z-e824f1b"
 const D2_NIGHTLY = "20261012T135118Z-f2fee09"
-const S7 = "20261012T090317Z-c5ce648"
+const S7 = "20261012T154357Z-a6bbb5b"
 const SWEEP = "1da5d58f5c90cbd75466c9f99c29167a46109c483d924b4f5cc56b75994ba1a3"
 
 // The preview server sends the production Content Security Policy; a violation is a console error

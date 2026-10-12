@@ -22,7 +22,7 @@ export const FIXTURE_ROOT = "/results"
 
 export const FIXTURE_RUNS = {
   nightly: "20261012T084246Z-c5ce648",
-  s7: "20261012T090317Z-c5ce648",
+  s7: "20261012T154357Z-a6bbb5b",
   failing: "20261008T004213Z-e824f1b",
 } as const
 

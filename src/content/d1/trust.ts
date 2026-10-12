@@ -56,12 +56,13 @@ export const TRUST: readonly TrustNote[] = [
 export const TRUST_CITATION: Citation = { file: DOMAIN_1_WRITE_UP, section: "How far to trust it" }
 
 /**
- * Said on the performance page when every adapter and cell records the same peak memory: the
- * write-up leaves peak memory out of its S7 results for that reason.
+ * Said on the performance page when every adapter and cell records the same peak memory: on Linux,
+ * runs made before the harness measured each assembler's own peak recorded the harness's, as the
+ * write-up says of the run it replaced.
  */
 export const PEAK_MEMORY_NOTE = {
   title: "Peak memory is not the adapters' own",
-  text: "Every adapter and every cell of this run records the same peak resident memory, which is not the assembler's own, so the Domain 1 write-up leaves peak memory out. The column shows the figure as recorded; do not compare adapters by it.",
+  text: "Every adapter and every cell of this run records the same peak resident memory, which is not the assembler's own: on Linux, runs made before the harness measured each assembler's own peak recorded the harness's. The column shows the figure as recorded; do not compare adapters by it.",
   citation: {
     file: DOMAIN_1_WRITE_UP,
     section: "Budget pressure at scale (S7)",

@@ -8,7 +8,7 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Repository: `contextwindowarchitecture/benchmark-ui`, vendoring the benchmark by copy at a pinned commit (the
   plan's 3.1): `vendor/cwa-bench/` holds each domain's v1 schemas (29 of Domain 1, 27 of Domain 2), fixture runs
   (Domain 1's three, Domain 2's one) and write-up, and the viability document; the lock
-  `vendor/cwa-bench.lock.json` pins commit `04db5a7` of `contextwindowarchitecture/benchmark`. `pnpm vendor
+  `vendor/cwa-bench.lock.json` pins commit `d970fef` of `contextwindowarchitecture/benchmark`. `pnpm vendor
   ../benchmark` re-vendors; `pnpm vendor:check` fails on drift between the lock, the copy and the checkout at the
   locked commit. Never edit a vendored file; move the pin in one commit with the regenerated types.
 - Application type and primary user tasks: a public, read-only results site for the benchmark; the plan's section 1.

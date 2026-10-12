@@ -67,7 +67,7 @@ describe("the Domain 1 overview", () => {
       within(agreement).getByText(`s7.agreement · S7 · run ${FIXTURE_RUNS.s7}`),
     ).toBeInTheDocument()
     expect(within(agreement).getByText("100%")).toBeInTheDocument()
-    expect(within(agreement).getByText("1,063 / 1,063")).toBeInTheDocument()
+    expect(within(agreement).getByText("1,060 / 1,060")).toBeInTheDocument()
     const ungated = evidence.node.querySelector('[data-headline-group="ungated"]') as HTMLElement
     expect(ungated.querySelectorAll("[data-metric]").length).toBeGreaterThanOrEqual(5)
     expect(within(ungated).getAllByText("info").length).toBeGreaterThan(0)
@@ -97,8 +97,8 @@ describe("the Domain 1 overview", () => {
     expect(within(matrix).getByText(`from run ${FIXTURE_RUNS.s7}`)).toBeInTheDocument()
     const exponents = await evidence.findByRole("region", { name: "Pressure exponents table" })
     const python = exponents.querySelector('[data-adapter="python"]') as HTMLElement
-    expect(within(python).getByText("0.94")).toBeInTheDocument()
-    expect(within(python).getByText("1.91")).toBeInTheDocument()
+    expect(within(python).getByText("0.95")).toBeInTheDocument()
+    expect(within(python).getByText("1.92")).toBeInTheDocument()
     expect(await evidence.findByRole("figure", { name: /what S2 changes/ })).toBeInTheDocument()
 
     const trust = await section("trust")

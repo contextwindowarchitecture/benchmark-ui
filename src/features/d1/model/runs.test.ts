@@ -87,7 +87,7 @@ describe("runs index selectors", () => {
   it("computes a duration from the timestamps", async () => {
     const idx = await index()
     expect(runDurationMs(idx.runs[0]!)).toBe(
-      Date.parse("2026-10-12T10:52:41.746Z") - Date.parse("2026-10-12T09:03:17.091Z"),
+      Date.parse("2026-10-12T17:33:35.368Z") - Date.parse("2026-10-12T15:43:57.877Z"),
     )
     expect(runDurationMs({ started_at: "2026-10-08T13:34:53.817Z", finished_at: null })).toBeNull()
   })

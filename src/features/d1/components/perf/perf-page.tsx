@@ -266,7 +266,7 @@ function Bar({ value, max }: { value: number; max: number }) {
   )
 }
 
-/** The write-up's reason for leaving peak memory out, when the run records one peak for all. */
+/** Why one peak recorded for every adapter is not theirs, when the run records one peak for all. */
 function PeakMemoryNote({ perf }: { perf: PerfSummaryV1 }) {
   const peak = uniformPeakMemory(perf)
   if (peak === null) return null

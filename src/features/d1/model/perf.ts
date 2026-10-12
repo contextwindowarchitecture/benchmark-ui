@@ -134,8 +134,9 @@ export function filterCells(cells: readonly PerfCell[], filter: CellFilter): Per
 
 /**
  * The one peak resident memory every adapter's startup and cells record, when they all record the
- * same one across more than one adapter: then the figure is not any adapter's own (the Domain 1
- * write-up leaves it out for that reason), and the page says so beside it. Null otherwise.
+ * same one across more than one adapter: then the figure is not any adapter's own (on Linux, runs
+ * made before the harness measured each assembler's own peak recorded the harness's), and the page
+ * says so beside it. Null otherwise.
  */
 export function uniformPeakMemory(perf: PerfSummaryV1): number | null {
   const peaks = [

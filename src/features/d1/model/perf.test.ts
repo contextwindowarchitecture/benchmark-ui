@@ -46,17 +46,25 @@ function slope(points: { x: number; y: number }[]): number {
 describe("the performance summary", () => {
   it("says when every adapter and cell records the same peak memory", async () => {
     const summary = await perf()
-    // The S7 run's Linux host recorded one peak for every adapter and cell, not the adapters' own.
-    expect(uniformPeakMemory(summary)).toBe(1_130_352_640)
-    const startup = summary.startup.map((entry, i) => ({
+    // The S7 run records each assembler's own peak, so they differ.
+    expect(uniformPeakMemory(summary)).toBeNull()
+    // A run made before that, on Linux, recorded the harness's peak for every adapter and cell.
+    const harness = 1_130_352_640
+    const uniform = {
+      ...summary,
+      startup: summary.startup.map((entry) => ({ ...entry, rss_peak_bytes: harness })),
+      cells: summary.cells.map((cell) => ({ ...cell, rss_peak_bytes: harness })),
+    }
+    expect(uniformPeakMemory(uniform)).toBe(harness)
+    const startup = uniform.startup.map((entry, i) => ({
       ...entry,
       rss_peak_bytes: 20_000_000 + i,
     }))
-    expect(uniformPeakMemory({ ...summary, startup })).toBeNull()
+    expect(uniformPeakMemory({ ...uniform, startup })).toBeNull()
     expect(uniformPeakMemory({ ...summary, startup: [], cells: [] })).toBeNull()
-    const one = summary.startup.filter((entry) => entry.adapter === "python")
-    const cells = summary.cells.filter((cell) => cell.adapter === "python")
-    expect(uniformPeakMemory({ ...summary, startup: one, cells })).toBeNull()
+    const one = uniform.startup.filter((entry) => entry.adapter === "python")
+    const cells = uniform.cells.filter((cell) => cell.adapter === "python")
+    expect(uniformPeakMemory({ ...uniform, startup: one, cells })).toBeNull()
   })
 
   it("names each series' sizes from the typed series parameters", async () => {
