@@ -110,6 +110,15 @@ before the UI's first rollout has completed. `KEEP=20 deploy/publish.sh …` pru
 twenty, except those in `keep.txt`. The site shows a pruned run as "pruned", since the index still lists it. Nothing
 runs the harness in the cluster.
 
+A run is copied in batches of about 64 MB (`PIECE_MB`), each a tar stream through `oc exec` retried up to three times
+(`RETRIES`), and its own `index.json` after the rest of it: a dropped connection to the API server costs one batch, not
+the run (a recorded Domain 2 run is 1.1 GB in 20,000 files). If a batch fails every attempt the script stops, copies
+no index, and can simply be run again.
+
+The claim's storage class reclaims with `Delete`: deleting the `benchmark-results` claim deletes its volume and every
+run on it, and the next `oc apply` creates an empty one. After that, publish the runs `keep.txt` names again, each
+domain on its own.
+
 Each domain is published on its own, with its own results root and index; the site reads `results/d1/` and
 `results/d2/`. Domain 2's reported runs are made on the GPU host, so copy the run directories and `index.json` from
 its `domain2/results/d2/` to a local directory first, then publish every run its index lists that the site should
