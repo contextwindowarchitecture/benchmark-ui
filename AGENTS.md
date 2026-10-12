@@ -26,13 +26,13 @@ checked out beside this repository as `../benchmark`.
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
 | `deploy/` | The container image, the nginx configuration, the Kustomize base and the production overlay (the cluster's storage, TLS through cert-manager), and `publish.sh`, which copies runs into the results volume; `deploy/README.md` is the procedure |
 
-Status: phases UI-P0 (the scaffold, the data layer, the shell and routes, the runs list and the run page), UI-P1
-(the deployment; the site serves at benchmark.contextwindowarchitecture.io), UI-P2 (the suite pages, the rows
-worker), UI-P3 (coverage, findings, the answer explorer), UI-P4 (S7: the scale grid, the sweeps list, the shedding
-viewer and the performance page), UI-P5 (the narrative layer: home, About, the Domain 1 overview, the domain pages,
-the diagrams, the pipeline walk, compare) and UI-D2 (Domain 2: its overview, runs, run and suite pages, over the same
-shell and data layer) are built. UI-P6 (polish: the budgets measured, the accessibility and visual passes) remains.
-The plan's section 15 says which phase builds what.
+Status: every phase of the plan is built: UI-P0 (the scaffold, the data layer, the shell and routes, the runs list
+and the run page), UI-P1 (the deployment; the site serves at benchmark.contextwindowarchitecture.io), UI-P2 (the suite
+pages, the rows worker), UI-P3 (coverage, findings, the answer explorer), UI-P4 (S7: the scale grid, the sweeps list,
+the shedding viewer and the performance page), UI-P5 (the narrative layer: home, About, the Domain 1 overview, the
+domain pages, the diagrams, the pipeline walk, compare), UI-D2 (Domain 2: its overview, runs, run and suite pages,
+over the same shell and data layer) and UI-P6 (the budgets set and measured, the accessibility and visual passes).
+The profile's last section checks DESIGN.md 14 and names what was not run.
 
 ## Working on it
 
@@ -41,6 +41,8 @@ pnpm install
 pnpm dev                                        # ../benchmark/domain<n>/results/d<n> if there, else the fixtures
 pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm vendor:check && pnpm format:check
 pnpm test:e2e                                   # needs `pnpm exec playwright install chromium` once
+pnpm budgets                                    # after a build: the bundle against the profile's budgets
+pnpm test:perf                                  # the rendering budgets, over ../benchmark's results when there
 pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with the copies, the lock and the types
 ```
 

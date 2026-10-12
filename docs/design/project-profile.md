@@ -8,13 +8,13 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Repository: `contextwindowarchitecture/benchmark-ui`, vendoring the benchmark by copy at a pinned commit (the
   plan's 3.1): `vendor/cwa-bench/` holds each domain's v1 schemas (29 of Domain 1, 27 of Domain 2), fixture runs
   (Domain 1's three, Domain 2's one) and write-up, and the viability document; the lock
-  `vendor/cwa-bench.lock.json` pins commit `091eb9f` of `contextwindowarchitecture/benchmark`. `pnpm vendor
+  `vendor/cwa-bench.lock.json` pins commit `73c4757` of `contextwindowarchitecture/benchmark`. `pnpm vendor
   ../benchmark` re-vendors; `pnpm vendor:check` fails on drift between the lock, the copy and the checkout at the
   locked commit. Never edit a vendored file; move the pin in one commit with the regenerated types.
 - Application type and primary user tasks: a public, read-only results site for the benchmark; the plan's section 1.
 - Framework and routing strategy: Vite 8.3.3 with `@vitejs/plugin-react` 6.1.2, React 19.3.0, React Router 8.4.0 in
   data mode (`createBrowserRouter`; route `handle`s carry the page title and the breadcrumb); client-side only, no
-  server rendering. The routes are the plan's 6.2; pages of later phases render a placeholder inside the shell.
+  server rendering. The routes are the plan's 6.2, every one a built page.
 - Runtime and package-manager versions: Node 24 (`engines.node >= 24`, developed on 24.20.0), pnpm 12.3.4 pinned
   through `packageManager`, exact versions in `package.json` and `pnpm-lock.yaml`. TypeScript 6.0.3 (not 7: the
   typescript-eslint release in use supports versions below 6.1).
@@ -29,7 +29,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   white text on a button, stays the buttons' and reads below 4.5:1 as small text on a tint), the status vocabulary
   mapped onto the semantic pairs (`--status-*`), the four adapter identities on `--chart-1` to `--chart-4`
   (`--adapter-python`, `-typescript`, `-go`, `-rust`), and the motion tokens. The preset's grey chart tokens are
-  replaced by the adapter hues; status colors are never used for series. Every status badge meets WCAG AA on its
+  replaced by the adapter hues (in `html:root` and `html.dark` blocks, since `tokens.css` is imported before the
+  generated `:root` and `.dark` and would otherwise lose to them; until UI-P6 it did, and the adapters drew in
+  greys); status colors are never used for series. Every status badge meets WCAG AA on its
   tint in the light theme (axe checks it in the smoke test).
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
@@ -112,58 +114,85 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Sidebar preference persistence and responsive breakpoint: the generated sidebar's own behaviour: the desktop
   open/collapsed preference in the `sidebar_state` cookie, honoured on load, expanded by default from 1024 px and
   collapsed to icons below; the mobile sheet below 768 px, never persisted. DESIGN.md 4.2's measurements apply.
-- Supported browsers and representative devices: current Chrome, Firefox and Safari; a laptop at 1280 px and a
-  phone at 375 px for the home page, the runs list and the run page (the tables scroll horizontally in a labelled
-  region; the page itself never overflows). The model, environment and oracle diagrams lay themselves out in their
-  frame's measured width: on a phone the model pairs its planes, the environment diagram bands its platforms and
-  the oracles stack on a spine, rather than scrolling inside the frame. The shedding viewer shows one panel at a
-  time below 1024 px (the URL's `view` picks it), the curve beside the items or the lanes above. The Playwright smoke
-  test opens the home page, the Domain 1 overview, the S2 suite page, coverage, the shedding viewer in two views, the
-  sweeps list, performance, and Domain 2's overview, a run page and a suite page with its rows loaded at 375 px, and fails if the page scrolls sideways or anything outside a table region
-  reaches past the screen's edge.
+- Supported browsers and representative devices: current Chrome, Firefox and Safari; a laptop at 1280 px, a
+  compact desktop at 1024 px, a phone at 375 px, and 320 px for reflow (WCAG 1.4.10: 400% zoom of a 1280 px
+  screen). The tables scroll horizontally in a labelled region; the page itself never overflows, and nothing spills
+  out of a table cell over the next (the generated cells do not wrap, so text that must wraps in a cell that does).
+  The model, environment and oracle diagrams lay themselves out in their frame's measured width: on a phone the
+  model pairs its planes, the environment diagram bands its platforms and the oracles stack on a spine, rather
+  than scrolling inside the frame. The shedding viewer shows one panel at a time below 1024 px (the URL's `view`
+  picks it), the curve beside the items or the lanes above. The Playwright smoke test opens the home page, the
+  Domain 1 overview, the S2 suite page, coverage, the shedding viewer in two views, the sweeps list, performance,
+  and Domain 2's overview, a run page and a suite page with its rows loaded at 375 px, and the home page, both
+  overviews, a run page, the viewer and performance at 320 px, and fails if the page scrolls sideways or anything
+  outside a table region reaches past the screen's edge. The automated runs are Chromium only.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
   navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
-  scrolling container cannot be focused, so the region takes the scrolling over), `aria-sort` on sortable headers, accessible names on every icon button, visible
-  focus rings, focus moved to the page title on route change (a lazily loaded page's title takes it over from its
-  fallback's). Diagrams are `aria-hidden` pictures beside a text
-  equivalent that carries every word; the shedding curve is an `img` named by its title and summary with a table
-  alternative; the pipeline walk is a range input with buttons and the current step as text, and under reduced
-  motion shows the final state with no playback. The shedding viewer is the same: a range input over the frames
-  (arrows step, space plays and pauses), step and jump buttons, the frame's counters as text and its value text on
-  the slider, no play button under reduced motion and the last frame first. The item strip and each scaling panel
-  are `img`s named by a sentence that carries their values, with a table of every item or fit. The Playwright smoke
-  test runs axe on the home page, the runs list, a run page, a suite page, the explorer, coverage, a finding, the
-  Domain 1 overview, About, a domain page, compare, the sweeps list, the viewer, S7's suite page with its grid,
-  performance, and Domain 2's overview, runs list, run page and a suite page against the fixtures; it plays a sweep
-  to its last frame and steps it from the keyboard, and checks the overview and the viewer under
-  `prefers-reduced-motion`. Keyboard runs by hand on the shell, the overview's walk and the pickers.
-- Performance budgets and measurement method: not yet measured against the plan's targets (first render of the
-  overview under 1 s, the viewer's first frame under 2 s); UI-P6 measures. The overview, the walk and the content
-  are their own chunks (73 kB, 80 kB with GSAP, 55 kB before gzip in the UI-P5 build) loaded on first visit, so the
-  dashboard pages carry neither D3 nor GSAP; so are the shedding viewer (22 kB) and performance (24 kB) in the UI-P4
-  build, the viewer sharing the walk's GSAP chunk. The viewer opens from the run's `index.json` and one sweep (in
-  the worker), then the frames' item states and the shown adapter's five timelines; the sweeps list and the S7
-  panel from S7's summary, the grid from its rows on request; performance from `perf/summary.json` alone. The
-  overview opens from the two runs' `index.json`, `summary.json`
-  and `manifest.json`, the nightly's `ci.json`, `coverage.json`, `contract.json` and S2 summary, the S7 run's
-  `perf/summary.json`, one sweep (in the worker) and one timeline. The run page opens from
-  `index.json`, `manifest.json`, `summary.json`, the suite summaries, `findings.jsonl` and `ci.json` and loads no
-  other row file.
+  scrolling container cannot be focused, so the region takes the scrolling over; the viewer's item strip, which
+  scrolls in place, is one too), `aria-sort` on sortable headers, accessible names on every icon button, visible
+  focus rings, every link and control at least 24 px (WCAG 2.5.8), focus moved to the page title on route change
+  (a lazily loaded page's title takes it over from its fallback's; choosing a run in the header's picker lands
+  there too), and focus returned to the menu button when the phone's navigation sheet closes on Escape (the
+  generated sheet has no trigger of its own to return it to; `src/components/layout/use-sheet-focus-return.ts`).
+  Diagrams are `aria-hidden` pictures beside a text equivalent that carries every word; the shedding curve is an
+  `img` named by its title and summary with a table alternative; the pipeline walk is a range input with buttons
+  and the current step as text, and under reduced motion shows the final state with no playback. The shedding
+  viewer is the same: a range input over the frames (arrows step, space plays and pauses), step and jump buttons,
+  the frame's counters as text and its value text on the slider, no play button under reduced motion and the last
+  frame first. The item strip and each scaling panel are `img`s named by a sentence that carries their values,
+  with a table of every item or fit. The Playwright smoke test runs axe (WCAG 2.0, 2.1 and 2.2 A and AA) on every
+  route: home, About, the glossary, a missing page, both domains' overviews, runs lists, run pages and a suite page
+  each, the explorer, coverage, the findings list and a finding, a pruned run, compare, a not-started domain, the
+  sweeps list, the viewer in each view, S7's suite page with its grid, and performance; and on eleven pages of
+  every kind again in the dark theme. It plays a sweep to its last frame and steps it from the keyboard, scrolls a
+  coverage matrix from the keyboard, opens the run picker and chooses a run with the keyboard alone, checks the
+  overview and the viewer under `prefers-reduced-motion`, the sidebar's collapse across a reload, and the phone's
+  sheet closing on Escape. Forced colors were checked by screenshot under Chromium's emulation (the status badges
+  keep their icons and words, the charts their marks and text); no screen reader was run.
+- Performance budgets and measurement method (set and measured at UI-P6):
+  - Bundle, gzipped, checked by `pnpm budgets` (`scripts/check-budgets.mjs`) over a production build, in CI after
+    the build: the initial load's JavaScript (the entry and the modules it preloads: React, the router, the shell,
+    Domain 1's validators) 400 kB, measured 377 kB; its stylesheet 20 kB, measured 15 kB; each lazy page or shared
+    chunk 40 kB (the largest, the shared chunk with GSAP, 28 kB); each domain's validators 100 kB (83 kB); each
+    worker 120 kB (94 kB). The overviews, the walk, the viewer and performance load on first visit, so the
+    dashboard pages carry neither D3 nor GSAP.
+  - Rendering and interaction, checked by `pnpm test:perf` (Playwright over the production build and the results
+    beside this repository; the checks that need the real S7 run skip without it), each time taken in the page
+    from the navigation or the action: Domain 1's headline on home within 1 s (126 ms), the Domain 1 overview's
+    headline cards within 1 s on the real nightly (369 ms) with no row file requested but each run's
+    `findings.jsonl` (tens of rows, for the counts by severity the summary does not carry), a run page to a suite
+    page within 500 ms (80 ms), the viewer's first frame from the real run's 20 MB sweep within 2 s (544 ms), one
+    step reflected in the counters within 100 ms (6 ms), and the main thread's heap with that sweep loaded under
+    64 MB (19 MB: the frames stay in the worker). Against the container (the plan's 12.5) with the real results
+    mounted: the overview 389 ms, the viewer 605 ms, every budget met. Not run in CI, whose shared runners would
+    make the times noise; measured on the maintainer's laptop (Apple silicon) and in its podman machine.
+  - What each page opens: the viewer the run's `index.json` and one sweep (in the worker), then the frames' item
+    states and the shown adapter's five timelines; the sweeps list and the S7 panel S7's summary, the grid its rows
+    on request; performance `perf/summary.json` alone; the overview the two runs' `index.json`, `summary.json` and
+    `manifest.json`, the nightly's `ci.json`, `coverage.json`, `contract.json` and S2 summary, the S7 run's
+    `perf/summary.json`, one sweep (in the worker), one timeline and each run's `findings.jsonl`; the run page
+    `index.json`, `manifest.json`, `summary.json`, the suite summaries, `findings.jsonl` and `ci.json`, and no other
+    row file.
 - Test commands and CI requirements: `pnpm lint`, `pnpm typecheck`, `pnpm test` (Vitest 5 with Testing Library,
-  jsdom; the data layer, the formatters, the shell and both pages against the vendored fixtures through a fetch over
-  the filesystem), `pnpm build`, `pnpm vendor:check`, `pnpm format:check`, and `pnpm test:e2e` (Playwright 1.63
-  against `vite preview` with the fixtures). `.github/workflows/ci.yml` runs them on `workflow_dispatch` only, like
-  the benchmark's CI, with the benchmark checked out at the locked commit for the vendor check.
-- Approved animation assets and licensing: none yet; any Lottie asset is reviewed and stored under
-  `public/animations/`.
+  jsdom; the data layer, the formatters, the shell and the pages against the vendored fixtures through a fetch over
+  the filesystem), `pnpm build`, `pnpm budgets`, `pnpm vendor:check`, `pnpm format:check`, and `pnpm test:e2e`
+  (Playwright 1.63 against `vite preview` with the fixtures). `.github/workflows/ci.yml` runs them on
+  `workflow_dispatch` only, like the benchmark's CI, with the benchmark checked out at the locked commit for the
+  vendor check. `pnpm test:perf` runs by hand. With `PLAYWRIGHT_BASE_URL` set, both Playwright runs test that
+  server instead of starting one: the image, run as `deploy/README.md` says, over the fixtures for the smoke test
+  and over the real results for the budgets.
+- Approved animation assets and licensing: none. The plan's 7.5 allows Lottie for a home page hero, the
+  not-started domain cards and the empty findings state, all optional; none was asked for, so UI-P6 added none and
+  `@lottiefiles/dotlottie-react` is not a dependency. An asset added later is reviewed, licensed and stored under
+  `public/animations/` with a static fallback, and never carries status.
 - Approved additional libraries: TanStack Query; Ajv with ajv-formats (the compiler at build time only; at runtime
   the generated validators and ajv-formats' format table); json-schema-to-typescript; Zod; sirv (dev server only);
   Playwright 1.63.0 with `@axe-core/playwright` 4.13.0 (tests only). Added at UI-P5, as DESIGN.md 2.2 names them:
   `d3-scale` 4.0.2, `d3-shape` 3.2.0 and `d3-array` 3.2.4 with their `@types` (scales, step lines and medians; React
   renders every SVG node), and `gsap` 3.15.0 with `@gsap/react` 2.1.2 (the pipeline walk, the reveal-once and, at
   UI-P4, the shedding viewer; registered once in `src/lib/motion.ts` and imported only by lazily loaded modules, so
-  the routes that do not animate never load it). Not yet added: TanStack Table and Virtual,
-  `@lottiefiles/dotlottie-react`.
+  the routes that do not animate never load it). Not added: TanStack Table and Virtual (row tables are paged a
+  hundred at a time, within every budget), `@lottiefiles/dotlottie-react` (no asset).
 - Exceptions and linked architecture decisions:
   - TypeScript 6.0 instead of the newest major, until typescript-eslint supports it (above).
   - The desktop sidebar preference lives in the generated component's cookie, not in local storage as the plan's
@@ -233,5 +262,43 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
     well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. UI-P0 to UI-P5 and UI-D2 are built, UI-P6 remains; the site
-  serves at its host with cert-manager's certificate (`deploy/README.md`).
+- Adoption/migration plan: greenfield; the plan's section 15. Every phase, UI-P0 to UI-P6 and UI-D2, is built; the
+  site serves at its host with cert-manager's certificate (`deploy/README.md`).
+
+## Definition of done (DESIGN.md 14), as checked at UI-P6
+
+- [x] The shared shell is reused: every route renders inside `DashboardShell`, the narrative pages in its wide
+  variant; no alternate shell.
+- [x] Semantic tokens control color, spacing, typography and status styling: `tokens.css` over the generated
+  stylesheet; the adapters' hues now win over the preset's greys.
+- [x] Mobile, compact desktop, expanded desktop and the user's collapse preference: 375 px and 320 px in the smoke
+  test, 1024 px in the keyboard test, 1280 px throughout; the collapse is kept across a reload.
+- [x] Keyboard navigation, focus restoration, route focus and the skip link: the smoke test's keyboard runs (the
+  viewer, a matrix, the run picker), route focus after a link, a lazy page and the picker, focus back on the menu
+  button from the phone's sheet; the skip link and one `main` on every page.
+- [x] Light, dark, reduced motion, zoom and long content: axe in both themes, the viewer and the overview under
+  reduced motion, reflow at 320 px, and the check that nothing spills out of a table cell. Browser zoom itself was
+  not driven; 320 px stands for 400%.
+- [x] Loading, empty, no-results, error, refreshing and forbidden states as they apply: `DataRegion`'s states in
+  the page tests (loading, failed, pruned, not in this run, unsupported, invalid, empty); the runs index's refresh;
+  forbidden does not apply (no accounts).
+- [x] Filters validated and shareable; comparison periods and timezones explicit: every filter and choice is URL
+  state parsed with Zod, one bad value falling back alone; times are UTC with the zone written; compare names its
+  two runs.
+- [x] Charts handle invalid, missing, single-point, constant, negative and large data: the geometry tests of each
+  chart (no frames, one frame, one budget, non-finite and negative values, all zeros, a fit under four points), and
+  the 737-frame, 20 MB sweep under the performance budgets.
+- [x] No DOM or property ownership conflicts: React renders every node; D3 computes scales and paths; GSAP drives a
+  clock whose progress is a frame or step index, and the reveal's dash offset, cleared after; no Lottie.
+- [x] Route changes and Strict Mode leak nothing: the app runs under `StrictMode`; `useGSAP` reverts its tweens on
+  dependency change and unmount, `useMeasure` disconnects its observer, the frame player and the sheet's focus
+  return cancel their frames. The rows and sweep workers live for the session by design (5.2: a run is
+  immutable), one per file.
+- [x] Type checking, lint, unit and component tests, the end-to-end smoke test and the production build pass, with
+  the bundle budgets, the vendor check and the formatting check; the smoke test and the performance budgets also
+  pass against the container.
+- [x] Dependency changes, budgets and deviations recorded: this profile (no package added at UI-P4 or UI-P6).
+
+Not run, and named: Firefox and Safari (every automated run is Chromium); a screen reader (NVDA, VoiceOver);
+Windows' own high-contrast themes (forced colors only under Chromium's emulation, by screenshot); browser zoom as
+such; interaction latency beyond the viewer's step and memory beyond its main thread.
