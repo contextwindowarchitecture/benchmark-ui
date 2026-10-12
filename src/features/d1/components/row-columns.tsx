@@ -501,7 +501,7 @@ export const COLUMNS: { [K in RowKind]: Column<K>[] } = {
         <div className="max-w-md">
           <Link
             to={`/d1/runs/${context.runId}/findings/${row.document.finding_id}`}
-            className="inline-flex min-h-6 items-center underline-offset-3 hover:underline"
+            className="block min-h-6 py-0.5 underline-offset-3 hover:underline"
           >
             {row.document.summary}
           </Link>
