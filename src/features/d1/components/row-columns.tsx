@@ -501,7 +501,7 @@ export const COLUMNS: { [K in RowKind]: Column<K>[] } = {
         <div className="max-w-md">
           <Link
             to={`/d1/runs/${context.runId}/findings/${row.document.finding_id}`}
-            className="underline-offset-3 hover:underline"
+            className="inline-flex min-h-6 items-center underline-offset-3 hover:underline"
           >
             {row.document.summary}
           </Link>
@@ -539,7 +539,7 @@ export const COLUMNS: { [K in RowKind]: Column<K>[] } = {
         row.document.upstream ? (
           <a
             href={row.document.upstream.url}
-            className="inline-flex items-center gap-1 text-xs underline underline-offset-3"
+            className="inline-flex min-h-6 min-w-6 items-center gap-1 text-xs underline underline-offset-3"
             rel="noreferrer"
           >
             {row.document.upstream.state}

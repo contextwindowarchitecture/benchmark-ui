@@ -98,7 +98,15 @@ export function ItemStrip({ items, frames, full, frame, adapterLabel }: ItemStri
       <p id={`${id}-summary`} className="text-sm text-muted-foreground">
         {summary}
       </p>
-      <div ref={ref} className="w-full overflow-y-auto" style={{ maxHeight: MAX_HEIGHT }}>
+      {/* A scrolling area is reachable from the keyboard (DESIGN.md 10), as a table region is. */}
+      <div
+        ref={ref}
+        className="w-full overflow-y-auto rounded-md focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+        style={{ maxHeight: MAX_HEIGHT }}
+        role="region"
+        aria-label="Item strip"
+        tabIndex={0}
+      >
         {layout ? (
           <svg
             viewBox={`0 0 ${layout.width} ${layout.height}`}
