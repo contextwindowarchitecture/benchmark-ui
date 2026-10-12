@@ -67,12 +67,8 @@
   /*
    * The four adapters, in their fixed order: Python, TypeScript, Go, Rust. Each takes one chart
    * series token, so series colors are never status colors. The generated preset's chart tokens
-   * are greys; these replace the first four with distinct hues that hold in both themes.
+   * are greys; the hues that replace the first four are in the blocks at the end of this file.
    */
-  --chart-1: oklch(0.5 0.17 290);
-  --chart-2: oklch(0.55 0.11 200);
-  --chart-3: oklch(0.55 0.18 340);
-  --chart-4: oklch(0.6 0.16 45);
   --adapter-python: var(--chart-1);
   --adapter-typescript: var(--chart-2);
   --adapter-go: var(--chart-3);
@@ -98,11 +94,6 @@
   --info-foreground: oklch(0.145 0 0);
   --failure: oklch(0.76 0.17 22);
   --failure-foreground: oklch(0.145 0 0);
-
-  --chart-1: oklch(0.75 0.15 290);
-  --chart-2: oklch(0.78 0.11 200);
-  --chart-3: oklch(0.75 0.17 340);
-  --chart-4: oklch(0.78 0.15 50);
 
   --plane-governance: oklch(0.78 0.09 25);
   --plane-state: oklch(0.78 0.1 110);
@@ -141,4 +132,23 @@
   table th {
     font-variant-numeric: tabular-nums;
   }
+}
+
+/*
+ * The adapters' hues over the generated grey chart tokens. This file is imported at the top of
+ * globals.css, before the generated :root and .dark blocks, so a plain :root here would lose to
+ * them; html:root and html.dark outrank both, in both themes.
+ */
+html:root {
+  --chart-1: oklch(0.5 0.17 290);
+  --chart-2: oklch(0.55 0.11 200);
+  --chart-3: oklch(0.55 0.18 340);
+  --chart-4: oklch(0.6 0.16 45);
+}
+
+html.dark {
+  --chart-1: oklch(0.75 0.15 290);
+  --chart-2: oklch(0.78 0.11 200);
+  --chart-3: oklch(0.75 0.17 340);
+  --chart-4: oklch(0.78 0.15 50);
 }
