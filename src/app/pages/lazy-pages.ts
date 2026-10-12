@@ -44,3 +44,9 @@ export const D2LongContextPage = lazy(() =>
     default: module.LongContextPage,
   })),
 )
+
+export const D2CostPage = lazy(() =>
+  import("@/features/d2/components/questions/cost-page").then((module) => ({
+    default: module.CostPage,
+  })),
+)

@@ -6,7 +6,7 @@
 
 import { DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "../source"
 
-export type QuestionId = "tracking" | "instructions" | "long-context"
+export type QuestionId = "tracking" | "instructions" | "long-context" | "cost"
 
 export type QuestionWords = {
   id: QuestionId
@@ -138,5 +138,37 @@ export const LONG_CONTEXT: QuestionWords = {
   },
 }
 
+export const COST: QuestionWords = {
+  id: "cost",
+  title: "Cost",
+  question:
+    "What does each arm pay in prompt tokens and time for a correct answer, and does the token estimate every budget rests on hold?",
+  viability: {
+    where: "Its Domain 4 section, which Domain 2 measures only in part",
+    metric: "Computational Economics and Prefix Caching",
+    baseline:
+      "A prompt whose head changes every turn (a timestamp, reshuffled tool definitions) breaks the prefix cache, so every turn pays full prefill again.",
+    expected:
+      "CWA assembles the stable planes deterministically and puts the changing content last, so the prefix stays stable, the cache keeps hitting, and time to first token and cost fall.",
+    citation: {
+      file: VIABILITY_DOCUMENT,
+      section: "Domain 4: Computational Economics and Prefix Caching",
+    },
+  },
+  measured: [
+    "Domain 2 does not measure prefix caching or time to first token: that is Domain 4's. S5 counts what Domain 2's own calls cost: the server's prompt and completion tokens, prompt tokens per correct answer, and each call's latency as recorded when the model cache was filled.",
+    "That latency describes the load it was recorded under, many requests in flight on one GPU, not a single request; the prefix-cached tokens are the server's own report under the same load, not a controlled measure of prefix stability.",
+    "S5 also checks the token estimate every budget rests on: the CWA arms estimate tokens from bytes and charge a margin over it, and the server's own count must stay within the budget (R-16).",
+  ],
+  writeUp: {
+    text: [
+      "Keeping state and recent turns, not the whole history, is both the most accurate and the cheapest.",
+      "No payload exceeded its budget by the server's own count. That margin was found, not assumed: the byte-based estimate under-counted the server's tokens most on short prompts, far below any budget, and on an extractor's state of many short facts, which is what raised the margin in steps.",
+      "Model-written text can be worse. No fixed margin bounds every text a model can write; a route that estimates tokens should keep its margin under measurement.",
+    ],
+    citation: { file: DOMAIN_2_WRITE_UP, section: "Cost and the token estimate (S5)" },
+  },
+}
+
 /** Every question page's words, in the sidebar's order. */
-export const QUESTIONS: readonly QuestionWords[] = [TRACKING, INSTRUCTIONS, LONG_CONTEXT]
+export const QUESTIONS: readonly QuestionWords[] = [TRACKING, INSTRUCTIONS, LONG_CONTEXT, COST]

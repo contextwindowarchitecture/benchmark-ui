@@ -6,6 +6,7 @@ import {
   BookA,
   BookOpen,
   Boxes,
+  Coins,
   GitCompare,
   House,
   Layers,
@@ -80,6 +81,13 @@ const domain2: NavGroup = {
       icon: Library,
       href: () => "/d2/long-context",
       patterns: ["/d2/long-context"],
+    },
+    {
+      id: "d2-cost",
+      label: "Cost",
+      icon: Coins,
+      href: () => "/d2/cost",
+      patterns: ["/d2/cost"],
     },
   ],
 }

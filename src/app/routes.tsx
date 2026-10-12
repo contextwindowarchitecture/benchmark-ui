@@ -22,6 +22,7 @@ import { DomainPage } from "./pages/domain-page"
 import { GlossaryPage } from "./pages/glossary-page"
 import { HomePage } from "./pages/home-page"
 import {
+  D2CostPage,
   D2InstructionsPage,
   D2LongContextPage,
   D2OverviewPage,
@@ -276,6 +277,15 @@ export const routes: RouteObject[] = [
                   title: () => "Long context",
                   crumb: () => ({ label: "Long context" }),
                 }),
+              },
+              {
+                path: "cost",
+                element: (
+                  <Suspense fallback={<PageFallback title="Cost" width="wide" />}>
+                    <D2CostPage />
+                  </Suspense>
+                ),
+                handle: handle({ title: () => "Cost", crumb: () => ({ label: "Cost" }) }),
               },
               {
                 path: "runs",

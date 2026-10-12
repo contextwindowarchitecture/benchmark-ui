@@ -52,3 +52,9 @@ export const d2LongContextParams = {
   run: RUN_ID_PARAM,
   questions: NAME,
 }
+
+/** Cost (UI-D2c): the pinned run and the budget the panels are read at. */
+export const d2CostParams = {
+  run: RUN_ID_PARAM,
+  at: NAME,
+}
