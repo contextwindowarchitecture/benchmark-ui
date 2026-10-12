@@ -25,6 +25,23 @@ The same image, the same configuration, with the results directory bind-mounted 
 `http://localhost:8080/results/d1/index.json` must answer, and the site must render from it. The mount holds one
 directory per domain (`d1`, `d2`); to see Domain 2 locally, mount a directory that holds both.
 
+The smoke test and the performance budgets run against the container as they do against `vite preview`: mount the
+fixture runs for the smoke test and the real results for the budgets, and point Playwright at the container.
+
+```sh
+podman run -d --name bui-fixtures -p 8081:8080 \
+  -v "$PWD/vendor/cwa-bench/domain1/fixtures/runs:/data/results/d1:ro,Z" \
+  -v "$PWD/vendor/cwa-bench/domain2/fixtures/runs:/data/results/d2:ro,Z" \
+  quay.io/contextwindowarchitecture/benchmark-ui:dev
+PLAYWRIGHT_BASE_URL=http://localhost:8081 pnpm test:e2e
+podman run -d --name bui-real -p 8082:8080 \
+  -v "$(cd ../benchmark/domain1/results/d1 && pwd):/data/results/d1:ro,Z" \
+  -v "$(cd ../benchmark/domain2/results/d2 && pwd):/data/results/d2:ro,Z" \
+  quay.io/contextwindowarchitecture/benchmark-ui:dev
+PLAYWRIGHT_BASE_URL=http://localhost:8082 pnpm test:perf
+podman rm -f bui-fixtures bui-real
+```
+
 ## First deployment
 
 Prerequisites, outside these manifests: the namespace (`oc new-project cwa-benchmark`), storage for the results
