@@ -98,6 +98,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   budget, the reference arm faint in every panel); each with a summary and a table of every value. Arms are categories
   with no hue of their own: their group's mark (an outline, grey, the accent) carries them, with the id as text. The
   arm × tier tables on Domain 2's suite pages hold every per-arm metric with its fraction and interval.
+  From UI-D2c, Domain 2's question pages (variable tracking, instruction persistence, long context, cost) reuse the
+  arm plot and the small multiples (the latter also over a conversation's turn count, still on a log scale) with
+  shares from the summaries' typed tallies, each with its table; no new chart.
 - Locale, currencies, timezone, and date-range semantics: the browser's locale for numbers (grouped thousands, one
   decimal for ms, s and bytes, two for exponents); UTC for every time, written `2026-10-08 13:34:53 UTC`, with the
   ISO form in `<time dateTime>`; no currencies; no date ranges (runs are picked by id). All through
@@ -123,7 +126,7 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   than scrolling inside the frame. The shedding viewer shows one panel at a time below 1024 px (the URL's `view`
   picks it), the curve beside the items or the lanes above. The Playwright smoke test opens the home page, the
   Domain 1 overview, the S2 suite page, coverage, the shedding viewer in two views, the sweeps list, performance,
-  and Domain 2's overview, a run page and a suite page with its rows loaded at 375 px, and the home page, both
+  and Domain 2's overview, a run page, a suite page with its rows loaded and its four question pages at 375 px, and the home page, both
   overviews, a run page, the viewer and performance at 320 px, and fails if the page scrolls sideways or anything
   outside a table region reaches past the screen's edge. The automated runs are Chromium only.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
@@ -152,10 +155,11 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Performance budgets and measurement method (set and measured at UI-P6):
   - Bundle, gzipped, checked by `pnpm budgets` (`scripts/check-budgets.mjs`) over a production build, in CI after
     the build: the initial load's JavaScript (the entry and the modules it preloads: React, the router, the shell,
-    Domain 1's validators) 400 kB, measured 377 kB; its stylesheet 20 kB, measured 15 kB; each lazy page or shared
+    Domain 1's validators) 400 kB, measured 377 kB (380 kB at UI-D2c); its stylesheet 20 kB, measured 15 kB; each lazy page or shared
     chunk 40 kB (the largest, the shared chunk with GSAP, 28 kB); each domain's validators 100 kB (83 kB); each
-    worker 120 kB (94 kB). The overviews, the walk, the viewer and performance load on first visit, so the
-    dashboard pages carry neither D3 nor GSAP.
+    worker 120 kB (94 kB). The overviews, the walk, the viewer, performance and Domain 2's question pages (2 to 3 kB
+    each, with an 8 kB chunk they share with the overview) load on first visit, so the dashboard pages carry
+    neither D3 nor GSAP.
   - Rendering and interaction, checked by `pnpm test:perf` (Playwright over the production build and the results
     beside this repository; the checks that need the real S7 run skip without it), each time taken in the page
     from the navigation or the action: Domain 1's headline on home within 1 s (126 ms), the Domain 1 overview's
@@ -232,6 +236,10 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     runs and the harness names no reported run. A run whose summary is not there (pruned, 6.4) is read past to the
     next run that has the suite, and the page says which run stands in for which; a summary that fails for any
     other reason is not. The page names the run and the scripts' size of every panel.
+  - Domain 2's question pages (`/d2/tracking`, `/d2/instructions`, `/d2/long-context`, `/d2/cost`) read runs the
+    overview's way (`components/evidence/use-evidence.ts`), not a domain's latest run, which may hold no S2. Their
+    sidebar labels name RULER and LongBench v2 as the viability document's table does, though Domain 2 runs neither;
+    each page's first section says so, links the paper, and says how Domain 2 measures the metric instead.
   - S7's `scale` block and the perf summary's `policy` and `series` are typed since the pin at `73c4757` (the
     plan's section 14, ask 18) and read: the sweeps list, the threshold searches, the timeouts and the cells the
     generator cannot build come from the summary without opening a sweep file, and a fit's points are the cells
@@ -268,7 +276,7 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
     well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. Every phase, UI-P0 to UI-P6 and UI-D2, is built; the
+- Adoption/migration plan: greenfield; the plan's section 15. Every phase, UI-P0 to UI-P6 and UI-D2 (with UI-D2c's question pages), is built; the
   site serves at its host with cert-manager's certificate (`deploy/README.md`).
 
 ## Definition of done (DESIGN.md 14), as checked at UI-P6
