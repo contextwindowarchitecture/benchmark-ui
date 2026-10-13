@@ -237,9 +237,10 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     next run that has the suite, and the page says which run stands in for which; a summary that fails for any
     other reason is not. The page names the run and the scripts' size of every panel.
   - Domain 2's question pages (`/d2/tracking`, `/d2/instructions`, `/d2/long-context`, `/d2/cost`) read runs the
-    overview's way (`components/evidence/use-evidence.ts`), not a domain's latest run, which may hold no S2. Their
-    sidebar labels name RULER and LongBench v2 as the viability document's table does, though Domain 2 runs neither;
-    each page's first section says so, links the paper, and says how Domain 2 measures the metric instead.
+    overview's way (`components/evidence/use-evidence.ts`), not a domain's latest run, which may hold no S2. Two of
+    them take their metric from a paper Domain 2 does not run (RULER, LongBench v2): the label names the metric
+    only, and the page's first section names the viability document's row, links the paper, says Domain 2 runs
+    neither, and says how it measures the metric instead.
   - S7's `scale` block and the perf summary's `policy` and `series` are typed since the pin at `73c4757` (the
     plan's section 14, ask 18) and read: the sweeps list, the threshold searches, the timeouts and the cells the
     generator cannot build come from the summary without opening a sweep file, and a fit's points are the cells

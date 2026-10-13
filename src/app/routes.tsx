@@ -239,15 +239,13 @@ export const routes: RouteObject[] = [
               {
                 path: "tracking",
                 element: (
-                  <Suspense
-                    fallback={<PageFallback title="Variable tracking (RULER)" width="wide" />}
-                  >
+                  <Suspense fallback={<PageFallback title="Variable Tracking" width="wide" />}>
                     <D2TrackingPage />
                   </Suspense>
                 ),
                 handle: handle({
-                  title: () => "Variable tracking",
-                  crumb: () => ({ label: "Variable tracking" }),
+                  title: () => "Variable Tracking",
+                  crumb: () => ({ label: "Variable Tracking" }),
                 }),
               },
               {
@@ -267,15 +265,13 @@ export const routes: RouteObject[] = [
               {
                 path: "long-context",
                 element: (
-                  <Suspense
-                    fallback={<PageFallback title="Long context (LongBench v2)" width="wide" />}
-                  >
+                  <Suspense fallback={<PageFallback title="Long Context" width="wide" />}>
                     <D2LongContextPage />
                   </Suspense>
                 ),
                 handle: handle({
-                  title: () => "Long context",
-                  crumb: () => ({ label: "Long context" }),
+                  title: () => "Long Context",
+                  crumb: () => ({ label: "Long Context" }),
                 }),
               },
               {

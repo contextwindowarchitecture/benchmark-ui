@@ -63,7 +63,7 @@ const domain2: NavGroup = {
     },
     {
       id: "d2-tracking",
-      label: "Variable tracking (RULER)",
+      label: "Variable Tracking",
       icon: Variable,
       href: () => "/d2/tracking",
       patterns: ["/d2/tracking"],
@@ -77,7 +77,7 @@ const domain2: NavGroup = {
     },
     {
       id: "d2-long-context",
-      label: "Long context (LongBench v2)",
+      label: "Long Context",
       icon: Library,
       href: () => "/d2/long-context",
       patterns: ["/d2/long-context"],

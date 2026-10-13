@@ -15,7 +15,7 @@ describe("Domain 2's variable tracking page", () => {
   it("names the viability document's RULER row and the paper, and says Domain 2 does not run it", async () => {
     renderApp("/d2/tracking")
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Variable tracking (RULER)" }),
+      await screen.findByRole("heading", { level: 1, name: "Variable Tracking" }),
     ).toBeInTheDocument()
     const viability = await section("viability")
     expect(viability.getByText(/Variable Tracking \(RULER\)/)).toBeInTheDocument()
@@ -23,10 +23,12 @@ describe("Domain 2's variable tracking page", () => {
       viability.getByRole("link", { name: /RULER: What's the Real Context Size/ }),
     ).toHaveAttribute("href", "https://arxiv.org/abs/2404.06654")
     expect(viability.getByText(/Domain 2 does not run RULER/)).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Variable tracking (RULER)" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    )
+    // The sidebar's item, beside the breadcrumb's.
+    expect(
+      screen
+        .getAllByRole("link", { name: "Variable Tracking" })
+        .some((link) => link.getAttribute("aria-current") === "page"),
+    ).toBe(true)
   })
 
   it("plots the VT family's current and stale values per arm from S2's tallies", async () => {

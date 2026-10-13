@@ -42,7 +42,7 @@ const VIABILITY_D2: Citation = {
 
 export const TRACKING: QuestionWords = {
   id: "tracking",
-  title: "Variable tracking (RULER)",
+  title: "Variable Tracking",
   question:
     "When a figure is reassigned or corrected over a long conversation, does the model answer with its current value, or with a stale one?",
   viability: {
@@ -106,7 +106,7 @@ export const INSTRUCTIONS: QuestionWords = {
 
 export const LONG_CONTEXT: QuestionWords = {
   id: "long-context",
-  title: "Long context (LongBench v2)",
+  title: "Long Context",
   question:
     "When the documents behind a question outgrow the budget many times over, does the model still find the answer?",
   viability: {

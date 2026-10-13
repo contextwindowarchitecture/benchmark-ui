@@ -15,7 +15,7 @@ describe("Domain 2's long-context page", () => {
   it("names the viability document's LongBench v2 row and the paper, and says Domain 2 does not run it", async () => {
     renderApp("/d2/long-context")
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Long context (LongBench v2)" }),
+      await screen.findByRole("heading", { level: 1, name: "Long Context" }),
     ).toBeInTheDocument()
     const viability = await section("viability")
     expect(viability.getByRole("link", { name: /^LongBench v2: Towards Deeper/ })).toHaveAttribute(
