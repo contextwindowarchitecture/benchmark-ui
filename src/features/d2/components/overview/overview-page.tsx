@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { domainById, sourceUrl } from "@/content"
+import { QUESTIONS } from "@/content/d2/questions"
 import { CONCLUSION, CONCLUSIONS, CONCLUSIONS_CITATION, QUESTION } from "@/content/d2/trust"
 import { suiteWords } from "@/content/d2/vocabulary"
 import { useDomainRunsIndex } from "@/data/queries"
@@ -341,6 +342,13 @@ function Overview({ index, pin }: { index: D2RunsIndexV1; pin: string | undefine
               Every run
             </Link>
           </li>
+          {QUESTIONS.map((words) => (
+            <li key={words.id}>
+              <Link to={`/d2/${words.id}`} className="underline underline-offset-3">
+                {words.title}
+              </Link>
+            </li>
+          ))}
           {view.runs.map((run) => (
             <li key={run.run_id}>
               <Link to={`/d2/runs/${run.run_id}`} className="underline underline-offset-3">

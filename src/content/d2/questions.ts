@@ -9,6 +9,7 @@ import { DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "../source"
 export type QuestionId = "tracking" | "instructions" | "long-context" | "cost"
 
 export type QuestionWords = {
+  /** The page's path under /d2. */
   id: QuestionId
   /** The page's title. */
   title: string

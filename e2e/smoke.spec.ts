@@ -260,6 +260,38 @@ test("Domain 2's overview, a run page and a suite page with its rows fit a phone
   await expectFitsThePhone(page)
 })
 
+test("Domain 2's question pages render accessibly and fit a phone", async ({ page }) => {
+  const pages: [string, () => Promise<void>][] = [
+    [
+      "/d2/tracking",
+      () =>
+        expect(
+          page.getByRole("img", { name: /^VT: the current value, at 8,192 tokens/ }),
+        ).toBeVisible(),
+    ],
+    [
+      "/d2/instructions",
+      () => expect(page.locator("[data-chart=tier-lines] [data-panel=truncate]")).toBeVisible(),
+    ],
+    [
+      "/d2/long-context",
+      () => expect(page.locator("[data-chart=tier-lines] [data-panel=cwa-ranked]")).toBeVisible(),
+    ],
+    ["/d2/cost", () => expect(page.getByText("The margin", { exact: true })).toBeVisible()],
+  ]
+  for (const [path, ready] of pages) {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto(path)
+    await ready()
+    await expectNoOverflow(page)
+    await expectAccessible(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.reload()
+    await ready()
+    await expectFitsThePhone(page)
+  }
+})
+
 // At a phone's width (DESIGN.md 4.2) the page never scrolls sideways, and nothing outside a
 // labelled table region reaches past the screen's edge, not even inside a picture's frame.
 async function expectFitsThePhone(page: Page) {

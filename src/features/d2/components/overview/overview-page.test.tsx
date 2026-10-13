@@ -130,6 +130,10 @@ describe("Domain 2's overview", () => {
 
     const drill = await section("drill-down")
     expect(drill.getByRole("link", { name: "Every run" })).toHaveAttribute("href", "/d2/runs")
+    expect(drill.getByRole("link", { name: "Variable tracking (RULER)" })).toHaveAttribute(
+      "href",
+      "/d2/tracking",
+    )
   })
 
   it("flags overflows a harness before the fix filed under facts sent", async () => {
