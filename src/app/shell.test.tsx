@@ -29,6 +29,14 @@ describe("the shell", () => {
     await waitFor(() => expect(document.title).toBe("CWA benchmark"))
   })
 
+  it("links back to the project's site", () => {
+    renderApp("/")
+    expect(screen.getByRole("link", { name: /contextwindowarchitecture\.io/ })).toHaveAttribute(
+      "href",
+      "https://contextwindowarchitecture.io",
+    )
+  })
+
   it("marks the active item and sets the document title with the run id", async () => {
     renderApp(`/d1/runs/${FIXTURE_RUNS.nightly}`)
     await waitFor(() =>

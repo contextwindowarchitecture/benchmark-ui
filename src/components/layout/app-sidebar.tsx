@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react"
 import { Link, useLocation, useParams } from "react-router"
 
 import { isNavItemActive, navigation } from "@/app/navigation"
@@ -17,7 +18,14 @@ import {
 } from "@/components/ui/sidebar"
 import { useResultsDomain, useRunsIndex } from "@/data/queries"
 import { resolveAlias } from "@/features/d1/model/runs"
+import logoDark from "@/assets/brand/logo-dark.png"
+import logoLight from "@/assets/brand/logo-light.png"
+import markDark from "@/assets/brand/mark-dark.png"
+import markLight from "@/assets/brand/mark-light.png"
 import { buildInfo } from "@/lib/build-info"
+
+/** The project's site, which the benchmark belongs to. */
+const CWA_SITE = "https://contextwindowarchitecture.io"
 
 /** The left navigation: the benchmark's domains, each with its pages (ui-plan.md 6.1). */
 export function AppSidebar() {
@@ -45,9 +53,16 @@ export function AppSidebar() {
               <Link to="/" onClick={() => isMobile && setOpenMobile(false)}>
                 <span
                   aria-hidden="true"
-                  className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-xs font-semibold text-primary-foreground"
+                  className="flex size-8 shrink-0 items-center justify-center"
                 >
-                  CWA
+                  <img src={markLight} alt="" width={96} height={66} className="w-7 dark:hidden" />
+                  <img
+                    src={markDark}
+                    alt=""
+                    width={96}
+                    height={66}
+                    className="hidden w-7 dark:block"
+                  />
                 </span>
                 <span className="flex flex-col leading-tight">
                   <span className="font-semibold">CWA benchmark</span>
@@ -89,6 +104,46 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip="contextwindowarchitecture.io"
+              className="h-auto"
+            >
+              <a
+                href={CWA_SITE}
+                aria-label="Context Window Architecture: contextwindowarchitecture.io"
+              >
+                <ExternalLink
+                  aria-hidden="true"
+                  className="hidden group-data-[collapsible=icon]:block"
+                />
+                <span className="flex flex-col gap-1 group-data-[collapsible=icon]:hidden">
+                  <img
+                    src={logoLight}
+                    alt=""
+                    width={560}
+                    height={207}
+                    className="h-auto w-36 dark:hidden"
+                  />
+                  <img
+                    src={logoDark}
+                    alt=""
+                    width={560}
+                    height={207}
+                    className="hidden h-auto w-36 dark:block"
+                  />
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    contextwindowarchitecture.io
+                    <ExternalLink aria-hidden="true" className="size-3!" />
+                  </span>
+                </span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <p className="px-2 text-xs leading-relaxed text-muted-foreground group-data-[collapsible=icon]:hidden">
           Reads {buildInfo.producers.join(", ")} v1 · benchmark{" "}
           <span className="font-mono" title={buildInfo.benchmarkCommit}>
