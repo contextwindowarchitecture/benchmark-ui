@@ -10,7 +10,10 @@ await loadValidators("d2")
 
 afterEach(() => {
   cleanup()
-  if (typeof window !== "undefined") window.localStorage.clear()
+  if (typeof window !== "undefined") {
+    window.localStorage.clear()
+    window.sessionStorage.clear()
+  }
 })
 
 // jsdom has no matchMedia, ResizeObserver or scrollIntoView; the sidebar, the theme and the

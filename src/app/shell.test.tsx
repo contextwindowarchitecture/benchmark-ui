@@ -29,6 +29,16 @@ describe("the shell", () => {
     await waitFor(() => expect(document.title).toBe("CWA benchmark"))
   })
 
+  it("tells visitors the site is still being built, until they dismiss it for the session", async () => {
+    renderApp("/")
+    const notice = screen.getByRole("region", { name: "Site notice" })
+    expect(notice).toHaveTextContent("This site is still being built.")
+    await userEvent.click(within(notice).getByRole("button", { name: "Dismiss notice" }))
+    expect(screen.queryByRole("region", { name: "Site notice" })).not.toBeInTheDocument()
+    renderApp("/about")
+    expect(screen.queryByRole("region", { name: "Site notice" })).not.toBeInTheDocument()
+  })
+
   it("links back to the project's site", () => {
     renderApp("/")
     expect(screen.getByRole("link", { name: /contextwindowarchitecture\.io/ })).toHaveAttribute(

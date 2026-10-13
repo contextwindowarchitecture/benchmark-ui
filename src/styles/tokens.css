@@ -83,6 +83,15 @@
   --plane-state: oklch(0.5 0.1 110);
   --plane-evidence: oklch(0.5 0.1 230);
   --plane-interaction: oklch(0.52 0.1 320);
+
+  /*
+   * The site notice (the preview banner): orange, apart from the status hues, with dark text that
+   * reads at 4.5:1 on both ends of its pulse. The same in both themes, so it is never mistaken for
+   * a warning about the data.
+   */
+  --notice: oklch(0.76 0.16 58);
+  --notice-pulse: oklch(0.66 0.19 48);
+  --notice-foreground: oklch(0.2 0.04 50);
 }
 
 .dark {
@@ -118,11 +127,38 @@
   --color-plane-state: var(--plane-state);
   --color-plane-evidence: var(--plane-evidence);
   --color-plane-interaction: var(--plane-interaction);
+  --color-notice: var(--notice);
+  --color-notice-foreground: var(--notice-foreground);
 
   /* Motion tokens (DESIGN.md 3.2). */
   --duration-fast: 120ms;
   --duration-standard: 180ms;
   --duration-emphasis: 280ms;
+}
+
+/*
+ * The preview banner's pulse: one slow cycle every 2 s, far under the three flashes a second WCAG
+ * 2.3.1 allows, and none under reduced motion (DESIGN.md 10). The banner can be dismissed, which
+ * is the hide mechanism WCAG 2.2.2 asks of blinking content.
+ */
+@keyframes notice-pulse {
+  0%,
+  100% {
+    background-color: var(--notice);
+  }
+  50% {
+    background-color: var(--notice-pulse);
+  }
+}
+
+.notice-pulse {
+  animation: notice-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notice-pulse {
+    animation: none;
+  }
 }
 
 @layer base {
