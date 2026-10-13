@@ -33,6 +33,14 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   generated `:root` and `.dark` and would otherwise lose to them; until UI-P6 it did, and the adapters drew in
   greys); status colors are never used for series. Every status badge meets WCAG AA on its
   tint in the light theme (axe checks it in the smoke test).
+- The site notice and the brand: the preview banner above the header has its own orange pair (`--notice`,
+  `--notice-foreground`), the same in both themes and apart from the status hues, so it never reads as a verdict on
+  the data. It pulses once every 2 s (WCAG 2.3.1 allows three flashes a second), stops under reduced motion and can be
+  dismissed for the session (WCAG 2.2.2); its text reads at AA on both ends of the pulse. The project's logo comes
+  from the organization's profile (`contextwindowarchitecture/.github`, `profile/assets/`), copied into
+  `src/assets/brand/` because the CSP serves images from the site's own origin only: resized to 560 px wide for the
+  sidebar's link back to contextwindowarchitecture.io, and its window mark cropped for the brand slot, which the
+  collapsed sidebar shows alone.
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
   infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this
