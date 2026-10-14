@@ -4,36 +4,12 @@
 // write-up at CONTENT_SOURCE. Words only: every number beside them comes from the records, and
 // the viability document's own figures come from other setups, so none is here.
 
+import type { QuestionWords as SharedQuestionWords } from "../questions"
 import { DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "../source"
 
 export type QuestionId = "tracking" | "instructions" | "long-context" | "cost"
 
-export type QuestionWords = {
-  /** The page's path under /d2. */
-  id: QuestionId
-  /** The page's title. */
-  title: string
-  /** The question the page answers, in one sentence. */
-  question: string
-  /**
-   * The viability document's metric: where it says it, its name, the conventional baseline and
-   * CWA's expected outcome.
-   */
-  viability: {
-    /** Where the document states it: a row of its table, its hypothesis. */
-    where: string
-    metric: string
-    baseline: string
-    expected: string
-    citation: Citation
-  }
-  /** The paper the viability document proposes adapting, when it names one. */
-  paper?: { title: string; authors: string; url: string; text: string }
-  /** How Domain 2 measures it instead, and how that differs from the paper and the document. */
-  measured: readonly string[]
-  /** What the write-up concludes on it. */
-  writeUp: { text: readonly string[]; citation: Citation }
-}
+export type QuestionWords = SharedQuestionWords<QuestionId>
 
 const VIABILITY_D2: Citation = {
   file: VIABILITY_DOCUMENT,
