@@ -20,12 +20,14 @@ import {
   useRunDocument,
   useRunsIndex,
 } from "@/data/queries"
+import { kindIn } from "@/data/kinds"
 import { regionOfDocument } from "@/data/region"
 import type { RunsIndexV1 } from "@/data/schema/generated"
 import { ModelDiagram } from "@/features/d1/components/diagrams/model-diagram"
 import { resolveComposite, type Composite } from "@/features/d1/model/composite"
 import { suitesPassing } from "@/features/d1/model/overview"
 import { newestPresentRun, resolveAlias } from "@/features/d1/model/runs"
+import { DOMAIN_PAGES } from "@/lib/domains"
 import { formatCount, formatUtc, isoUtc } from "@/lib/format"
 
 export function HomePage() {
@@ -134,17 +136,21 @@ function DomainCards({ index }: { index: RunsIndexV1 }) {
       {DOMAINS.map((domain) => (
         <li
           key={domain.id}
-          className={domain.id === "d1" || domain.id === "d2" ? "md:col-span-2" : undefined}
+          className={
+            domain.id === "d1" || domain.id === "d2" || domain.id === "d5"
+              ? "md:col-span-2"
+              : undefined
+          }
         >
           <DomainCard
             domain={domain}
             headline={
               domain.id === "d1" ? (
                 <Domain1Headline composite={composite} />
-              ) : domain.id === "d2" ? (
-                // The home page is no domain's: this card reads Domain 2's results.
-                <ResultsDomainContext.Provider value="d2">
-                  <Domain2Headline />
+              ) : domain.id === "d2" || domain.id === "d5" ? (
+                // The home page is no domain's: this card reads that domain's results.
+                <ResultsDomainContext.Provider value={domain.id}>
+                  <LatestRunHeadline domain={domain.id} />
                 </ResultsDomainContext.Provider>
               ) : null
             }
@@ -231,16 +237,18 @@ function Domain1Headline({ composite }: { composite: Composite }) {
   )
 }
 
-/** Domain 2's latest run from its own index: its status and how many suites pass. */
-function Domain2Headline() {
-  const index = useDomainRunsIndex("d2")
+/** A domain's latest run from its own index: its status and how many suites pass. */
+function LatestRunHeadline({ domain }: { domain: "d2" | "d5" }) {
+  const { base, label } = DOMAIN_PAGES[domain]
+  const index = useDomainRunsIndex(domain)
   const latest = index.data?.ok ? resolveAlias(index.data.document, "latest") : undefined
-  const summary = useRunDocument(latest?.run_id, "summary.json", "d2/summary")
-  if (index.isPending) return <Skeleton className="h-5 w-72" aria-label="Loading Domain 2's runs" />
+  const summary = useRunDocument(latest?.run_id, "summary.json", kindIn(domain, "summary"))
+  if (index.isPending)
+    return <Skeleton className="h-5 w-72" aria-label={`Loading ${label}'s runs`} />
   if (!index.data?.ok) {
     return (
       <p className="text-muted-foreground" data-state="unreadable">
-        Domain 2's runs index could not be read.
+        {label}'s runs index could not be read.
       </p>
     )
   }
@@ -248,7 +256,7 @@ function Domain2Headline() {
     return (
       <p className="text-muted-foreground" data-state="empty">
         No finished run yet.{" "}
-        <Link to="/d2/runs" className="underline underline-offset-3">
+        <Link to={`${base}/runs`} className="underline underline-offset-3">
           The runs list
         </Link>{" "}
         shows what exists.
@@ -264,7 +272,7 @@ function Domain2Headline() {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1" data-run={latest.run_id}>
       <span className="text-muted-foreground">Latest</span>
-      <Link to={`/d2/runs/${latest.run_id}`} className="font-mono underline underline-offset-3">
+      <Link to={`${base}/runs/${latest.run_id}`} className="font-mono underline underline-offset-3">
         {latest.run_id}
       </Link>
       <StatusBadge status={latest.status} />

@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { CONTENT_SOURCE } from "@/content"
-import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
+import { D2_FIXTURE_RUNS, D5_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 describe("home page", () => {
@@ -40,11 +40,18 @@ describe("home page", () => {
     await waitFor(() => expect(within(d2).getByText("8 of 8 suites pass")).toBeInTheDocument())
     expect(within(d2).getByRole("link", { name: /The overview/ })).toHaveAttribute("href", "/d2")
 
-    expect(screen.getAllByText("not started")).toHaveLength(3)
+    const d5 = document.querySelector('[data-domain="d5"]') as HTMLElement
+    expect(await within(d5).findByRole("link", { name: D5_FIXTURE_RUNS.recorded })).toHaveAttribute(
+      "href",
+      `/d5/runs/${D5_FIXTURE_RUNS.recorded}`,
+    )
+    await waitFor(() => expect(within(d5).getByText("8 of 8 suites pass")).toBeInTheDocument())
     expect(screen.getByRole("link", { name: /Domain 5 · Instruction hierarchy/ })).toHaveAttribute(
       "href",
       "/d5",
     )
+
+    expect(screen.getAllByText("not started")).toHaveLength(2)
     expect(screen.getByText(/No single check is trusted alone/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "The glossary of terms" })).toHaveAttribute(
       "href",
