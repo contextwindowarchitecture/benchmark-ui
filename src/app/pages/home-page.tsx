@@ -132,7 +132,7 @@ export function HomePage() {
 function DomainCards({ index }: { index: RunsIndexV1 }) {
   const composite = resolveComposite(index, {})
   return (
-    <ul className="grid gap-3 md:grid-cols-2">
+    <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
       {DOMAINS.map((domain) => (
         <li
           key={domain.id}
@@ -244,7 +244,7 @@ function LatestRunHeadline({ domain }: { domain: "d2" | "d5" }) {
   const latest = index.data?.ok ? resolveAlias(index.data.document, "latest") : undefined
   const summary = useRunDocument(latest?.run_id, "summary.json", kindIn(domain, "summary"))
   if (index.isPending)
-    return <Skeleton className="h-5 w-72" aria-label={`Loading ${label}'s runs`} />
+    return <Skeleton className="h-5 w-72 max-w-full" aria-label={`Loading ${label}'s runs`} />
   if (!index.data?.ok) {
     return (
       <p className="text-muted-foreground" data-state="unreadable">

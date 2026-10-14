@@ -622,6 +622,26 @@ test("the densest pages reflow at 320 px", async ({ page }) => {
   }
 })
 
+// The loading states reflow too: the home page's cards while Domains 2 and 5's runs indexes are held.
+test("the home page reflows at 320 px while the runs indexes load", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  let release = () => {}
+  const held = new Promise<void>((resolve) => (release = resolve))
+  for (const domain of ["d2", "d5"]) {
+    await page.route(`**/results/${domain}/index.json`, async (route) => {
+      await held
+      await route.continue()
+    })
+  }
+  await page.goto("/")
+  await expect(page.getByText("11 of 11 suites pass")).toBeVisible()
+  await expect(page.getByLabel("Loading Domain 5's runs")).toBeVisible()
+  await expectFitsThePhone(page)
+  release()
+  await expect(page.locator(`[data-run="${D5_RECORDED}"]`)).toBeVisible()
+  await expectFitsThePhone(page)
+})
+
 // The keyboard alone (DESIGN.md 10): a matrix's scroll region takes the focus and scrolls with the
 // arrows, and the run picker opens, moves and chooses, landing focus on the new page's title.
 test("the keyboard scrolls a matrix and works the run picker", async ({ page }) => {

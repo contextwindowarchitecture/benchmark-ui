@@ -38,7 +38,7 @@ export function StatusLine({
       <dt className="text-muted-foreground">Contract</dt>
       <dd>
         {manifest?.isPending ? (
-          <Skeleton className="h-5 w-64" aria-label="Loading the contract commit" />
+          <Skeleton className="h-5 w-64 max-w-full" aria-label="Loading the contract commit" />
         ) : document ? (
           <span className="flex flex-wrap items-center gap-x-2">
             <span className="min-w-0 break-words">{document.contract.repository}</span>
