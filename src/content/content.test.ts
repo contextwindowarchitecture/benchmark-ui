@@ -27,6 +27,8 @@ import {
   TRUST as D2_TRUST,
 } from "./d2/trust"
 import { QUESTIONS } from "./d2/questions"
+import { QUESTIONS as D5_QUESTIONS } from "./d5/questions"
+import * as D5_TRUST from "./d5/trust"
 import * as D5 from "./d5/vocabulary"
 import {
   armGroup,
@@ -211,22 +213,28 @@ describe("the content files", () => {
   it("cite vendored files on Domain 2's question pages, link papers over https, and hold no values", async () => {
     expect(QUESTIONS.length).toBeGreaterThan(0)
     expect(new Set(QUESTIONS.map((words) => words.id)).size).toBe(QUESTIONS.length)
+    expect(new Set(D5_QUESTIONS.map((words) => words.id)).size).toBe(D5_QUESTIONS.length)
     // Names, not values: a suite, a domain, a requirement, the paper's own version.
     const identifiers = /\b(?:Domain |S|R-|CEP-)\d+\b|\bLongBench v2\b/g
-    for (const words of QUESTIONS) {
+    for (const words of [...QUESTIONS, ...D5_QUESTIONS]) {
       for (const file of [words.viability.citation.file, words.writeUp.citation.file]) {
         await expect(
           readFile(resolve(root, "vendor/cwa-bench", file), "utf8"),
         ).resolves.toBeTruthy()
       }
-      if (words.paper) expect(words.paper.url).toMatch(/^https:\/\/arxiv\.org\/abs\//)
+      for (const paper of [...(words.paper ? [words.paper] : []), ...(words.morePapers ?? [])]) {
+        expect(paper.url).toMatch(/^https:\/\/arxiv\.org\/abs\//)
+      }
       const texts = [
         words.title,
         words.question,
         words.viability.metric,
         words.viability.baseline,
         words.viability.expected,
-        ...(words.paper ? [words.paper.title, words.paper.text] : []),
+        ...[...(words.paper ? [words.paper] : []), ...(words.morePapers ?? [])].flatMap((paper) => [
+          paper.title,
+          paper.text,
+        ]),
         ...words.measured,
         ...words.writeUp.text,
       ]
@@ -262,6 +270,18 @@ describe("the content files", () => {
       ...D5.ATTACK_FAMILIES.map((family) => `${family.title} ${family.text}`),
       ...Object.values(D5.CARRIERS),
       ...D5.SUITES.map((suite) => suite.text),
+      D5_TRUST.QUESTION.question,
+      D5_TRUST.QUESTION.heldEqual,
+      D5_TRUST.CONCLUSION,
+      ...D5_TRUST.SCOPE.doesNot,
+      ...[
+        ...D5_TRUST.KINDS_OF_CLAIM,
+        ...D5_TRUST.CONCLUSIONS,
+        ...D5_TRUST.CORRECTIONS_TO_VIABILITY,
+        ...D5_TRUST.JUDGING,
+        ...D5_TRUST.TRUST,
+        ...D5_TRUST.CORRECTIONS,
+      ].map((note) => `${note.title} ${note.text}`),
     ]
     for (const text of words) expect(text.replace(identifiers, ""), text).not.toMatch(/\d/)
   })

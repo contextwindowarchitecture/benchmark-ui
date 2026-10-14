@@ -4,6 +4,8 @@
 
 import type { Citation } from "./source"
 
+export type Paper = { title: string; authors: string; url: string; text: string }
+
 export type QuestionWords<Id extends string = string> = {
   /** The page's path under the domain's base. */
   id: Id
@@ -23,8 +25,10 @@ export type QuestionWords<Id extends string = string> = {
     expected: string
     citation: Citation
   }
-  /** The paper the viability document proposes adapting, when it names one. */
-  paper?: { title: string; authors: string; url: string; text: string }
+  /** The paper the viability document proposes adapting, or the domain adopts, when there is one. */
+  paper?: Paper
+  /** Further papers the page draws on. */
+  morePapers?: readonly Paper[]
   /** How the domain measures it instead, and how that differs from the paper and the document. */
   measured: readonly string[]
   /** What the write-up concludes on it. */

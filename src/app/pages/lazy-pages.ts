@@ -50,3 +50,9 @@ export const D2CostPage = lazy(() =>
     default: module.CostPage,
   })),
 )
+
+export const D5OverviewPage = lazy(() =>
+  import("@/features/d5/components/overview/overview-page").then((module) => ({
+    default: module.D5OverviewPage,
+  })),
+)

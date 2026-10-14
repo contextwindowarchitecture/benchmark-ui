@@ -19,8 +19,14 @@ import {
   suiteWords as d5SuiteWords,
 } from "@/content/d5/vocabulary"
 import { useResultsDomain } from "@/data/queries"
-import { POINTS_OUT_OF_100, type PointsFormat } from "@/features/d2/model/metric-text"
+import {
+  intervalLevel,
+  intervalWords as d2IntervalWords,
+  POINTS_OUT_OF_100,
+  type PointsFormat,
+} from "@/features/d2/model/metric-text"
 import { tierLabel as d2TierLabel } from "@/features/d2/model/metrics"
+import { suiteOfMetric } from "@/features/d5/model/metrics"
 import { d5TierLabel } from "@/features/d5/model/tiers"
 import { formatPointsDifference, formatPointsDifferenceInterval } from "@/lib/format"
 
@@ -58,6 +64,27 @@ export type ArmVocabulary = ArmOrder & {
    * difference of two rates as a fraction (its paired metrics; ask 21).
    */
   points: PointsFormat
+  /** A metric's interval in words: "95% cluster-bootstrap interval over task instances". */
+  intervalWords(metric: IntervalMetric): string | null
+}
+
+/** What naming a metric's interval needs. */
+export type IntervalMetric = {
+  id: string
+  suite: string | null
+  interval?: { level: number; method: string } | null
+}
+
+/**
+ * What Domain 5's intervals cluster over, by suite, as its write-up states it: Domain 2's
+ * statistics name every interval as over conversations (ask 23), and Domain 5 reuses them.
+ */
+const D5_CLUSTERS: Record<string, string> = {
+  S2: "task instances",
+  S3: "SEP cases and LLMail-Inject's submitting teams",
+  S4: "task instances",
+  S5: "task instances",
+  S6: "conversations",
 }
 
 const D2_GROUP_MARKS: Record<ArmGroup, Pick<ArmGroupWords, "legend" | "name" | "tone">> = {
@@ -80,6 +107,7 @@ export const D2_VOCABULARY: ArmVocabulary = {
   tierLabel: (tier) => d2TierLabel(tier),
   suiteWords: d2SuiteWords,
   points: POINTS_OUT_OF_100,
+  intervalWords: (metric) => d2IntervalWords(metric.interval),
 }
 
 export const D5_VOCABULARY: ArmVocabulary = {
@@ -90,6 +118,11 @@ export const D5_VOCABULARY: ArmVocabulary = {
   tierLabel: d5TierLabel,
   suiteWords: d5SuiteWords,
   points: { value: formatPointsDifference, interval: formatPointsDifferenceInterval },
+  intervalWords: (metric) => {
+    if (!metric.interval) return null
+    const over = D5_CLUSTERS[suiteOfMetric(metric) ?? ""]
+    return `${intervalLevel(metric.interval.level)} cluster-bootstrap interval${over ? ` over ${over}` : ""}`
+  },
 }
 
 /**

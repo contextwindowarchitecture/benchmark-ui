@@ -19,11 +19,13 @@ import {
   type Note,
 } from "@/content/d2/trust"
 import type { D2Metric } from "@/features/d2/model/metrics"
+import { useDomainPages } from "@/lib/domains"
 import { formatTarget } from "@/lib/format"
 
 import { MetricValue } from "../metric-value"
 
 export function ChecksGrid({ checks }: { checks: { runId: string; metric: D2Metric }[] }) {
+  const { base } = useDomainPages()
   if (checks.length === 0) {
     return (
       <p
@@ -52,7 +54,7 @@ export function ChecksGrid({ checks }: { checks: { runId: string; metric: D2Metr
               <p className="text-xs text-muted-foreground">
                 target {formatTarget(metric.unit, metric.target)} ·{" "}
                 <Link
-                  to={`/d2/runs/${runId}/suites/${metric.suite ?? ""}`}
+                  to={`${base}/runs/${runId}/suites/${metric.suite ?? ""}`}
                   className="font-mono underline underline-offset-3"
                 >
                   {metric.id}

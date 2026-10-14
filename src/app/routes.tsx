@@ -29,6 +29,7 @@ import {
   D2LongContextPage,
   D2OverviewPage,
   D2TrackingPage,
+  D5OverviewPage,
   OverviewPage,
   PerfPage,
   ViewerPage,
@@ -330,8 +331,19 @@ export const routes: RouteObject[] = [
             children: [
               {
                 index: true,
-                element: <DomainPage id="d5" />,
-                handle: handle({ title: () => "Domain 5" }),
+                element: (
+                  <Suspense
+                    fallback={
+                      <PageFallback
+                        title="Domain 5 · Instruction hierarchy, security and indirect prompt injection"
+                        width="wide"
+                      />
+                    }
+                  >
+                    <D5OverviewPage />
+                  </Suspense>
+                ),
+                handle: handle({ title: () => "Domain 5 overview" }),
               },
               {
                 path: "runs",

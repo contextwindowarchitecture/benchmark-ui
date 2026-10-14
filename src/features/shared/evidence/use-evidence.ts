@@ -53,13 +53,15 @@ export type Evidence<D extends EvidenceDomain> = {
 
 /**
  * The evidence of the runs the composite reads over a domain's index, with the suite summaries
- * of `summarySuites` from the run each of those suites is read from.
+ * of `summarySuites` from the run each of those suites is read from. `suiteOf` files a metric
+ * under its suite (Domain 5 reads it from the id; ask 22).
  */
 export function useDomainEvidence<D extends EvidenceDomain>(
   domain: D,
   index: RunsIndexV1,
   pin: string | undefined,
   summarySuites: readonly string[],
+  suiteOf: (metric: MetricOf<D>) => string | null = (metric) => metric.suite,
 ): Evidence<D> {
   // The runs found gone from the volume so far: a summary asked for and not there. The set only
   // grows, so the composite settles on the newest runs that are actually there.
@@ -124,7 +126,11 @@ export function useDomainEvidence<D extends EvidenceDomain>(
           size: sizes.get(entry.run.run_id) ?? null,
           ...(entry.insteadOf ? { insteadOf: entry.insteadOf.run_id } : {}),
         },
-        metrics: (summary.metrics as MetricOf<D>[]).filter((metric) => metric.suite === suite),
+        metrics: (summary.metrics as MetricOf<D>[]).flatMap((metric) => {
+          const filed = suiteOf(metric)
+          if (filed !== suite) return []
+          return filed === metric.suite ? [metric] : [{ ...metric, suite: filed }]
+        }),
       }
     },
     suiteSummaryOf: (suite) => {

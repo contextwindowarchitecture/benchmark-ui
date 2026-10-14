@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { intervalWords } from "@/features/d2/model/metric-text"
 import { tierLabel } from "@/features/d2/model/metrics"
 import type { ArmRowWithMetrics } from "@/features/d2/model/overview"
 import type { ShareRow } from "@/features/d2/model/questions"
@@ -143,7 +142,8 @@ export function MetricPlot({
   format: (value: number) => string
   formatTick?: (value: number) => string
 }) {
-  const { groups } = useArmVocabulary()
+  const vocabulary = useArmVocabulary()
+  const { groups } = vocabulary
   if (rows.length === 0) {
     return (
       <p
@@ -154,7 +154,8 @@ export function MetricPlot({
       </p>
     )
   }
-  const interval = intervalWords(rows.find((row) => row.metric.interval)?.metric.interval)
+  const withInterval = rows.find((row) => row.metric.interval)?.metric
+  const interval = withInterval ? vocabulary.intervalWords(withInterval) : null
   return (
     <ArmPlot
       title={title}

@@ -203,22 +203,22 @@ function ViabilitySection({ words }: { words: QuestionWords }) {
           </div>
         </dl>
         <Cited file={viability.citation.file} section={viability.citation.section} />
-        {paper ? (
-          <div className="max-w-prose space-y-1 text-sm" data-paper>
+        {[...(paper ? [paper] : []), ...(words.morePapers ?? [])].map((entry) => (
+          <div key={entry.url} className="max-w-prose space-y-1 text-sm" data-paper>
             <p>
               <a
-                href={paper.url}
+                href={entry.url}
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 font-medium underline underline-offset-3"
               >
-                {paper.title}
+                {entry.title}
                 <ExternalLink aria-hidden="true" className="size-3.5" />
               </a>{" "}
-              <span className="text-muted-foreground">({paper.authors})</span>
+              <span className="text-muted-foreground">({entry.authors})</span>
             </p>
-            <p className="text-muted-foreground">{paper.text}</p>
+            <p className="text-muted-foreground">{entry.text}</p>
           </div>
-        ) : null}
+        ))}
         <section aria-labelledby="measured-heading" className="max-w-prose space-y-2">
           <h3 id="measured-heading" className="text-sm font-medium">
             How {label} measures it

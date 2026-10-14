@@ -9,32 +9,18 @@ import { Link } from "react-router"
 
 import { DashboardPage, PageSection } from "@/components/dashboard/dashboard-page"
 import { DataRegion } from "@/components/dashboard/data-region"
-import { StatusBadge } from "@/components/dashboard/status-badge"
-import { TableRegion } from "@/components/dashboard/table-region"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { domainById, sourceUrl } from "@/content"
 import { QUESTIONS } from "@/content/d2/questions"
 import { CONCLUSION, CONCLUSIONS, CONCLUSIONS_CITATION, QUESTION } from "@/content/d2/trust"
-import { suiteWords } from "@/content/d2/vocabulary"
 import { useDomainRunsIndex } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { D2RunsIndexV1 } from "@/data/schema/generated"
 import type { ArmBlocks } from "@/features/d2/model/blocks"
-import type { Composite } from "@/features/shared/model/composite"
 import { headlineBudget } from "@/features/d2/model/metrics"
 import { checks, type CheckSource } from "@/features/d2/model/overview"
 import { d2OverviewParams } from "@/features/d2/model/url"
-import { formatUtc, isoUtc } from "@/lib/format"
+import { SourcesTable } from "@/features/shared/evidence/sources-table"
 import { useUrlState } from "@/lib/url-state"
 
 import { ArmLegend } from "../arm-label"
@@ -375,84 +361,5 @@ function Overview({ index, pin }: { index: D2RunsIndexV1; pin: string | undefine
         </ul>
       </PageSection>
     </div>
-  )
-}
-
-/** Which runs the page reads, each with the suites read from it and the scripts' size. */
-function SourcesTable({ view, sizes }: { view: Composite; sizes: ReadonlyMap<string, string> }) {
-  return (
-    <TableRegion label="Runs read">
-      <Table>
-        <TableCaption className="sr-only">
-          Each run this page reads, the suites it is read for, and the scripts' size in it.
-        </TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead scope="col">Run</TableHead>
-            <TableHead scope="col">Suites read from it</TableHead>
-            <TableHead scope="col">Size</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {view.runs.map((run) => {
-            const suites = view.suites.filter((source) => source.run.run_id === run.run_id)
-            return (
-              <TableRow key={run.run_id} data-run={run.run_id}>
-                <TableCell className="align-top">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      to={`/d2/runs/${run.run_id}`}
-                      className="font-mono text-xs underline underline-offset-3"
-                    >
-                      {run.run_id}
-                    </Link>
-                    <StatusBadge status={run.status} />
-                    {run.ci_profile ? <Badge variant="outline">{run.ci_profile}</Badge> : null}
-                    {suites.some((source) => source.pinned) ? (
-                      <Badge variant="secondary">pinned</Badge>
-                    ) : null}
-                  </div>
-                  {[
-                    ...new Set(suites.flatMap((s) => (s.insteadOf ? [s.insteadOf.run_id] : []))),
-                  ].map((instead) => (
-                    <p key={instead} className="text-xs text-muted-foreground">
-                      instead of{" "}
-                      <Link
-                        to={`/d2/runs/${instead}`}
-                        className="font-mono underline underline-offset-3"
-                      >
-                        {instead}
-                      </Link>
-                      , pruned
-                    </p>
-                  ))}
-                  <time dateTime={isoUtc(run.started_at)} className="text-xs text-muted-foreground">
-                    {formatUtc(run.started_at)}
-                  </time>
-                </TableCell>
-                <TableCell className="align-top">
-                  <ul className="flex flex-wrap gap-x-3 gap-y-1">
-                    {suites.map((source) => (
-                      <li key={source.suite}>
-                        <Link
-                          to={`/d2/runs/${run.run_id}/suites/${source.suite}`}
-                          className="font-mono text-xs underline underline-offset-3"
-                          title={suiteWords(source.suite)}
-                        >
-                          {source.suite}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </TableCell>
-                <TableCell className="align-top text-sm">
-                  {sizes.get(run.run_id) ?? <span className="text-muted-foreground">—</span>}
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </TableRegion>
   )
 }

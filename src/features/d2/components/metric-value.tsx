@@ -9,7 +9,7 @@ import { formatCount, formatPercent } from "@/lib/format"
  * no value is "not measured", never a zero.
  */
 export function MetricValue({ metric, compact = false }: { metric: D2Metric; compact?: boolean }) {
-  const { points } = useArmVocabulary()
+  const { points, intervalWords } = useArmVocabulary()
   if (metric.value === null) return <span className="text-muted-foreground">not measured</span>
   const main =
     metric.unit === "rate" ? formatPercent(metric.value) : metricValueText(metric, points)
@@ -27,7 +27,7 @@ export function MetricValue({ metric, compact = false }: { metric: D2Metric; com
       {interval ? (
         <span
           className="text-xs text-muted-foreground"
-          title={`${intervalLevel(interval.level)} interval, ${interval.method}, ${formatCount(interval.resamples)} resamples`}
+          title={`${intervalWords(metric) ?? `${intervalLevel(interval.level)} interval`}, ${formatCount(interval.resamples)} resamples`}
         >
           {metricIntervalText(metric.unit, interval.low, interval.high, points)}
         </span>
