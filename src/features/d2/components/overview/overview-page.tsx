@@ -54,6 +54,8 @@ export function D2OverviewPage() {
   const region = regionOfDocument(runsIndex, "d2/index.json", "the runs index")
   return (
     <DashboardPage
+      variant="narrative"
+      kicker="Overview"
       title={`Domain 2 · ${domain?.title ?? "Long-horizon multi-turn stability"}`}
       description={domain?.claim}
       width="wide"

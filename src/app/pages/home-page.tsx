@@ -45,6 +45,8 @@ export function HomePage() {
   }
   return (
     <DashboardPage
+      variant="narrative"
+      kicker="Viability results"
       title="CWA benchmark"
       description="The viability benchmark of the Context Window Architecture: what each domain establishes, with every number behind it."
     >
@@ -165,7 +167,10 @@ function DomainCard({ domain, headline }: { domain: DomainContent; headline: Rea
   return (
     <Card className="h-full" data-domain={domain.id}>
       <CardHeader>
-        <CardTitle className="flex flex-wrap items-center gap-2 text-base">
+        <CardTitle
+          data-heading
+          className="flex flex-wrap items-center gap-2 text-[17px] font-semibold tracking-[-0.015em]"
+        >
           <Link to={`/${domain.id}`} className="underline-offset-3 hover:underline">
             Domain {domain.number} · {domain.title}
           </Link>

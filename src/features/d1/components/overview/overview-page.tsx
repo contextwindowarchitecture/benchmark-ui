@@ -60,6 +60,8 @@ export function OverviewPage() {
   const indexRegion = regionOfDocument(runsIndex, "d1/index.json", "the runs index")
   return (
     <DashboardPage
+      variant="narrative"
+      kicker="Overview"
       title="Domain 1 · Assembly determinism, budgeting and traceability"
       description={domain?.claim}
       width="wide"

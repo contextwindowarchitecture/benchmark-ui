@@ -6,6 +6,12 @@ import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
 describe("the shell", () => {
+  it("opens a page with its sidebar group as the kicker", async () => {
+    renderApp("/d1/runs")
+    const runs = await screen.findByRole("heading", { level: 1, name: "Runs" })
+    expect(runs.previousElementSibling).toHaveTextContent("Domain 1 · Assembly")
+  })
+
   it("has a skip link, one main, named navigation and the plan's tree", async () => {
     renderApp("/")
     expect(screen.getByRole("link", { name: "Skip to content" })).toHaveAttribute("href", "#page")

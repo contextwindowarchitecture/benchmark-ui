@@ -55,6 +55,13 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   and the menus and the sheet cast no shadow, through rules in `tokens.css` that select the generated components'
   `data-slot` and sit outside Tailwind's layers, so the components stay as generated. The shadow rule clears
   Tailwind's `--tw-shadow` rather than `box-shadow`, which also carries the focus ring and the menus' hairline.
+- The website's type scale (its `STYLE.md` 4), in px as it sets them. `DashboardPage` puts a mono kicker over every
+  title, the page's sidebar group by default (`navGroupOf`), with `kicker` to name another or none. Its `variant`
+  is `dashboard` (a 26 to 34 px title, a 15 px description) or `narrative` (a 34 to 56 px display title at -0.045em,
+  balanced, and an 18 px lede at 64ch), the latter on home, About, the glossary, the domain overviews and the
+  question pages. `PageSection` titles are 22 px at 600. Card titles and table column heads take the website's
+  muted label, mono 11 px, uppercase, tracked 0.12em, through a `data-slot` rule in `tokens.css`; a card whose
+  title is a heading a reader follows (the home page's domain cards) opts out with `data-heading`.
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
   infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this

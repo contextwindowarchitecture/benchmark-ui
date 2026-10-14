@@ -48,6 +48,7 @@ function Out({ href, children }: { href: string; children: React.ReactNode }) {
 export function AboutPage() {
   return (
     <DashboardPage
+      variant="narrative"
       title="About"
       description="The document this benchmark comes from, where its pieces live, and what this viewer reads."
     >

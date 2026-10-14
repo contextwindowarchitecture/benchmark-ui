@@ -280,3 +280,8 @@ export const navigation: NavGroup[] = [
 export function isNavItemActive(item: NavItem, pathname: string): boolean {
   return item.patterns.some((pattern) => matchPath({ path: pattern, end: true }, pathname) !== null)
 }
+
+/** The group whose page the path is, for the page's kicker; none for a path outside the navigation. */
+export function navGroupOf(pathname: string): NavGroup | undefined {
+  return navigation.find((group) => group.items.some((item) => isNavItemActive(item, pathname)))
+}

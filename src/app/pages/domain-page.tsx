@@ -14,6 +14,8 @@ export function DomainPage({ id }: { id: string }) {
   if (!domain || domain.id === "d1") return <NotFoundPage />
   return (
     <DashboardPage
+      variant="narrative"
+      kicker="Overview"
       title={`Domain ${domain.number} · ${domain.title}`}
       description={
         <span className="inline-flex flex-wrap items-center gap-2">

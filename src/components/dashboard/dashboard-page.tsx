@@ -1,5 +1,8 @@
 import { cn } from "cn"
 import { useEffect, useRef, type ReactNode } from "react"
+import { useLocation } from "react-router"
+
+import { navGroupOf } from "@/app/navigation"
 
 import { takeTitleFocus } from "./title-focus"
 
@@ -11,6 +14,16 @@ export type DashboardPageProps = {
   filters?: ReactNode
   status?: ReactNode
   width?: "standard" | "wide"
+  /**
+   * A narrative page (DESIGN.md 4.5) opens as the website's pages do, with a display title and a
+   * lede; a dashboard page keeps a compact title over its data.
+   */
+  variant?: "dashboard" | "narrative"
+  /**
+   * The mono line above the title. By default the sidebar group the page belongs to ("Domain 1 ·
+   * Assembly"); null leaves it out where the title already says it.
+   */
+  kicker?: string | null
   children: ReactNode
 }
 
@@ -21,8 +34,13 @@ export function DashboardPage({
   filters,
   status,
   width = "standard",
+  variant = "dashboard",
+  kicker,
   children,
 }: DashboardPageProps) {
+  const { pathname } = useLocation()
+  const kickerText = kicker === undefined ? navGroupOf(pathname)?.label : kicker
+  const narrative = variant === "narrative"
   const titleRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     if (!takeTitleFocus()) return
@@ -37,18 +55,49 @@ export function DashboardPage({
         width === "standard" && "max-w-[90rem]",
       )}
     >
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 space-y-1">
+      <header
+        data-variant={variant}
+        className={cn(
+          "flex flex-wrap items-start justify-between gap-4",
+          narrative && "pt-4 pb-2 md:pt-8",
+        )}
+      >
+        <div className="min-w-0">
+          {kickerText ? (
+            <p
+              data-kicker
+              className={cn(
+                "font-mono text-[12px] tracking-[0.14em] text-primary uppercase",
+                narrative ? "mb-5" : "mb-3",
+              )}
+            >
+              {kickerText}
+            </p>
+          ) : null}
           <h1
             ref={titleRef}
             id="page-title"
             tabIndex={-1}
-            className="text-2xl font-semibold tracking-tight outline-none"
+            className={cn(
+              "font-bold text-balance outline-none",
+              narrative
+                ? "max-w-[24ch] text-[clamp(34px,4.4vw,56px)] leading-[0.98] tracking-[-0.045em]"
+                : "text-[clamp(26px,2.6vw,34px)] leading-[1.05] tracking-[-0.035em]",
+            )}
           >
             {title}
           </h1>
           {description ? (
-            <p className="max-w-prose text-sm text-muted-foreground">{description}</p>
+            <p
+              className={cn(
+                "text-pretty text-muted-foreground",
+                narrative
+                  ? "mt-5 max-w-[64ch] text-[18px] leading-[1.6]"
+                  : "mt-2 max-w-[70ch] text-[15px] leading-[1.55]",
+              )}
+            >
+              {description}
+            </p>
           ) : null}
         </div>
         {actions ? (
@@ -86,11 +135,15 @@ export function PageSection({
         <div>
           <h2
             id={id ? `${id}-heading` : undefined}
-            className="text-lg font-semibold tracking-tight"
+            className="text-[22px] leading-[1.2] font-semibold tracking-[-0.02em] text-pretty"
           >
             {title}
           </h2>
-          {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+          {description ? (
+            <p className="mt-1 max-w-[70ch] text-[14.5px] leading-[1.55] text-pretty text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
         </div>
         {actions ? (
           <div className="flex max-w-full min-w-0 items-center gap-2">{actions}</div>

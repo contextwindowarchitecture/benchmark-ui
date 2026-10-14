@@ -55,6 +55,8 @@ export function D5OverviewPage() {
   const region = regionOfDocument(runsIndex, "d5/index.json", "the runs index")
   return (
     <DashboardPage
+      variant="narrative"
+      kicker="Overview"
       title={`Domain 5 · ${domain?.title ?? "Instruction hierarchy and indirect prompt injection"}`}
       description={domain?.claim}
       width="wide"

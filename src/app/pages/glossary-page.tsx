@@ -40,6 +40,7 @@ export function GlossaryPage() {
   const shown = filterGlossary(GLOSSARY, query)
   return (
     <DashboardPage
+      variant="narrative"
       title="Glossary"
       description="The terms of the Context Window Architecture and of the benchmark that tests it, each defined once with the document it was read against."
       filters={

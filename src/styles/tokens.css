@@ -264,6 +264,22 @@ html.dark {
   --tw-shadow: 0 0 #0000;
 }
 
+/*
+ * The website's muted label (its STYLE.md 4: mono 11px, uppercase, tracked 0.12em) on what names a
+ * block of data: a card's title and a table's column heads. A card whose title is a heading a
+ * reader follows, not a label, opts out with data-heading on its CardTitle.
+ */
+[data-slot="card-title"]:not([data-heading]),
+[data-slot="table-head"] {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
 @layer base {
   ::selection {
     background: var(--cwa-accent);

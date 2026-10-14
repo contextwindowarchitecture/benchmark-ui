@@ -67,6 +67,7 @@ export function QuestionPage<E extends FrameEvidence>({
   const { words } = props
   return (
     <DashboardPage
+      variant="narrative"
       title={words.title}
       description={words.question}
       width="wide"
