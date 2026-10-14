@@ -666,6 +666,8 @@ test("the keyboard scrolls a matrix and works the run picker", async ({ page }) 
   // A person's pace between the keys: Radix's select ignores a choice made the instant it opens.
   await page.waitForTimeout(300)
   await page.keyboard.press("ArrowDown")
+  // The select moves the focus in a timeout after the arrow; an Enter before it chooses the old run.
+  await expect(page.getByRole("option", { name: new RegExp(FAILING) })).toBeFocused()
   await page.keyboard.press("Enter")
   await expect(page).toHaveURL(new RegExp(`/d1/runs/${FAILING}/coverage$`))
   await expect(page.getByRole("heading", { level: 1, name: "Coverage" })).toBeFocused()
