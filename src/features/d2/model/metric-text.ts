@@ -1,20 +1,53 @@
-// A Domain 2 metric in words, for accessible names and summaries beside a chart or a cell: its
+// A metric in words (Domain 2's shape, which Domain 5's shares), for accessible names and summaries beside a chart or a cell: its
 // value, its interval named by its own level and method, and what reached no model.
 
 import { formatInterval, formatMetricValue } from "@/lib/format"
 
 import type { D2Metric } from "./metrics"
 
-/** The words for a value and its interval, for an accessible name or a summary. */
-export function metricText(metric: D2Metric): string {
+/** How a domain writes a value in points, and an interval of it. */
+export type PointsFormat = {
+  value(value: number): string
+  interval(low: number, high: number): string
+}
+
+/** Domain 2's points: points out of 100 (unreliability), the default. */
+export const POINTS_OUT_OF_100: PointsFormat = {
+  value: (value) => formatMetricValue("points", value),
+  interval: (low, high) => formatInterval("points", low, high),
+}
+
+/** A metric's value in its unit, points as the domain writes them. */
+export function metricValueText(
+  metric: Pick<D2Metric, "unit" | "value" | "numerator" | "denominator">,
+  points: PointsFormat = POINTS_OUT_OF_100,
+): string {
   if (metric.value === null) return "not measured"
-  const main =
-    metric.unit === "rate"
-      ? formatMetricValue("rate", metric.value, metric.numerator, metric.denominator)
-      : formatMetricValue(metric.unit, metric.value)
+  if (metric.unit === "rate") {
+    return formatMetricValue("rate", metric.value, metric.numerator, metric.denominator)
+  }
+  return metric.unit === "points"
+    ? points.value(metric.value)
+    : formatMetricValue(metric.unit, metric.value)
+}
+
+/** An interval's bounds in the metric's unit, points as the domain writes them. */
+export function metricIntervalText(
+  unit: D2Metric["unit"],
+  low: number,
+  high: number,
+  points: PointsFormat = POINTS_OUT_OF_100,
+): string {
+  return unit === "points" ? points.interval(low, high) : formatInterval(unit, low, high)
+}
+
+/** The words for a value and its interval, for an accessible name or a summary. */
+export function metricText(metric: D2Metric, points: PointsFormat = POINTS_OUT_OF_100): string {
+  if (metric.value === null) return "not measured"
+  const main = metricValueText(metric, points)
   const interval = metric.interval
   return interval
-    ? `${main}, ${intervalLevel(interval.level)} interval ${formatInterval(metric.unit, interval.low, interval.high)}`
+    ? `${main}, ${intervalLevel(interval.level)} interval ${metricIntervalText(metric.unit, interval.low, interval.high, points)}`
     : main
 }
 

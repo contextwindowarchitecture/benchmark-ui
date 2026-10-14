@@ -92,6 +92,27 @@ const domain2: NavGroup = {
   ],
 }
 
+const domain5: NavGroup = {
+  id: "d5",
+  label: "Domain 5 · Hierarchy and security",
+  items: [
+    {
+      id: "d5-overview",
+      label: "Overview",
+      icon: Layers,
+      href: () => "/d5",
+      patterns: ["/d5"],
+    },
+    {
+      id: "d5-runs",
+      label: "Runs",
+      icon: ListChecks,
+      href: () => "/d5/runs",
+      patterns: ["/d5/runs", "/d5/runs/:runId", "/d5/runs/:runId/suites/*"],
+    },
+  ],
+}
+
 export const navigation: NavGroup[] = [
   {
     id: "benchmark",
@@ -179,11 +200,11 @@ export const navigation: NavGroup[] = [
     ],
   },
   domain2,
+  domain5,
   ...(
     [
       ["d3", "Domain 3 · Agentic capability"],
       ["d4", "Domain 4 · Economics and caching"],
-      ["d5", "Domain 5 · Hierarchy and security"],
     ] as const
   ).map(([id, label]): NavGroup => ({
     id,

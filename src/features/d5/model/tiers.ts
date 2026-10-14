@@ -96,3 +96,15 @@ export function d5TierSize(tier: string, metricId: string): number | null {
   }
   return null
 }
+
+/**
+ * An order over one metric's tiers: by size where the tier has one (lengths, budgets, bands),
+ * else the order the harness wrote them in (a stable sort keeps it).
+ */
+export function compareD5Tiers(metricId: string): (a: string, b: string) => number {
+  return (a, b) => {
+    const sa = d5TierSize(a, metricId)
+    const sb = d5TierSize(b, metricId)
+    return sa !== null && sb !== null ? sa - sb : 0
+  }
+}

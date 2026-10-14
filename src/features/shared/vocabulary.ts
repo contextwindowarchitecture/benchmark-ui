@@ -19,8 +19,10 @@ import {
   suiteWords as d5SuiteWords,
 } from "@/content/d5/vocabulary"
 import { useResultsDomain } from "@/data/queries"
+import { POINTS_OUT_OF_100, type PointsFormat } from "@/features/d2/model/metric-text"
 import { tierLabel as d2TierLabel } from "@/features/d2/model/metrics"
 import { d5TierLabel } from "@/features/d5/model/tiers"
+import { formatPointsDifference, formatPointsDifferenceInterval } from "@/lib/format"
 
 export type { ArmGroup }
 
@@ -51,6 +53,11 @@ export type ArmVocabulary = ArmOrder & {
   /** A tier in words; Domain 5's tiers mean what their metric means. */
   tierLabel(tier: string, metricId?: string): string
   suiteWords(suite: string): string | undefined
+  /**
+   * What a value in points is: Domain 2 writes points out of 100 (unreliability), Domain 5 a
+   * difference of two rates as a fraction (its paired metrics; ask 21).
+   */
+  points: PointsFormat
 }
 
 const D2_GROUP_MARKS: Record<ArmGroup, Pick<ArmGroupWords, "legend" | "name" | "tone">> = {
@@ -72,6 +79,7 @@ export const D2_VOCABULARY: ArmVocabulary = {
   words: d2ArmWords,
   tierLabel: (tier) => d2TierLabel(tier),
   suiteWords: d2SuiteWords,
+  points: POINTS_OUT_OF_100,
 }
 
 export const D5_VOCABULARY: ArmVocabulary = {
@@ -81,6 +89,7 @@ export const D5_VOCABULARY: ArmVocabulary = {
   words: d5ArmWords,
   tierLabel: d5TierLabel,
   suiteWords: d5SuiteWords,
+  points: { value: formatPointsDifference, interval: formatPointsDifferenceInterval },
 }
 
 /**

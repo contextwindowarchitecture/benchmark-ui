@@ -16,6 +16,8 @@ import { SuitePage } from "@/features/d1/components/suite-page"
 import { SweepsPage } from "@/features/d1/components/sweeps/sweeps-page"
 import { D2RunPage } from "@/features/d2/components/run-page"
 import { D2SuitePage } from "@/features/d2/components/suite-page"
+import { D5RunPage } from "@/features/d5/components/run-page"
+import { D5SuitePage } from "@/features/d5/components/suite-page"
 
 import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
@@ -42,7 +44,6 @@ const param = (params: Record<string, string | undefined>, name: string) => para
 const DOMAINS: Record<string, string> = {
   d3: "Domain 3 · Agentic capability",
   d4: "Domain 4 · Economics and caching",
-  d5: "Domain 5 · Hierarchy and security",
 }
 
 export const routes: RouteObject[] = [
@@ -309,6 +310,55 @@ export const routes: RouteObject[] = [
                       {
                         path: "suites/:suite",
                         element: <D2SuitePage />,
+                        handle: handle({
+                          title: (p) => param(p, "suite"),
+                          crumb: (p) => ({ label: param(p, "suite") }),
+                        }),
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: "d5",
+            handle: handle({
+              title: () => "Domain 5",
+              crumb: () => ({ label: "Domain 5", to: "/d5" }),
+            }),
+            children: [
+              {
+                index: true,
+                element: <DomainPage id="d5" />,
+                handle: handle({ title: () => "Domain 5" }),
+              },
+              {
+                path: "runs",
+                handle: handle({
+                  title: () => "Runs",
+                  crumb: () => ({ label: "Runs", to: "/d5/runs" }),
+                }),
+                children: [
+                  { index: true, element: <RunsPage />, handle: handle({ title: () => "Runs" }) },
+                  {
+                    path: ":runId",
+                    handle: handle({
+                      title: () => "Run",
+                      crumb: (p) => ({
+                        label: param(p, "runId"),
+                        to: `/d5/runs/${param(p, "runId")}`,
+                      }),
+                    }),
+                    children: [
+                      {
+                        index: true,
+                        element: <D5RunPage />,
+                        handle: handle({ title: () => "Run" }),
+                      },
+                      {
+                        path: "suites/:suite",
+                        element: <D5SuitePage />,
                         handle: handle({
                           title: (p) => param(p, "suite"),
                           crumb: (p) => ({ label: param(p, "suite") }),

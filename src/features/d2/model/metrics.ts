@@ -7,6 +7,9 @@ import type { D2SummaryV1 } from "@/data/schema/generated"
 import { armGroup, compareArms, type ArmGroup } from "@/content/d2/vocabulary"
 import type { ArmOrder } from "@/features/shared/vocabulary"
 
+/** An order over a metric's tiers; Domain 2's by default (compareTiers). */
+export type TierCompare = (a: string, b: string) => number
+
 /** Domain 2's arm order and groups, the selectors' default; Domain 5 passes its own. */
 export const D2_ARM_ORDER: ArmOrder = { groupOf: armGroup, compare: compareArms }
 import { formatCount } from "@/lib/format"
@@ -102,7 +105,7 @@ export type ArmTierTable = {
 export function armTierTable(
   metrics: readonly D2Metric[],
   id: string,
-  options: { tierKinds?: readonly TierKind[]; order?: ArmOrder } = {},
+  options: { tierKinds?: readonly TierKind[]; order?: ArmOrder; compareTier?: TierCompare } = {},
 ): ArmTierTable | null {
   const chosen = metricsOf(metrics, id).filter(
     (metric) =>
@@ -113,7 +116,9 @@ export function armTierTable(
   const first = chosen[0]
   if (!first) return null
   const cells = new Map(chosen.map((metric) => [`${metric.arm}\u0000${metric.tier}`, metric]))
-  const tiers = [...new Set(chosen.map((metric) => metric.tier as string))].sort(compareTiers)
+  const tiers = [...new Set(chosen.map((metric) => metric.tier as string))].sort(
+    options.compareTier ?? compareTiers,
+  )
   const arms = [...new Set(chosen.map((metric) => metric.arm as string))]
     .sort((options.order ?? D2_ARM_ORDER).compare)
     .map((arm) => ({ id: arm, group: (options.order ?? D2_ARM_ORDER).groupOf(arm) }))

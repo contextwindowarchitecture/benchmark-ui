@@ -75,7 +75,7 @@ export function ArmTierTable({
                   </TableCell>
                   {table.tiers.map((tier) => {
                     const metric = table.cell(arm.id, tier)
-                    const name = `${arm.id}, ${tierLabel(tier)}: ${metric ? metricText(metric) : "not measured"}`
+                    const name = `${arm.id}, ${tierLabel(tier)}: ${metric ? metricText(metric, vocabulary.points) : "not measured"}`
                     return (
                       <TableCell
                         key={tier}
