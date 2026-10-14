@@ -27,6 +27,7 @@ import {
   TRUST as D2_TRUST,
 } from "./d2/trust"
 import { QUESTIONS } from "./d2/questions"
+import * as D5 from "./d5/vocabulary"
 import {
   armGroup,
   ARMS,
@@ -72,10 +73,11 @@ describe("the content files", () => {
       expect(domain.claim.endsWith(".")).toBe(true)
       expect(domain.design.length).toBeGreaterThan(0)
     }
-    // Domains 1 and 2 have write-ups.
+    // Domains 1, 2 and 5 have write-ups.
     expect(DOMAINS.filter((domain) => domain.writeUp).map((domain) => domain.id)).toEqual([
       "d1",
       "d2",
+      "d5",
     ])
   })
 
@@ -230,5 +232,37 @@ describe("the content files", () => {
       ]
       for (const text of texts) expect(text.replace(identifiers, ""), text).not.toMatch(/\d/)
     }
+  })
+
+  it("name every arm, family and suite Domain 5's fixture records, in words without values", async () => {
+    const summary = JSON.parse(
+      await readFile(
+        resolve(
+          root,
+          "vendor/cwa-bench/domain5/fixtures/runs/20261013T224806Z-5fc59ba/summary.json",
+        ),
+        "utf8",
+      ),
+    ) as { suites: { id: string }[]; metrics: { arm: string | null }[] }
+    const arms = new Set(
+      summary.metrics.flatMap((m) => (m.arm && !m.arm.includes(" vs ") ? [m.arm] : [])),
+    )
+    expect(arms.size).toBe(D5.ARMS.length)
+    for (const arm of arms) expect(D5.armWords(arm), arm).toBeDefined()
+    for (const suite of summary.suites) expect(D5.suiteWords(suite.id), suite.id).toBeDefined()
+    expect(D5.armGroup("xml-unescaped")).toBe("control")
+    expect(D5.armGroup("cwa-something-new")).toBe("cwa")
+    expect([...D5.ARMS].sort((a, b) => D5.compareArms(a.id, b.id))).toEqual(D5.ARMS)
+    // Names, not values: suites, requirements, an encoding.
+    const identifiers = /\b(?:Domain |S|R-)\d+\b|\bBase64\b/g
+    const words = [
+      ...D5.ARMS.map((arm) => `${arm.payload} ${arm.role ?? ""}`),
+      ...D5.ARM_GROUPS.map((group) => `${group.label} ${group.text}`),
+      ...D5.TASK_FAMILIES.map((family) => `${family.title} ${family.text}`),
+      ...D5.ATTACK_FAMILIES.map((family) => `${family.title} ${family.text}`),
+      ...Object.values(D5.CARRIERS),
+      ...D5.SUITES.map((suite) => suite.text),
+    ]
+    for (const text of words) expect(text.replace(identifiers, ""), text).not.toMatch(/\d/)
   })
 })

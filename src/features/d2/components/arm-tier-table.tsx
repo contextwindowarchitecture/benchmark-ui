@@ -10,16 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ARM_GROUPS } from "@/content/d2/vocabulary"
 import { metricText } from "@/features/d2/model/metric-text"
-import { tierLabel, type ArmTierTable as Layout } from "@/features/d2/model/metrics"
+import type { ArmTierTable as Layout } from "@/features/d2/model/metrics"
+import { useArmVocabulary } from "@/features/shared/vocabulary"
 
 import { ArmLabel } from "./arm-label"
 import { MetricValue } from "./metric-value"
 
 /**
- * One metric by arm and tier (the write-up's tables): arms down, grouped as upper bounds,
- * conventional baselines and CWA arms; tiers across. Every cell is the producer's value with its
+ * One metric by arm and tier (the write-up's tables): arms down, grouped as the current domain
+ * groups them; tiers across, named as the metric means them. Every cell is the producer's value with its
  * fraction and interval; a dash is an arm the metric was not measured for at that tier.
  */
 export function ArmTierTable({
@@ -31,10 +31,14 @@ export function ArmTierTable({
   label?: string
   caption?: string
 }) {
-  const groups = ARM_GROUPS.map((group) => ({
-    ...group,
-    arms: table.arms.filter((arm) => arm.group === group.id),
-  })).filter((group) => group.arms.length > 0)
+  const vocabulary = useArmVocabulary()
+  const tierLabel = (tier: string) => vocabulary.tierLabel(tier, table.id)
+  const groups = vocabulary.groups
+    .map((group) => ({
+      ...group,
+      arms: table.arms.filter((arm) => arm.group === group.id),
+    }))
+    .filter((group) => group.arms.length > 0)
   const columns = table.tiers.length + 1
   return (
     <TableRegion label={label ?? `${table.label} by arm and tier`}>

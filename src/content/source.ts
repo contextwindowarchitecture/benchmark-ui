@@ -23,3 +23,4 @@ export function sourceUrl(file: string): string {
 export const VIABILITY_DOCUMENT = "docs/benchmarking_cwa_viability.md"
 export const DOMAIN_1_WRITE_UP = "docs/domain1.md"
 export const DOMAIN_2_WRITE_UP = "docs/domain2.md"
+export const DOMAIN_5_WRITE_UP = "docs/domain5.md"

@@ -19,6 +19,7 @@ export {
   CONTENT_SOURCE,
   DOMAIN_1_WRITE_UP,
   DOMAIN_2_WRITE_UP,
+  DOMAIN_5_WRITE_UP,
   sourceUrl,
   VIABILITY_DOCUMENT,
 } from "./source"

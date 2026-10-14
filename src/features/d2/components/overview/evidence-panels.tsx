@@ -43,7 +43,9 @@ import {
 } from "@/lib/format"
 
 import { ArmLabel } from "../arm-label"
-import { GROUPS, percentTick } from "../evidence/arm-groups"
+import { useArmVocabulary } from "@/features/shared/vocabulary"
+
+import { percentTick } from "../evidence/arm-groups"
 import { SourceNote } from "../evidence/evidence-states"
 import type { PanelSource } from "../evidence/use-evidence"
 import { GroupedArmTable, ShareCell } from "../grouped-arm-table"
@@ -120,6 +122,7 @@ export function AptitudePanel({
   source: PanelSource
   factSource: PanelSource | null
 }) {
+  const { groups } = useArmVocabulary()
   const rows = aptitudeRows(s2, budget, s1)
   const reference = rows.find((row) => row.id === REFERENCE_ARMS.conversations)
   const label = tierLabel(budget)
@@ -130,7 +133,7 @@ export function AptitudePanel({
         title={`Correct answers per arm at ${label}`}
         summary={`Each arm's share of correct answers over every probe and sample at ${label}${interval ? `, with its ${interval}` : ""}; the upper bounds have no budget.${factSource ? " Behind each, the share of the arm's probes whose needed facts were in the payload at that budget, so a wrong answer can be told from a fact that was never sent." : ""}${reference ? ` The dashed rule is ${REFERENCE_ARMS.conversations}, the fair reference.` : ""}`}
         rows={rows}
-        groups={GROUPS}
+        groups={groups}
         domain={[0, 1]}
         mark="dot"
         format={(value) => formatPercent(value)}
@@ -170,6 +173,7 @@ export function UnreliabilityPanel({
   budget: string
   source: PanelSource
 }) {
+  const { groups } = useArmVocabulary()
   const rows = valueRows(metrics, "s3.unreliability", budget)
   const label = tierLabel(budget)
   const interval = intervalWords(rows.find((row) => row.metric.interval)?.metric.interval)
@@ -179,7 +183,7 @@ export function UnreliabilityPanel({
         title={`Unreliability per arm at ${label}`}
         summary={`Unreliability, the study's U90−10: for each probe, the 90th less the 10th percentile of its repeated samples' scores at a temperature above zero, averaged over probes, in points out of 100${interval ? `, with its ${interval}` : ""}. Lower is steadier.`}
         rows={rows}
-        groups={GROUPS}
+        groups={groups}
         domain="auto"
         mark="dot"
         format={formatPoints}
@@ -208,6 +212,7 @@ export function CostPanel({
   budget: string
   source: PanelSource
 }) {
+  const { groups } = useArmVocabulary()
   const rows = valueRows(metrics, "s5.prompt_tokens_per_correct", budget).filter(
     (row) => row.metric.family === null,
   )
@@ -218,7 +223,7 @@ export function CostPanel({
         title={`Prompt tokens per correct answer at ${label}`}
         summary={`What each correct answer cost in prompt tokens at ${label}, from the calls S2 made: every prompt token the arm sent, divided by its correct answers. Lower is cheaper.`}
         rows={rows}
-        groups={GROUPS}
+        groups={groups}
         domain="auto"
         mark="bar"
         format={(value) => `${formatCount(value)} tokens`}
@@ -449,6 +454,7 @@ export function PairedPanel({
   budget: string
   source: PanelSource
 }) {
+  const { groups } = useArmVocabulary()
   const rows = pairedRows(entries, budget)
   const reference = pairedReference(entries) ?? REFERENCE_ARMS.conversations
   const label = tierLabel(budget)
@@ -467,7 +473,7 @@ export function PairedPanel({
         title={title}
         summary={`Each arm's share of correct answers less ${reference}'s on the same probes and samples at ${label}, in percentage points${interval ? `, with its ${interval}` : ""}; the dashed rule at zero is ${reference} itself. The upper bounds have no budget and are not paired.`}
         rows={rows}
-        groups={GROUPS}
+        groups={groups}
         domain="auto"
         mark="dot"
         format={formatPointsDifference}

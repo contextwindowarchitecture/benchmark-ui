@@ -20,12 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { compareArms } from "@/content/d2/vocabulary"
 import type { D2SummaryV1 } from "@/data/schema/generated"
 import { compareSuites } from "@/features/d1/model/runs"
-import { filterD2Metrics, tierLabel } from "@/features/d2/model/metrics"
+import { filterD2Metrics } from "@/features/d2/model/metrics"
 import { d2RunPageParams } from "@/features/d2/model/url"
 import { formatCount, formatTarget } from "@/lib/format"
+import { useArmVocabulary } from "@/features/shared/vocabulary"
 import { useUrlState } from "@/lib/url-state"
 
 import { ArmLabel } from "./arm-label"
@@ -38,12 +38,13 @@ const METRIC_STATUSES = ["pass", "fail", "info", "na"] as const
  * Every metric of a Domain 2 run, grouped by suite (DESIGN.md 4.4 rows): the producer's value,
  * interval, target and judgment, with the arm, family and tier it measures. Filters in the URL.
  */
-export function D2RunMetrics({ summary }: { summary: D2SummaryV1 }) {
+export function D2RunMetrics({ summary }: { summary: Pick<D2SummaryV1, "suites" | "metrics"> }) {
   const [state, setState] = useUrlState(d2RunPageParams)
+  const vocabulary = useArmVocabulary()
   const suites = [...summary.suites].sort((a, b) => compareSuites(a.id, b.id))
   const arms = [
     ...new Set(summary.metrics.flatMap((metric) => (metric.arm ? [metric.arm] : []))),
-  ].sort(compareArms)
+  ].sort(vocabulary.compare)
   const shown = filterD2Metrics(summary.metrics, {
     suite: state.suite,
     status: state.metric,
@@ -218,7 +219,7 @@ export function D2RunMetrics({ summary }: { summary: D2SummaryV1 }) {
                       </TableCell>
                       <TableCell className="align-top text-xs">
                         {metric.tier ? (
-                          tierLabel(metric.tier)
+                          vocabulary.tierLabel(metric.tier, metric.id)
                         ) : (
                           <span className="text-muted-foreground">all</span>
                         )}

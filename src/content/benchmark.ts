@@ -1,9 +1,15 @@
 // The benchmark as a whole (ui-plan.md 1, 8.11): what CWA is, what each domain is designed to
 // establish, and how to read the results. Words only; every number on the site comes from a
-// record. Reviewed against the viability document and the Domain 1 and 2 write-ups at
+// record. Reviewed against the viability document and the Domain 1, 2 and 5 write-ups at
 // CONTENT_SOURCE.
 
-import { DOMAIN_1_WRITE_UP, DOMAIN_2_WRITE_UP, VIABILITY_DOCUMENT, type Citation } from "./source"
+import {
+  DOMAIN_1_WRITE_UP,
+  DOMAIN_2_WRITE_UP,
+  DOMAIN_5_WRITE_UP,
+  VIABILITY_DOCUMENT,
+  type Citation,
+} from "./source"
 
 export type DomainId = "d1" | "d2" | "d3" | "d4" | "d5"
 
@@ -117,6 +123,10 @@ export const DOMAINS: readonly DomainContent[] = [
       "CWA moves the hierarchy out of the model: untrusted content is isolated in the evidence plane with explicit authority, trust and injection-risk metadata, and nothing a user or a tool says may change the governance plane. The design exercises that defense with indirect prompt injection suites such as BIPIA and adversarial cases of its own.",
       "What it would measure: attack success rate against benign utility, system-prompt extraction, memory poisoning over time, and attempts by low-authority items to bind to governance slots.",
     ],
+    writeUp: {
+      file: DOMAIN_5_WRITE_UP,
+      title: "Domain 5: instruction hierarchy and indirect prompt injection",
+    },
     citation: {
       file: VIABILITY_DOCUMENT,
       section: "Domain 5: Instruction Hierarchy, Security, and Indirect Prompt Injection",

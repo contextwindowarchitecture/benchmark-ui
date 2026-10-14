@@ -11,13 +11,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { suiteWords } from "@/content/d2/vocabulary"
 import type { D2SummaryV1 } from "@/data/schema/generated"
 import { compareSuites } from "@/features/d1/model/runs"
+import { useArmVocabulary } from "@/features/shared/vocabulary"
+import { useDomainPages } from "@/lib/domains"
 import { formatCount } from "@/lib/format"
 
 /** The run's suites (ui-plan.md 8.3 for Domain 2): status, what each is for, findings, the page. */
-export function D2RunSuites({ runId, summary }: { runId: string; summary: D2SummaryV1 }) {
+export function D2RunSuites({
+  runId,
+  summary,
+}: {
+  runId: string
+  summary: Pick<D2SummaryV1, "suites" | "findings">
+}) {
+  const { suiteWords } = useArmVocabulary()
+  const { base } = useDomainPages()
   const suites = [...summary.suites].sort((a, b) => compareSuites(a.id, b.id))
   if (suites.length === 0) {
     return (
@@ -50,7 +59,7 @@ export function D2RunSuites({ runId, summary }: { runId: string; summary: D2Summ
             <TableRow key={suite.id} data-suite={suite.id}>
               <TableCell className="align-top">
                 <Link
-                  to={`/d2/runs/${runId}/suites/${suite.id}`}
+                  to={`${base}/runs/${runId}/suites/${suite.id}`}
                   className="underline underline-offset-3"
                 >
                   <span className="font-mono">{suite.id}</span> · {suite.title}

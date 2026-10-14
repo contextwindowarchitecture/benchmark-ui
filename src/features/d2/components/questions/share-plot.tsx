@@ -20,7 +20,9 @@ import type { ShareRow } from "@/features/d2/model/questions"
 import { formatCount, formatPercent, formatRate } from "@/lib/format"
 
 import { ArmLabel } from "../arm-label"
-import { GROUPS, percentTick } from "../evidence/arm-groups"
+import { useArmVocabulary } from "@/features/shared/vocabulary"
+
+import { percentTick } from "../evidence/arm-groups"
 import { ShareCell } from "../grouped-arm-table"
 import { MetricValue } from "../metric-value"
 
@@ -91,6 +93,7 @@ export function SharePlot({
   mark?: "dot" | "bar"
   reference?: { value: number; label: string } | null
 }) {
+  const { groups } = useArmVocabulary()
   if (rows.length === 0) {
     return (
       <p
@@ -106,7 +109,7 @@ export function SharePlot({
       title={title}
       summary={summary}
       rows={rows}
-      groups={GROUPS}
+      groups={groups}
       domain={mark === "dot" ? [0, 1] : "auto"}
       mark={mark}
       format={(value) => formatPercent(value)}
@@ -140,6 +143,7 @@ export function MetricPlot({
   format: (value: number) => string
   formatTick?: (value: number) => string
 }) {
+  const { groups } = useArmVocabulary()
   if (rows.length === 0) {
     return (
       <p
@@ -156,7 +160,7 @@ export function MetricPlot({
       title={title}
       summary={summary}
       rows={rows}
-      groups={GROUPS}
+      groups={groups}
       domain={domain}
       mark={mark}
       format={format}

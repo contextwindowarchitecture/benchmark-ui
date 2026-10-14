@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ARM_GROUPS, type ArmGroup } from "@/content/d2/vocabulary"
+import { useArmVocabulary, type ArmGroup } from "@/features/shared/vocabulary"
 
 import { ArmLabel } from "./arm-label"
 
@@ -40,10 +40,12 @@ export function GroupedArmTable({
   cell: (arm: string, column: string) => ArmCell
   showPayload?: boolean
 }) {
-  const groups = ARM_GROUPS.map((group) => ({
-    ...group,
-    arms: arms.filter((arm) => arm.group === group.id),
-  })).filter((group) => group.arms.length > 0)
+  const groups = useArmVocabulary()
+    .groups.map((group) => ({
+      ...group,
+      arms: arms.filter((arm) => arm.group === group.id),
+    }))
+    .filter((group) => group.arms.length > 0)
   return (
     <TableRegion label={label}>
       <Table>

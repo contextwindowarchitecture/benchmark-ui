@@ -17,7 +17,8 @@ describe("about page", () => {
     )
     expect(screen.getByRole("link", { name: /docs\/domain1\.md/ })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: /docs\/domain2\.md/ })).toBeInTheDocument()
-    expect(screen.getAllByText(/no write-up yet/)).toHaveLength(3)
+    expect(screen.getByRole("link", { name: /docs\/domain5\.md/ })).toBeInTheDocument()
+    expect(screen.getAllByText(/no write-up yet/)).toHaveLength(2)
     expect(screen.getByRole("link", { name: /The Rust assembler/ })).toHaveAttribute(
       "href",
       "https://github.com/contextwindowarchitecture/assembler-rust",

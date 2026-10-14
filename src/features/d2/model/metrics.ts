@@ -5,6 +5,10 @@
 
 import type { D2SummaryV1 } from "@/data/schema/generated"
 import { armGroup, compareArms, type ArmGroup } from "@/content/d2/vocabulary"
+import type { ArmOrder } from "@/features/shared/vocabulary"
+
+/** Domain 2's arm order and groups, the selectors' default; Domain 5 passes its own. */
+export const D2_ARM_ORDER: ArmOrder = { groupOf: armGroup, compare: compareArms }
 import { formatCount } from "@/lib/format"
 
 export type D2Metric = D2SummaryV1["metrics"][number]
@@ -98,7 +102,7 @@ export type ArmTierTable = {
 export function armTierTable(
   metrics: readonly D2Metric[],
   id: string,
-  options: { tierKinds?: readonly TierKind[] } = {},
+  options: { tierKinds?: readonly TierKind[]; order?: ArmOrder } = {},
 ): ArmTierTable | null {
   const chosen = metricsOf(metrics, id).filter(
     (metric) =>
@@ -111,8 +115,8 @@ export function armTierTable(
   const cells = new Map(chosen.map((metric) => [`${metric.arm}\u0000${metric.tier}`, metric]))
   const tiers = [...new Set(chosen.map((metric) => metric.tier as string))].sort(compareTiers)
   const arms = [...new Set(chosen.map((metric) => metric.arm as string))]
-    .sort(compareArms)
-    .map((arm) => ({ id: arm, group: armGroup(arm) }))
+    .sort((options.order ?? D2_ARM_ORDER).compare)
+    .map((arm) => ({ id: arm, group: (options.order ?? D2_ARM_ORDER).groupOf(arm) }))
   return {
     id,
     label: first.label,
@@ -150,14 +154,19 @@ export type ArmPoint = {
  * bounds, which have no budget, at theirs. Arms in the write-up's order; a metric without a value
  * is left out (the table beside the chart shows it as not measured).
  */
-export function armPoints(metrics: readonly D2Metric[], id: string, tier: string): ArmPoint[] {
+export function armPoints(
+  metrics: readonly D2Metric[],
+  id: string,
+  tier: string,
+  order: ArmOrder = D2_ARM_ORDER,
+): ArmPoint[] {
   const points: ArmPoint[] = []
   for (const metric of metricsOf(metrics, id)) {
     if (metric.arm === null || metric.tier === null || metric.value === null) continue
     if (metric.tier !== tier && metric.tier !== "control") continue
-    points.push({ arm: metric.arm, group: armGroup(metric.arm), tier: metric.tier, metric })
+    points.push({ arm: metric.arm, group: order.groupOf(metric.arm), tier: metric.tier, metric })
   }
-  return points.sort((a, b) => compareArms(a.arm, b.arm))
+  return points.sort((a, b) => order.compare(a.arm, b.arm))
 }
 
 /** The metrics of a suite measured across every arm and tier: the gate and the counts. */

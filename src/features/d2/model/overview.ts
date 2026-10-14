@@ -4,6 +4,7 @@
 // harness did not measure: a panel takes the producer's values, intervals and judgments.
 
 import { armGroup, compareArms, type ArmGroup } from "@/content/d2/vocabulary"
+import type { ArmOrder } from "@/features/shared/vocabulary"
 import type { ArmRow } from "@/components/charts/arm-plot-geometry"
 import type { TierSeries } from "@/components/charts/tier-lines-geometry"
 
@@ -59,8 +60,9 @@ export function valueRows(
   metrics: readonly D2Metric[],
   id: string,
   budget: string,
+  order?: ArmOrder,
 ): ArmRowWithMetrics[] {
-  return armPoints(metrics, id, budget).map((point) => ({
+  return armPoints(metrics, id, budget, order).map((point) => ({
     id: point.arm,
     group: point.group,
     tier: point.tier,
