@@ -41,6 +41,15 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   `src/assets/brand/` because the CSP serves images from the site's own origin only: resized to 560 px wide for the
   sidebar's link back to contextwindowarchitecture.io, and its window mark cropped for the brand slot, which the
   collapsed sidebar shows alone.
+- The palette and typefaces are the CWA website's (its `STYLE.md`; DESIGN.md 5, revision 1.4). `tokens.css` holds
+  the website's tokens verbatim as `--cwa-*` and sets the generated tokens to them in its `html:root` and `html.dark`
+  blocks: background, card and popover on the paper `--cwa-bg`, muted, secondary and the sidebar on `--cwa-surface`,
+  border and input on `--cwa-line`, primary and ring on the clay `--cwa-accent`, shadcn's accent (the hover fill) on
+  `--cwa-accent-soft`. The four planes take the website's plane colors exactly. The Rust adapter's series moved from
+  orange to olive, off the accent. Space Grotesk (`@fontsource-variable/space-grotesk` 5.3.0, the sans) and IBM Plex
+  Mono (`@fontsource/ibm-plex-mono` 5.3.0, the mono, weights 400 to 600) replace the preset's Geist; they are
+  packages rather than the website's Google Fonts link because the deployed policy serves fonts from the site's own
+  origin only.
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
   infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this

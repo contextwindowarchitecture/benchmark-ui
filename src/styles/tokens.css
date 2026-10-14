@@ -1,7 +1,8 @@
 /*
  * Token extensions over the generated shadcn stylesheet (DESIGN.md 5; ui-plan.md 7.2). The
- * generated tokens stay as generated in globals.css; this file adds the status pairs, maps the
- * status vocabulary onto them, and gives the four adapters their fixed identities.
+ * generated tokens stay as generated in globals.css; this file sets them to the CWA website's
+ * palette (its STYLE.md 2), adds the status pairs, maps the status vocabulary onto them, and gives
+ * the four adapters their fixed identities.
  */
 
 :root {
@@ -76,13 +77,14 @@
 
   /*
    * The four planes (ui-plan.md 7.2): slots are colored by plane, the hue, and slot, the shade.
-   * Lower in chroma than the adapter hues, so a plane never reads as a series, and distinct from
-   * the status hues, which are reserved for status. Used by the model diagram and the item strip.
+   * The website's plane colors, exactly, so a plane looks the same on both sites. State shares
+   * info's hue and evidence sits beside success's; a status badge always carries its word and
+   * icon, so the two never stand in for each other. Used by the model diagram and the item strip.
    */
-  --plane-governance: oklch(0.52 0.1 25);
-  --plane-state: oklch(0.5 0.1 110);
-  --plane-evidence: oklch(0.5 0.1 230);
-  --plane-interaction: oklch(0.52 0.1 320);
+  --plane-governance: oklch(0.55 0.17 38);
+  --plane-state: oklch(0.53 0.14 250);
+  --plane-evidence: oklch(0.52 0.13 155);
+  --plane-interaction: oklch(0.54 0.15 310);
 
   /*
    * The site notice (the preview banner): orange, apart from the status hues, with dark text that
@@ -104,10 +106,10 @@
   --failure: oklch(0.76 0.17 22);
   --failure-foreground: oklch(0.145 0 0);
 
-  --plane-governance: oklch(0.78 0.09 25);
-  --plane-state: oklch(0.78 0.1 110);
-  --plane-evidence: oklch(0.76 0.09 230);
-  --plane-interaction: oklch(0.78 0.09 320);
+  --plane-governance: oklch(0.76 0.15 45);
+  --plane-state: oklch(0.76 0.12 250);
+  --plane-evidence: oklch(0.76 0.13 155);
+  --plane-interaction: oklch(0.76 0.13 310);
 }
 
 @theme inline {
@@ -171,20 +173,73 @@
 }
 
 /*
- * The adapters' hues over the generated grey chart tokens. This file is imported at the top of
- * globals.css, before the generated :root and .dark blocks, so a plain :root here would lose to
- * them; html:root and html.dark outrank both, in both themes.
+ * The CWA website's palette and the adapters' hues over the generated neutral tokens. This file
+ * is imported at the top of globals.css, before the generated :root and .dark blocks, so a plain
+ * :root here would lose to them; html:root and html.dark outrank both, in both themes.
+ *
+ * The --cwa-* values are the website's tokens verbatim (its STYLE.md 2): warm paper, not white;
+ * one clay accent for emphasis, the primary action and focus; hairlines in --cwa-line.
  */
 html:root {
+  --cwa-bg: oklch(0.985 0.004 90);
+  --cwa-surface: oklch(0.955 0.005 90);
+  --cwa-fg: oklch(0.2 0.01 80);
+  --cwa-muted: oklch(0.52 0.01 80);
+  --cwa-line: oklch(0.885 0.006 90);
+  --cwa-accent: oklch(0.55 0.2 38);
+  --cwa-accent-soft: oklch(0.94 0.035 45);
+
+  --background: var(--cwa-bg);
+  --foreground: var(--cwa-fg);
+  --card: var(--cwa-bg);
+  --card-foreground: var(--cwa-fg);
+  --popover: var(--cwa-bg);
+  --popover-foreground: var(--cwa-fg);
+  --primary: var(--cwa-accent);
+  --primary-foreground: var(--cwa-bg);
+  --secondary: var(--cwa-surface);
+  --secondary-foreground: var(--cwa-fg);
+  --muted: var(--cwa-surface);
+  --muted-foreground: var(--cwa-muted);
+  --accent: var(--cwa-accent-soft);
+  --accent-foreground: var(--cwa-fg);
+  --border: var(--cwa-line);
+  --input: var(--cwa-line);
+  --ring: var(--cwa-accent);
+  --sidebar: var(--cwa-surface);
+  --sidebar-foreground: var(--cwa-fg);
+  --sidebar-primary: var(--cwa-accent);
+  --sidebar-primary-foreground: var(--cwa-bg);
+  --sidebar-accent: var(--cwa-accent-soft);
+  --sidebar-accent-foreground: var(--cwa-fg);
+  --sidebar-border: var(--cwa-line);
+  --sidebar-ring: var(--cwa-accent);
+
+  /* Rust is olive, off the accent's clay, which an orange series would read as. */
   --chart-1: oklch(0.5 0.17 290);
   --chart-2: oklch(0.55 0.11 200);
   --chart-3: oklch(0.55 0.18 340);
-  --chart-4: oklch(0.6 0.16 45);
+  --chart-4: oklch(0.55 0.12 115);
 }
 
 html.dark {
+  --cwa-bg: oklch(0.175 0.008 80);
+  --cwa-surface: oklch(0.215 0.008 80);
+  --cwa-fg: oklch(0.955 0.004 90);
+  --cwa-muted: oklch(0.68 0.01 85);
+  --cwa-line: oklch(0.305 0.008 80);
+  --cwa-accent: oklch(0.74 0.17 45);
+  --cwa-accent-soft: oklch(0.3 0.045 45);
+
   --chart-1: oklch(0.75 0.15 290);
   --chart-2: oklch(0.78 0.11 200);
   --chart-3: oklch(0.75 0.17 340);
-  --chart-4: oklch(0.78 0.15 50);
+  --chart-4: oklch(0.8 0.13 115);
+}
+
+@layer base {
+  ::selection {
+    background: var(--cwa-accent);
+    color: var(--cwa-bg);
+  }
 }

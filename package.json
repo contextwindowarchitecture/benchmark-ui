@@ -26,7 +26,8 @@
     "generate:types": "node scripts/generate-types.mjs && node scripts/generate-validators.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/space-grotesk": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
     "@gsap/react": "2.1.2",
     "@tanstack/react-query": "5.104.1",
     "ajv": "8.20.0",

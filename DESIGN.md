@@ -1,7 +1,7 @@
 # DESIGN.md
 
-> Shared front-end foundation · Revision 1.3 · 2026-10-08
-> Status: baseline for adoption. Revision 1.0 was written before any consumer existed. Revision 1.1 folds in what the first real consumer, the Domain 1 results contract (the benchmark repository's `domain1/schemas/` and `docs/domain1.md`), showed; 1.2 adds what the maintainer's decisions about that consumer (a public site that explains what each benchmark domain establishes) ask of the baseline; 1.3 moves the document from the benchmark repository to this one, where the UI lives. Section 17 lists the changes and section 18 the references.
+> Shared front-end foundation · Revision 1.4 · 2026-10-14
+> Status: baseline for adoption. Revision 1.0 was written before any consumer existed. Revision 1.1 folds in what the first real consumer, the Domain 1 results contract (the benchmark repository's `domain1/schemas/` and `docs/domain1.md`), showed; 1.2 adds what the maintainer's decisions about that consumer (a public site that explains what each benchmark domain establishes) ask of the baseline; 1.3 moves the document from the benchmark repository to this one, where the UI lives; 1.4 takes the palette and typefaces from the CWA website. Section 17 lists the changes and section 18 the references.
 
 ## 1. Purpose and authority
 
@@ -249,7 +249,7 @@ Diagrams on these pages are React-rendered SVG drawn from the data's own vocabul
 - Maintain generated shadcn tokens for background, foreground, card, popover, primary, secondary, muted, accent, destructive, border, input, ring, sidebar, and chart series.
 - Add explicit success, warning, and info pairs; define foreground/background pairs for every status. Do not make `primary` synonymous with “success.”
 - Define the status vocabulary once, with one token pair per status the data can carry: outcome statuses (`pass`, `fail`, `partial`, `error`), judgment statuses (`info`, `na`, not run) and change verdicts (`baseline`, `unchanged`, `changed`, `regressed`). Map them to the semantic pairs centrally. `info` must not look like `pass`, `partial` must not look like `fail`, and not run is muted, never red. Every status badge carries text or an icon as well as color.
-- Define light and dark themes, radius, typography, spacing, motion, and overlay layers centrally. Do not invent an undefined “CWA” palette.
+- Define light and dark themes, radius, typography, spacing, motion, and overlay layers centrally. The palette and typefaces are the CWA website's, as its `STYLE.md` records them (section 2, tokens; section 4, typography): set the generated tokens to its values rather than inventing a second CWA palette, and take its four plane colors exactly. A plane color may share a hue with a status color, since every status badge carries its word and an icon; a status color is never used to mean a plane, nor a plane color a status.
 - Use a 4 px spacing rhythm as the default policy: 4, 8, 12, 16, 24, 32, 48. Borders, typography, optical corrections, and accessible control sizing are valid exceptions. Not every Tailwind utility is inherently a multiple of 4 px.
 - Use a neutral surface hierarchy, one primary accent, limited shadows, and visible focus rings. Avoid gradient backgrounds and decorative texture by default.
 - Default body size: 1 rem; supporting metadata: 0.875 rem; primary page heading: 1.5–2 rem. Dense tables may be compact but must stay readable.
@@ -597,6 +597,10 @@ For future repositories, create a template repository after this baseline is val
 Documentation evidence is cited inline as [n] and listed in section 18. Uncited defaults are proposed project policies, not guarantees of a library's behavior. Recheck official documentation when adopting or upgrading packages.
 
 ## 17. Revision history
+
+### 1.4 · 2026-10-14
+
+The maintainer decided the results site should look like contextwindowarchitecture.io, whose `STYLE.md` records a defined CWA palette and type: warm paper neutrals, one clay accent, four plane colors, Space Grotesk and IBM Plex Mono. Section 5 now takes the palette and typefaces from there instead of forbidding a CWA palette, and lets a plane color share a hue with a status color, which the website's plane colors require. Migration: the generated tokens are set to the website's values over the generated stylesheet, the planes take the website's colors, and the typefaces replace the preset's. Tests: the existing axe passes in both themes check the new colors' contrast.
 
 ### 1.3 · 2026-10-08
 
