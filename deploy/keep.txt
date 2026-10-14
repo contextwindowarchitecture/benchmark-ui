@@ -8,3 +8,5 @@
 # Domain 2's write-up (docs/domain2.md): the recorded run and the S6 pilot it reports beside it, 2026-10-12.
 20261012T052348Z-4a0ea5d
 20261012T042632Z-4a0ea5d
+# Domain 5's write-up (docs/domain5.md): the recorded run of 2026-10-13.
+20261013T224806Z-5fc59ba
