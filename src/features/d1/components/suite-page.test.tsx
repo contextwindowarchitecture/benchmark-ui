@@ -66,7 +66,7 @@ describe("suite page", () => {
     },
   )
 
-  it("shows S0's mutation table and S12's drift, S2's matrix and S10's harmless writes", async () => {
+  it("shows S0's mutation table", async () => {
     renderApp(`/d1/runs/${nightly}/suites/S0`)
     const s0 = await section("panel")
     expect(
@@ -77,7 +77,9 @@ describe("suite page", () => {
       "href",
       `/d1/runs/${nightly}/suites/S0?verdict=survived`,
     )
+  })
 
+  it("shows S12's drift", async () => {
     renderApp(`/d1/runs/${nightly}/suites/S12`)
     const s12 = (await screen.findAllByRole("region", { name: "Golden drift table" }))[0]!
     expect(within(s12).getAllByText("1,352").length).toBeGreaterThanOrEqual(4)
@@ -85,12 +87,16 @@ describe("suite page", () => {
       "href",
       "/d1/runs/20261008T030058Z-8cf806e",
     )
+  })
 
+  it("shows S2's matrix", async () => {
     renderApp(`/d1/runs/${nightly}/suites/S2`)
     const matrix = (await screen.findAllByRole("region", { name: "Environment matrix" }))[0]!
     expect(within(matrix).getByText("baseline")).toBeInTheDocument()
     expect(matrix.querySelectorAll('[data-applied="false"]').length).toBeGreaterThan(0)
+  })
 
+  it("shows S10's harmless writes", async () => {
     renderApp(`/d1/runs/${nightly}/suites/S10`)
     const purity = (await screen.findAllByRole("region", { name: "Purity table" }))[0]!
     expect(within(purity).getAllByText(/\(harmless\)/).length).toBeGreaterThan(0)
