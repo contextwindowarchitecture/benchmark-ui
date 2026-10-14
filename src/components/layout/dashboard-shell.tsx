@@ -8,6 +8,7 @@ import { domainOfPath } from "@/lib/domains"
 import { AppHeader } from "./app-header"
 import { AppSidebar } from "./app-sidebar"
 import { PreviewBanner } from "./preview-banner"
+import { SiteFooter } from "./site-footer"
 import { SkipLink } from "./skip-link"
 
 const SIDEBAR_COOKIE = "sidebar_state"
@@ -23,7 +24,7 @@ function sidebarDefaultOpen(): boolean {
 
 /**
  * The one shell (DESIGN.md 4.1): skip link, collapsible sidebar, the preview notice, sticky
- * header, one main. The
+ * header, one main, the footer. The
  * generated SidebarInset is the `main` landmark; the page region inside it takes the skip link.
  * The path's domain is the results domain of everything inside, the header's run picker included.
  */
@@ -42,6 +43,7 @@ export function DashboardShell() {
           <div id="page" tabIndex={-1} className="flex min-w-0 flex-1 flex-col outline-none">
             <Outlet />
           </div>
+          <SiteFooter />
         </SidebarInset>
       </SidebarProvider>
     </ResultsDomainContext.Provider>

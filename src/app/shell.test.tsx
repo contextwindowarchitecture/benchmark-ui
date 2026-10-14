@@ -2,6 +2,7 @@ import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { buildInfo } from "@/lib/build-info"
 import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
 
@@ -45,12 +46,14 @@ describe("the shell", () => {
     expect(screen.queryByRole("region", { name: "Site notice" })).not.toBeInTheDocument()
   })
 
-  it("links back to the project's site", () => {
+  it("links back to the project's site from the sidebar and the footer", () => {
     renderApp("/")
-    expect(screen.getByRole("link", { name: /contextwindowarchitecture\.io/ })).toHaveAttribute(
-      "href",
-      "https://contextwindowarchitecture.io",
-    )
+    const links = screen.getAllByRole("link", { name: /contextwindowarchitecture\.io/ })
+    expect(links).toHaveLength(2)
+    for (const link of links)
+      expect(link).toHaveAttribute("href", "https://contextwindowarchitecture.io")
+    const footer = screen.getByRole("navigation", { name: "Footer" }).closest("footer")
+    expect(footer).toHaveTextContent(`ui ${buildInfo.uiCommit}`)
   })
 
   it("marks the active item and sets the document title with the run id", async () => {

@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/table"
 import { ABOUT, CONTENT_SOURCE, DOMAINS, sourceUrl, VIABILITY_DOCUMENT } from "@/content"
 import { buildInfo } from "@/lib/build-info"
-
-const ORGANISATION = "https://github.com/contextwindowarchitecture"
+import { ORGANISATION } from "@/lib/sites"
 
 const REPOSITORIES = [
   { name: "The specification", url: `${ORGANISATION}/contextwindowarchitecture` },

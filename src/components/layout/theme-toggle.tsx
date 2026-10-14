@@ -13,15 +13,25 @@ import { THEMES, type Theme } from "@/lib/theme-constants"
 
 const LABELS: Record<Theme, string> = { light: "Light", dark: "Dark", system: "System" }
 
-/** Light, dark or system, as a menu on one icon button with an accessible name. */
+/**
+ * Light, dark or system, as a menu on the website's ghost pill: mono, muted, a hairline outline, and
+ * the theme in use as its word.
+ */
 export function ThemeToggle() {
   const { theme, resolved, setTheme } = useTheme()
   const Icon = resolved === "dark" ? Moon : Sun
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={`Theme: ${LABELS[theme]}`} title="Theme">
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={`Theme: ${LABELS[theme]}`}
+          title="Theme"
+          className="border-border bg-transparent font-mono text-[12px] font-normal tracking-[0.05em] text-muted-foreground hover:border-foreground hover:bg-transparent hover:text-foreground aria-expanded:border-foreground aria-expanded:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
+        >
           <Icon aria-hidden="true" />
+          {LABELS[theme]}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

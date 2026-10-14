@@ -33,10 +33,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   generated `:root` and `.dark` and would otherwise lose to them; until UI-P6 it did, and the adapters drew in
   greys); status colors are never used for series. Every status badge meets WCAG AA on its
   tint in the light theme (axe checks it in the smoke test).
-- The site notice and the brand: the preview banner above the header has its own orange pair (`--notice`,
-  `--notice-foreground`), the same in both themes and apart from the status hues, so it never reads as a verdict on
-  the data. It pulses once every 2 s (WCAG 2.3.1 allows three flashes a second), stops under reduced motion and can be
-  dismissed for the session (WCAG 2.2.2); its text reads at AA on both ends of the pulse. The project's logo comes
+- The site notice and the brand: the preview banner above the header is the website's note callout, the soft accent
+  fill under an accent hairline, still, as the website's notes are; it is the site's accent, not a status hue, so it
+  never reads as a verdict on the data, and it can be dismissed for the session. The project's logo comes
   from the organization's profile (`contextwindowarchitecture/.github`, `profile/assets/`), copied into
   `src/assets/brand/` because the CSP serves images from the site's own origin only: resized to 560 px wide for the
   sidebar's link back to contextwindowarchitecture.io, and its window mark cropped for the brand slot, which the
@@ -62,6 +61,11 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   question pages. `PageSection` titles are 22 px at 600. Card titles and table column heads take the website's
   muted label, mono 11 px, uppercase, tracked 0.12em, through a `data-slot` rule in `tokens.css`; a card whose
   title is a heading a reader follows (the home page's domain cards) opts out with `data-heading`.
+- The website's shell details over the DESIGN.md 4.1 shell: the header's paper is translucent (88%) and blurred
+  12 px; the theme menu opens from the website's ghost pill (mono, muted, a hairline outline, the theme in use as its
+  word); the current page in the sidebar carries the website's 3 px accent bar, with the fill kept for hover; and a
+  mono footer under every page holds what the build reads and was built from (moved there from the sidebar) and the
+  links to About, contextwindowarchitecture.io and the organisation on GitHub.
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
   infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this

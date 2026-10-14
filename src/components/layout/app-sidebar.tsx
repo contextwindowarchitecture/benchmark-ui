@@ -22,10 +22,7 @@ import logoDark from "@/assets/brand/logo-dark.png"
 import logoLight from "@/assets/brand/logo-light.png"
 import markDark from "@/assets/brand/mark-dark.png"
 import markLight from "@/assets/brand/mark-light.png"
-import { buildInfo } from "@/lib/build-info"
-
-/** The project's site, which the benchmark belongs to. */
-const CWA_SITE = "https://contextwindowarchitecture.io"
+import { CWA_SITE } from "@/lib/sites"
 
 /** The left navigation: the benchmark's domains, each with its pages (ui-plan.md 6.1). */
 export function AppSidebar() {
@@ -144,13 +141,6 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <p className="px-2 text-xs leading-relaxed text-muted-foreground group-data-[collapsible=icon]:hidden">
-          Reads {buildInfo.producers.join(", ")} v1 · benchmark{" "}
-          <span className="font-mono" title={buildInfo.benchmarkCommit}>
-            {buildInfo.benchmarkCommit.slice(0, 7)}
-          </span>{" "}
-          · ui <span className="font-mono">{buildInfo.uiCommit}</span>
-        </p>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
