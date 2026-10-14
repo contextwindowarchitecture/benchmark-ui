@@ -78,7 +78,7 @@ export function S7Rows({
   )
   if (!opened) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-4 text-sm">
+      <div className="flex flex-wrap items-center gap-3 border border-dashed p-4 text-sm">
         <span>
           The grid and the fixed windows are drawn from the{" "}
           {file.rows === undefined ? "" : `${formatCount(file.rows)} `}rows, loaded on request.

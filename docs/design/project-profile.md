@@ -50,6 +50,11 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   Mono (`@fontsource/ibm-plex-mono` 5.3.0, the mono, weights 400 to 600) replace the preset's Geist; they are
   packages rather than the website's Google Fonts link because the deployed policy serves fonts from the site's own
   origin only.
+- The website's shapes: `--radius` is zero, so every generated radius and every `rounded-*` scale class is square,
+  and pages carry no `rounded-sm` to `rounded-xl` of their own. Buttons, the sidebar trigger and badges are pills,
+  and the menus and the sheet cast no shadow, through rules in `tokens.css` that select the generated components'
+  `data-slot` and sit outside Tailwind's layers, so the components stay as generated. The shadow rule clears
+  Tailwind's `--tw-shadow` rather than `box-shadow`, which also carries the focus ring and the menus' hairline.
 - Remote data ownership and cache policy: TanStack Query 5.104.1 over the `ResultsSource` adapter
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
   infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this

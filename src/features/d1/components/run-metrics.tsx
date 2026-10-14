@@ -52,10 +52,7 @@ function RunMetricsTable({ summary }: { summary: SummaryV1 }) {
   const filtering = state.suite || state.metric || state.q
   if (summary.metrics.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         This run judged no metrics.
       </p>
     )
@@ -133,7 +130,7 @@ function RunMetricsTable({ summary }: { summary: SummaryV1 }) {
       </div>
       {shown.length === 0 ? (
         <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+          className="border border-dashed p-4 text-sm text-muted-foreground"
           data-state="no-results"
         >
           No metrics match these filters.

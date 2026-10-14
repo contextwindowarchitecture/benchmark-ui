@@ -62,7 +62,7 @@ export function RunsTable({ runs, sort, dir, onSort }: RunsTableProps) {
                   <button
                     type="button"
                     onClick={() => onSort(column.key as RunsSortKey)}
-                    className="inline-flex items-center gap-1 rounded-sm font-medium hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    className="inline-flex items-center gap-1 font-medium hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
                   >
                     {column.label}
                     {column.key === sort ? (

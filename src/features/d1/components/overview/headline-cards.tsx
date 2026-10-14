@@ -28,7 +28,7 @@ export function HeadlineGroups({
           </h3>
           {metrics.length === 0 && missing.length > 0 ? (
             <p
-              className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
+              className="border border-dashed p-3 text-sm text-muted-foreground"
               data-state="absent"
             >
               {missingNote(suiteOfMetricId(missing[0] ?? ""))}

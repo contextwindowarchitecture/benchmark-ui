@@ -22,7 +22,7 @@ export function TableRegion({
       aria-label={label}
       tabIndex={0}
       className={cn(
-        "overflow-x-auto rounded-lg border focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none [&>[data-slot=table-container]]:overflow-visible",
+        "overflow-x-auto border focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none [&>[data-slot=table-container]]:overflow-visible",
         className,
       )}
     >

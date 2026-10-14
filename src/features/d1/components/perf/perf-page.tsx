@@ -260,8 +260,8 @@ function Term({ label, value }: { label: string; value: string }) {
 function Bar({ value, max }: { value: number; max: number }) {
   const width = max > 0 ? Math.max((value / max) * 100, 1) : 0
   return (
-    <div className="h-2 w-full min-w-16 rounded-sm bg-muted" aria-hidden="true">
-      <div className="h-2 rounded-sm bg-primary" style={{ width: `${width}%` }} />
+    <div className="h-2 w-full min-w-16 bg-muted" aria-hidden="true">
+      <div className="h-2 bg-primary" style={{ width: `${width}%` }} />
     </div>
   )
 }

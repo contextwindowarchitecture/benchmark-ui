@@ -468,7 +468,7 @@ function Overview({ composite }: { composite: Composite }) {
           )}
           <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2" data-trust>
             {TRUST.map((note) => (
-              <li key={note.id} className="rounded-lg border p-4 text-sm">
+              <li key={note.id} className="border p-4 text-sm">
                 <h3 className="font-medium">{note.title}</h3>
                 <p className="mt-1 text-muted-foreground">{note.text}</p>
                 {note.details ? (
@@ -600,10 +600,7 @@ function HeadlineRegion({
         </DataRegion>
       ))}
       {sources.length === 0 ? (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           No summary to read the headline metrics from.
         </p>
       ) : (
@@ -619,7 +616,7 @@ function HeadlineRegion({
             </p>
             {ungated.length === 0 ? (
               <p
-                className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
+                className="border border-dashed p-3 text-sm text-muted-foreground"
                 data-state="empty"
               >
                 The loaded runs carry no summarizer metrics.
@@ -650,10 +647,7 @@ function CompositeMatrix({
   if (!nightly && !s7) {
     if (pending) return <Skeleton className="h-64 w-full" aria-label="Loading the matrix" />
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         No summary to draw the matrix from.
       </p>
     )

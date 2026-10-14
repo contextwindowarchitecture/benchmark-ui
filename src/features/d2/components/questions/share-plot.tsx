@@ -95,10 +95,7 @@ export function SharePlot({
   const { groups } = useArmVocabulary()
   if (rows.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         No arm has a tally for this in the run read.
       </p>
     )
@@ -146,10 +143,7 @@ export function MetricPlot({
   const { groups } = vocabulary
   if (rows.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         No arm has this metric in the run read.
       </p>
     )

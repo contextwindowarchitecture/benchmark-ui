@@ -72,10 +72,7 @@ export function S10Purity({ summary }: SuitePanelProps) {
         </Alert>
       ) : null}
       {rows.length === 0 ? (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This run's summary has no purity block.
         </p>
       ) : (

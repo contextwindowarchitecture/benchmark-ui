@@ -193,11 +193,11 @@ function ViabilitySection({ words }: { words: QuestionWords }) {
     >
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
         <dl className="grid gap-4 md:grid-cols-2" data-viability>
-          <div className="rounded-lg border p-4">
+          <div className="border p-4">
             <dt className="text-sm font-medium">With conventional assembly</dt>
             <dd className="mt-1 text-sm text-muted-foreground">{viability.baseline}</dd>
           </div>
-          <div className="rounded-lg border p-4">
+          <div className="border p-4">
             <dt className="text-sm font-medium">Expected with CWA</dt>
             <dd className="mt-1 text-sm text-muted-foreground">{viability.expected}</dd>
           </div>

@@ -273,10 +273,7 @@ function Coverage({
             <RateMatrixLegend />
           </div>
         ) : (
-          <p
-            className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-            data-state="empty"
-          >
+          <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
             No reasons in this run's coverage.
           </p>
         )}
@@ -319,10 +316,7 @@ function Coverage({
           .
         </p>
         {tags.length === 0 ? (
-          <p
-            className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-            data-state="empty"
-          >
+          <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
             No tags in this run's coverage.
           </p>
         ) : (

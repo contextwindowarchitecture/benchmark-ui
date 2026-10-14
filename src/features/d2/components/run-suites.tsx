@@ -30,10 +30,7 @@ export function D2RunSuites({
   const suites = [...summary.suites].sort((a, b) => compareSuites(a.id, b.id))
   if (suites.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         This run ran no suites.
       </p>
     )

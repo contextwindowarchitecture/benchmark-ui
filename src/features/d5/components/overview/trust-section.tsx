@@ -32,7 +32,7 @@ function Notes({ notes, label }: { notes: readonly Note[]; label: string }) {
   return (
     <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2" aria-label={label}>
       {notes.map((note) => (
-        <li key={note.id} className="rounded-lg border p-4 text-sm" data-note={note.id}>
+        <li key={note.id} className="border p-4 text-sm" data-note={note.id}>
           <h4 className="font-medium">{note.title}</h4>
           <p className="mt-1 text-muted-foreground">{note.text}</p>
         </li>

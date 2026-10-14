@@ -255,10 +255,7 @@ function Answers({
         description="One column per adapter, in the fixed order."
       >
         {view.answers.length === 0 ? (
-          <p
-            className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-            data-state="empty"
-          >
+          <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
             No answer in these rows.
           </p>
         ) : (
@@ -378,7 +375,7 @@ function PartView({
 }) {
   const present = part.blobs.filter((blob) => blob.digest !== null)
   return (
-    <div className="space-y-2 rounded-lg border p-3" data-part={part.label ?? "answer"}>
+    <div className="space-y-2 border p-3" data-part={part.label ?? "answer"}>
       {part.label ? <h3 className="font-mono text-xs font-medium">{part.label}</h3> : null}
       <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-xs">
         <dt className="text-muted-foreground">Outcome</dt>

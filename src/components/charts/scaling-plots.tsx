@@ -125,7 +125,7 @@ function Panel({
     )
     .join("; ")
   return (
-    <figure className="min-w-0 space-y-1 rounded-md border p-2" data-panel={panel.shape}>
+    <figure className="min-w-0 space-y-1 border p-2" data-panel={panel.shape}>
       <figcaption id={`${id}-caption`} className="text-sm font-medium">
         {panel.shape}
       </figcaption>

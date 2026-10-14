@@ -215,6 +215,13 @@ html:root {
   --sidebar-border: var(--cwa-line);
   --sidebar-ring: var(--cwa-accent);
 
+  /*
+   * Square, as the website is: every generated radius is a multiple of --radius, so zero squares
+   * cards, panels, inputs and menus. The pill is the one radius, on buttons and badges (below).
+   */
+  --radius: 0px;
+  --cwa-pill: 999px;
+
   /* Rust is olive, off the accent's clay, which an orange series would read as. */
   --chart-1: oklch(0.5 0.17 290);
   --chart-2: oklch(0.55 0.11 200);
@@ -235,6 +242,26 @@ html.dark {
   --chart-2: oklch(0.78 0.11 200);
   --chart-3: oklch(0.75 0.17 340);
   --chart-4: oklch(0.8 0.13 115);
+}
+
+/*
+ * The website's two shape rules over the generated components, which stay as generated: buttons
+ * and badges are pills, and nothing casts a shadow (the menus keep their hairline ring). These
+ * rules sit outside Tailwind's layers, so they win over the components' utilities without
+ * !important. Shadows are cleared through Tailwind's --tw-shadow, not box-shadow, which also
+ * carries the focus ring.
+ */
+[data-slot="button"],
+[data-slot="sidebar-trigger"],
+[data-slot="badge"] {
+  border-radius: var(--cwa-pill);
+}
+
+[data-slot="dropdown-menu-content"],
+[data-slot="dropdown-menu-sub-content"],
+[data-slot="select-content"],
+[data-slot="sheet-content"] {
+  --tw-shadow: 0 0 #0000;
 }
 
 @layer base {

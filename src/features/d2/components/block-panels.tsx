@@ -237,10 +237,7 @@ export function BreakdownsPanel({
   const tier = tiers.includes(state.at ?? "") ? (state.at as string) : defaultTier(tiers)
   if (!tier || breakdowns.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         {suite} recorded no breakdown in this run.
       </p>
     )

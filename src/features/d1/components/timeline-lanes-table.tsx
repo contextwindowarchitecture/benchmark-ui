@@ -38,7 +38,7 @@ export function TimelineLanesTable({ timeline }: { timeline: TimelineV1 }) {
         {formatCount(timeline.counters.omitted)} omitted
         {inferred > 0 ? `; ${formatCount(inferred)} events in inferred order` : ""}.
       </p>
-      <TableRegion label="Timeline lanes table" className="rounded-lg">
+      <TableRegion label="Timeline lanes table">
         <Table>
           <TableCaption className="sr-only">Events per pipeline stage, in sequence.</TableCaption>
           <TableHeader>

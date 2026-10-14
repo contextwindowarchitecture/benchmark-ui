@@ -150,7 +150,7 @@ export function SuitePage() {
                     >
                       {document.metrics.length === 0 ? (
                         <p
-                          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+                          className="border border-dashed p-4 text-sm text-muted-foreground"
                           data-state="empty"
                         >
                           This suite judged no metrics.

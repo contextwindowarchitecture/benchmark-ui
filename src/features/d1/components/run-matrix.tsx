@@ -64,10 +64,7 @@ export function MatrixTable({
   )
   if (!first || rows.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         This run has no suites.
       </p>
     )
@@ -201,7 +198,7 @@ function MetricsCell({
   return (
     <Link
       to={`/d1/runs/${runId}/suites/${suite}?adapter=${adapter}`}
-      className="flex flex-col gap-1 rounded-sm underline-offset-3 hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="flex flex-col gap-1 underline-offset-3 hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
       aria-label={`${suite} ${adapter}: ${tally.total} metrics, ${parts.join(", ")}`}
     >
       <StatusBadge status={tally.status} />
@@ -233,7 +230,7 @@ function Cell({
   return (
     <Link
       to={`/d1/runs/${runId}/suites/${suite}?adapter=${entry.adapter}`}
-      className="flex flex-col gap-1 rounded-sm underline-offset-3 hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="flex flex-col gap-1 underline-offset-3 hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
       aria-label={`${suite} ${entry.adapter}: ${label}`}
     >
       <StatusBadge status={entry.status} />

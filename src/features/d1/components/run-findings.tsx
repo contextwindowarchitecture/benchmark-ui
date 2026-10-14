@@ -147,7 +147,7 @@ export function RunFindings({ runId, summary, findingsFile }: RunFindingsProps) 
               ) : null}
               {data.rows.length === 0 ? (
                 <p
-                  className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+                  className="border border-dashed p-4 text-sm text-muted-foreground"
                   data-state="empty"
                 >
                   findings.jsonl is empty.

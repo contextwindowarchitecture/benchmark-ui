@@ -36,10 +36,7 @@ export function S4Relations({ runId, suite, summary }: SuitePanelProps) {
         ])}
       />
       {relations.length === 0 ? (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This run's S4 summary judges no relation metric.
         </p>
       ) : (

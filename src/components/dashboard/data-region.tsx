@@ -121,10 +121,7 @@ export function DataRegion<T>({ state, label, skeleton, children }: DataRegionPr
       )
     case "empty":
       return (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           {state.message}
         </p>
       )

@@ -88,10 +88,7 @@ export function S1Conformance({ runId, suite, summary, index }: SuitePanelProps)
       {results ? (
         <CaseTable runId={runId} suite={suite} file={results} summary={summary} />
       ) : (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This run has no S1 results file.
         </p>
       )}

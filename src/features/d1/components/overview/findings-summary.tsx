@@ -36,7 +36,7 @@ export function FindingsSummary({
   if (totals.total === 0) {
     return (
       <div
-        className="flex items-start gap-3 rounded-lg border p-4"
+        className="flex items-start gap-3 border p-4"
         data-state="none"
         data-findings-run={runId}
       >
@@ -55,7 +55,7 @@ export function FindingsSummary({
     ? countBySeverity(rows.data.rows.map((row) => row.document))
     : null
   return (
-    <div className="space-y-2 rounded-lg border p-4 text-sm" data-findings-run={runId}>
+    <div className="space-y-2 border p-4 text-sm" data-findings-run={runId}>
       <p className="font-medium">
         {formatCount(totals.total)} {totals.total === 1 ? "finding" : "findings"} in the {label} run
       </p>

@@ -251,7 +251,7 @@ export function SweepViewer({ runId, summary, frames, runIndex }: SweepViewerPro
       </div>
 
       <dl
-        className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-md border p-3 text-sm sm:grid-cols-4 lg:grid-cols-8"
+        className="grid grid-cols-2 gap-x-6 gap-y-2 border p-3 text-sm sm:grid-cols-4 lg:grid-cols-8"
         data-counters
       >
         <Counter label="Budget" value={point ? formatCount(point.budget) : "—"} />

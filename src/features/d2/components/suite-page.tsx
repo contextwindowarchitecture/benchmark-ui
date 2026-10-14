@@ -306,10 +306,7 @@ function SuiteMetrics({ suite, metrics }: { suite: string; metrics: D2Metric[] }
   if (gate.length === 0 && tables.length === 0) {
     return (
       <PageSection title="Metrics" id="metrics">
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This suite measured no metrics in this run.
         </p>
       </PageSection>
@@ -422,10 +419,7 @@ function SuiteRowsSection({
           <D2SuiteRows key={file.path} runId={runId} suite={suite} file={file} />
         </div>
       ) : (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This suite wrote no row file this viewer reads.
         </p>
       )}

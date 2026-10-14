@@ -110,7 +110,7 @@ function Overview({ index, pin }: { index: D5RunsIndexV1; pin: string | undefine
         </div>
         <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2" data-kinds>
           {KINDS_OF_CLAIM.map((kind) => (
-            <li key={kind.id} className="rounded-lg border p-4 text-sm">
+            <li key={kind.id} className="border p-4 text-sm">
               <h3 className="font-medium">{kind.title}</h3>
               <p className="mt-1 text-muted-foreground">{kind.text}</p>
             </li>
@@ -128,7 +128,7 @@ function Overview({ index, pin }: { index: D5RunsIndexV1; pin: string | undefine
       >
         <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2" data-conclusions>
           {CONCLUSIONS.map((note) => (
-            <li key={note.id} className="rounded-lg border p-4 text-sm">
+            <li key={note.id} className="border p-4 text-sm">
               <h3 className="font-medium">{note.title}</h3>
               <p className="mt-1 text-muted-foreground">{note.text}</p>
             </li>

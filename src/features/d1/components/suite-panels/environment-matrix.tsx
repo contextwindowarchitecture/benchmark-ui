@@ -47,10 +47,7 @@ export function EnvironmentMatrix({
   const { rows, adapters } = environmentMatrix(cells)
   if (rows.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         No cells were run.
       </p>
     )

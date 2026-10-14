@@ -41,7 +41,7 @@ export function PreviewBanner() {
         type="button"
         onClick={dismiss}
         aria-label="Dismiss notice"
-        className="-my-1 flex size-8 shrink-0 items-center justify-center rounded-md outline-none hover:bg-notice-foreground/10 focus-visible:ring-2 focus-visible:ring-notice-foreground"
+        className="-my-1 flex size-8 shrink-0 items-center justify-center outline-none hover:bg-notice-foreground/10 focus-visible:ring-2 focus-visible:ring-notice-foreground"
       >
         <X aria-hidden="true" className="size-4" />
       </button>

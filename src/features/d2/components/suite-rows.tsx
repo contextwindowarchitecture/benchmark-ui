@@ -87,7 +87,7 @@ export function D2SuiteRows({
 
   if (!opened && !tooBig) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-4 text-sm">
+      <div className="flex flex-wrap items-center gap-3 border border-dashed p-4 text-sm">
         <span>{rowsText}, loaded on request.</span>
         <Button variant="outline" size="sm" onClick={() => setOpened(true)}>
           Load the rows
@@ -260,15 +260,12 @@ export function D2SuiteRows({
       {!page && pending ? (
         <Skeleton className="h-64 w-full" aria-label="Loading a page of rows" />
       ) : page && page.total === 0 ? (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           {file.path} has no rows.
         </p>
       ) : page && page.matched === 0 ? (
         <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+          className="border border-dashed p-4 text-sm text-muted-foreground"
           data-state="no-results"
         >
           No rows match these filters.

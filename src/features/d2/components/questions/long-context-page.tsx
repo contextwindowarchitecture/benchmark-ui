@@ -214,10 +214,7 @@ function SizePanel({
         options={QUESTION_OPTIONS}
       />
       {series.length === 0 ? (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           S4's summary has no tally for these questions in this run.
         </p>
       ) : (

@@ -116,7 +116,7 @@ export function SuiteRows({ runId, suite, kind, file, autoOpen = false }: SuiteR
 
   if (!opened && !tooBig) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-4 text-sm">
+      <div className="flex flex-wrap items-center gap-3 border border-dashed p-4 text-sm">
         <span>
           {rowsText} of <span className="font-mono">{kind}</span>, loaded on request.
         </span>
@@ -304,15 +304,12 @@ export function SuiteRows({ runId, suite, kind, file, autoOpen = false }: SuiteR
       {!page && pending ? (
         <Skeleton className="h-64 w-full" aria-label="Loading a page of rows" />
       ) : page && page.total === 0 ? (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           {file.path} has no rows.
         </p>
       ) : page && page.matched === 0 ? (
         <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+          className="border border-dashed p-4 text-sm text-muted-foreground"
           data-state="no-results"
         >
           No rows match these filters.

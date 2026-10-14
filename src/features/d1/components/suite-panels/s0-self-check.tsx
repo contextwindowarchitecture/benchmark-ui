@@ -85,7 +85,7 @@ export function S0SelfCheck({ runId, suite, summary }: SuitePanelProps) {
                         <TableCell className="min-w-40">
                           <div className="flex items-center gap-2">
                             <div
-                              className="h-1.5 flex-1 overflow-hidden rounded-sm bg-muted"
+                              className="h-1.5 flex-1 overflow-hidden bg-muted"
                               aria-hidden="true"
                             >
                               <div
@@ -151,10 +151,7 @@ export function S0SelfCheck({ runId, suite, summary }: SuitePanelProps) {
           </div>
         </div>
       ) : (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This run's S0 summary has no mutation block.
         </p>
       )}

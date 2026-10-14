@@ -68,7 +68,7 @@ export function ComparePage() {
         {(doc) =>
           !from || !to ? (
             <p
-              className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+              className="border border-dashed p-4 text-sm text-muted-foreground"
               data-state="empty"
             >
               Pick two runs above, or come from a run page's drift section, which compares a run
@@ -76,7 +76,7 @@ export function ComparePage() {
             </p>
           ) : from === to ? (
             <p
-              className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+              className="border border-dashed p-4 text-sm text-muted-foreground"
               data-state="empty"
             >
               Pick two different runs: <span className="font-mono">{from}</span> is both sides.

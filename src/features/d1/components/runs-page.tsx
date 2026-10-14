@@ -128,7 +128,7 @@ export function RunsPage() {
           if (document.runs.length === 0) {
             return (
               <p
-                className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground"
+                className="border border-dashed p-6 text-sm text-muted-foreground"
                 data-state="empty"
               >
                 No runs yet. The index is there but lists nothing; a run appears once the harness
@@ -150,7 +150,7 @@ export function RunsPage() {
               </p>
               {shown.length === 0 ? (
                 <p
-                  className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground"
+                  className="border border-dashed p-6 text-sm text-muted-foreground"
                   data-state="no-results"
                 >
                   No runs match these filters.

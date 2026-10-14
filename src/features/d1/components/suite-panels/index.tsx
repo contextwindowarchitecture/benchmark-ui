@@ -9,10 +9,7 @@ export function SuitePanel(props: SuitePanelProps) {
   if (!Panel) {
     return (
       <PageSection title="Suite panel" id="panel">
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This viewer has no dedicated panel for {props.suite}; its metrics and rows are above and
           below.
         </p>

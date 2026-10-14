@@ -31,7 +31,7 @@ export function DiagramFrame({
   return (
     <figure
       id={id}
-      className="grid grid-cols-[minmax(0,1fr)] gap-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+      className="grid grid-cols-[minmax(0,1fr)] gap-4 bg-card p-4 ring-1 ring-foreground/10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
       aria-labelledby={`${id}-caption`}
       data-diagram={id}
     >

@@ -88,7 +88,7 @@ export function BlobView({
     )
   }
   return (
-    <details open={open} className="group rounded-lg border" data-blob="ready">
+    <details open={open} className="group border" data-blob="ready">
       <summary className="cursor-pointer px-3 py-2 text-sm">
         <span className="font-medium">{label}</span>
         <span className="ml-2 text-xs text-muted-foreground">

@@ -210,10 +210,7 @@ function ValuesPanel({
   const chosen = family && families.includes(family) ? family : families[0]
   if (!tier || !chosen) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         S2's summary breaks no arm's answers down by family in this run.
       </p>
     )

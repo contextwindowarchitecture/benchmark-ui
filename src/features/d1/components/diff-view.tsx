@@ -42,7 +42,7 @@ export function DiffView({
         tabIndex={0}
         role="region"
         aria-label={`Diff of ${afterLabel} against ${beforeLabel}`}
-        className="max-h-96 overflow-auto rounded-lg border font-mono text-xs leading-5 whitespace-pre focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+        className="max-h-96 overflow-auto border font-mono text-xs leading-5 whitespace-pre focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
         {diff.lines.map((line, i) => (
           <div

@@ -67,10 +67,7 @@ export function S7Scale({ runId, summary, index }: SuitePanelProps) {
           <TimingLoops scale={scale} />
         </>
       ) : (
-        <p
-          className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-          data-state="empty"
-        >
+        <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
           This run&apos;s summary has no scale block: no threshold searches, timeouts or sweeps to
           show.
         </p>

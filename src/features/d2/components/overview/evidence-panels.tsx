@@ -330,10 +330,7 @@ export function LoopPanel({
   const reference = pairedReference(blocks)
   if (rows.length === 0) {
     return (
-      <p
-        className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-        data-state="empty"
-      >
+      <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
         S6 measured no arm in this run.
       </p>
     )

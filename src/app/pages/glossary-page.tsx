@@ -113,7 +113,7 @@ function Term({ entry }: { entry: GlossaryEntry }) {
       <dt
         id={entry.id}
         tabIndex={-1}
-        className="scroll-mt-20 rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="scroll-mt-20 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <span className="font-medium">{entry.term}</span>
         {entry.also?.length ? (

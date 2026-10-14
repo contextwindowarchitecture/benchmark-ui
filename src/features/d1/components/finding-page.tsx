@@ -316,10 +316,7 @@ function Finding({
             />
           </div>
         ) : (
-          <p
-            className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-            data-state="empty"
-          >
+          <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
             The finding has no reproducer snapshot.
           </p>
         )}
@@ -332,10 +329,7 @@ function Finding({
         {finding.minimized ? (
           <Minimization runId={runId} run={run} finding={finding} blobs={blobs} />
         ) : (
-          <p
-            className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
-            data-state="empty"
-          >
+          <p className="border border-dashed p-4 text-sm text-muted-foreground" data-state="empty">
             The harness did not minimize this finding.
           </p>
         )}
@@ -515,7 +509,7 @@ function DraftFile({
 }) {
   const raw = useRunRaw(runId, file.path, { enabled: file.listed })
   return (
-    <details className="rounded-lg border" data-draft-file={file.name}>
+    <details className="border" data-draft-file={file.name}>
       <summary className="cursor-pointer px-3 py-2 text-sm">
         <span className="font-mono">{file.name}</span>
         {file.schema ? (
