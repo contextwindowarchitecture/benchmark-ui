@@ -98,3 +98,13 @@ export const D5PersistencePage = lazy(() =>
     default: module.PersistencePage,
   })),
 )
+
+export const D5RunPage = lazy(() =>
+  import("@/features/d5/components/run-page").then((module) => ({ default: module.D5RunPage })),
+)
+
+export const D5SuitePage = lazy(() =>
+  import("@/features/d5/components/suite-page").then((module) => ({
+    default: module.D5SuitePage,
+  })),
+)

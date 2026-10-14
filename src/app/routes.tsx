@@ -16,8 +16,6 @@ import { SuitePage } from "@/features/d1/components/suite-page"
 import { SweepsPage } from "@/features/d1/components/sweeps/sweeps-page"
 import { D2RunPage } from "@/features/d2/components/run-page"
 import { D2SuitePage } from "@/features/d2/components/suite-page"
-import { D5RunPage } from "@/features/d5/components/run-page"
-import { D5SuitePage } from "@/features/d5/components/suite-page"
 
 import { AboutPage } from "./pages/about-page"
 import { DomainPage } from "./pages/domain-page"
@@ -37,6 +35,8 @@ import {
   D5ExternalPage,
   D5PastedPage,
   D5PersistencePage,
+  D5RunPage,
+  D5SuitePage,
   OverviewPage,
   PerfPage,
   ViewerPage,
@@ -450,12 +450,20 @@ export const routes: RouteObject[] = [
                     children: [
                       {
                         index: true,
-                        element: <D5RunPage />,
+                        element: (
+                          <Suspense fallback={<PageFallback title="Run" width="wide" />}>
+                            <D5RunPage />
+                          </Suspense>
+                        ),
                         handle: handle({ title: () => "Run" }),
                       },
                       {
                         path: "suites/:suite",
-                        element: <D5SuitePage />,
+                        element: (
+                          <Suspense fallback={<PageFallback title="Suite" width="wide" />}>
+                            <D5SuitePage />
+                          </Suspense>
+                        ),
                         handle: handle({
                           title: (p) => param(p, "suite"),
                           crumb: (p) => ({ label: param(p, "suite") }),

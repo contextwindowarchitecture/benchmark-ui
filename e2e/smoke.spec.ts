@@ -7,6 +7,7 @@ import { expect, test, type Page } from "@playwright/test"
 const NIGHTLY = "20261012T084246Z-c5ce648"
 const FAILING = "20261008T004213Z-e824f1b"
 const D2_NIGHTLY = "20261012T135118Z-f2fee09"
+const D5_RECORDED = "20261013T224806Z-5fc59ba"
 const S7 = "20261012T154357Z-a6bbb5b"
 const SWEEP = "1da5d58f5c90cbd75466c9f99c29167a46109c483d924b4f5cc56b75994ba1a3"
 
@@ -200,9 +201,9 @@ test("the Domain 1 overview, About, a domain page and compare render", async ({ 
   await expect(page.getByRole("region", { name: "Schema kinds table" })).toBeVisible()
   await expectAccessible(page)
 
-  await page.goto("/d5")
+  await page.goto("/d4")
   await expect(
-    page.getByRole("heading", { level: 1, name: /Domain 5 · Instruction hierarchy/ }),
+    page.getByRole("heading", { level: 1, name: /Domain 4 · Computational economics/ }),
   ).toBeVisible()
   await expect(page.getByRole("main").getByText("not started", { exact: true })).toBeVisible()
   await expectAccessible(page)
@@ -258,6 +259,93 @@ test("Domain 2's overview, a run page and a suite page with its rows fit a phone
   await page.getByRole("button", { name: "Load the rows" }).click()
   await expect(page.getByText("12 rows")).toBeVisible()
   await expectFitsThePhone(page)
+})
+
+test("Domain 5's overview, runs, run page and a suite page render accessibly and fit a phone", async ({
+  page,
+}) => {
+  const pages: [string, () => Promise<void>][] = [
+    [
+      "/d5",
+      () => expect(page.getByRole("img", { name: /^Attacks executed per arm/ })).toBeVisible(),
+    ],
+    ["/d5/runs", () => expect(page.getByRole("link", { name: D5_RECORDED })).toBeVisible()],
+    [
+      `/d5/runs/${D5_RECORDED}`,
+      () => expect(page.getByRole("region", { name: "Tasks table" })).toBeVisible(),
+    ],
+    [
+      `/d5/runs/${D5_RECORDED}/suites/S2`,
+      () => expect(page.getByRole("region", { name: "S2 metrics by arm" })).toBeVisible(),
+    ],
+  ]
+  for (const [path, ready] of pages) {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto(path)
+    await ready()
+    await expectNoOverflow(page)
+    await expectAccessible(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.reload()
+    await ready()
+    await expectFitsThePhone(page)
+  }
+})
+
+test("Domain 5's question pages render accessibly and fit a phone", async ({ page }) => {
+  const pages: [string, () => Promise<void>][] = [
+    [
+      "/d5/structure",
+      () =>
+        expect(
+          page.getByRole("region", { name: "Forged structure in the conventional payloads" }),
+        ).toBeVisible(),
+    ],
+    [
+      "/d5/attacks",
+      () =>
+        expect(page.locator("[data-chart=tier-lines] [data-panel=cwa-reinforced]")).toBeVisible(),
+    ],
+    [
+      "/d5/utility",
+      () =>
+        expect(
+          page.getByRole("img", { name: /^Clean tasks answered correctly per arm/ }),
+        ).toBeVisible(),
+    ],
+    [
+      "/d5/adaptive",
+      () =>
+        expect(page.getByRole("img", { name: /^Adaptive attack success per arm/ })).toBeVisible(),
+    ],
+    [
+      "/d5/external",
+      () =>
+        expect(
+          page.getByRole("img", { name: /^LLMail-Inject's emails that succeeded per arm/ }),
+        ).toBeVisible(),
+    ],
+    [
+      "/d5/pasted",
+      () =>
+        expect(page.getByRole("img", { name: /^Pasted attacks executed per arm/ })).toBeVisible(),
+    ],
+    [
+      "/d5/persistence",
+      () => expect(page.locator("[data-chart=tier-lines] [data-panel=chat]")).toBeVisible(),
+    ],
+  ]
+  for (const [path, ready] of pages) {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto(path)
+    await ready()
+    await expectNoOverflow(page)
+    await expectAccessible(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.reload()
+    await ready()
+    await expectFitsThePhone(page)
+  }
 })
 
 test("Domain 2's question pages render accessibly and fit a phone", async ({ page }) => {
