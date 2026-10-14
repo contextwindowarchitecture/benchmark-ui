@@ -6,9 +6,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 
 - Baseline revision: DESIGN.md 1.3
 - Repository: `contextwindowarchitecture/benchmark-ui`, vendoring the benchmark by copy at a pinned commit (the
-  plan's 3.1): `vendor/cwa-bench/` holds each domain's v1 schemas (29 of Domain 1, 27 of Domain 2), fixture runs
-  (Domain 1's three, Domain 2's one) and write-up, and the viability document; the lock
-  `vendor/cwa-bench.lock.json` pins commit `d970fef` of `contextwindowarchitecture/benchmark`. `pnpm vendor
+  plan's 3.1): `vendor/cwa-bench/` holds each domain's v1 schemas (29 of Domain 1, 27 of Domain 2, 28 of Domain 5),
+  fixture runs (Domain 1's three, Domain 2's one, Domain 5's one) and write-up, and the viability document; the lock
+  `vendor/cwa-bench.lock.json` pins commit `18d02ae` of `contextwindowarchitecture/benchmark`. `pnpm vendor
   ../benchmark` re-vendors; `pnpm vendor:check` fails on drift between the lock, the copy and the checkout at the
   locked commit. Never edit a vendored file; move the pin in one commit with the regenerated types.
 - Application type and primary user tasks: a public, read-only results site for the benchmark; the plan's section 1.
@@ -45,13 +45,14 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   (`src/data/source.ts`, DESIGN.md 6.4). Everything under a run id is cached for the session (`staleTime` and `gcTime`
   infinite); the runs index refetches on window focus and on the Refresh action. A 404 is a state (pruned, not in this
   run), never retried. Query keys carry the results root, the domain, the run id and the path. There is one source per
-  domain (`<root>/<domain>/…`); the shell sets the results domain from the path (`/d2…` is Domain 2's, everything else
-  Domain 1's), so every hook, the workers and the run picker read the page's domain.
+  domain (`<root>/<domain>/…`); the shell sets the results domain from the path (`/d2…` is Domain 2's, `/d5…` Domain 5's,
+  everything else Domain 1's), so every hook, the workers and the run picker read the page's domain.
 - Data source and publishing: the client reads `/config.json` (`{ "resultsRoot": "/results" }`) at startup
   (`src/data/config.ts`); a missing or malformed document is a visible error, never a default. In `vite dev` and
-  `vite preview` a plugin (`dev/results-plugin.ts`) serves `/results/d1/` and `/results/d2/` from the benchmark
-  checkout's `domain1/results/d1` and `domain2/results/d2` when they are beside this repository, else from the
-  vendored fixtures, with `VITE_RESULTS_DIR` and `VITE_D2_RESULTS_DIR` overriding them; JSON and JSONL get their
+  `vite preview` a plugin (`dev/results-plugin.ts`) serves `/results/d1/`, `/results/d2/` and `/results/d5/` from
+  the benchmark checkout's `domain1/results/d1`, `domain2/results/d2` and `domain5/results/d5` when they are beside
+  this repository, else from the vendored fixtures, with `VITE_RESULTS_DIR`, `VITE_D2_RESULTS_DIR` and
+  `VITE_D5_RESULTS_DIR` overriding them; JSON and JSONL get their
   media types, misses 404, no listing. Deployed, the same build serves `/results/` from a volume published to by
   `deploy/publish.sh` (`deploy/`, the plan's section 12).
 - Row and file-size budgets (6.4): `src/data/budgets.ts`, from the plan's 5.4: 5,000 rows on the main thread,
@@ -71,9 +72,9 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   (draft 2020-12, `allErrors`, `strict`, `allowUnionTypes`, ajv-formats for `date-time` and `uri`), so nothing is
   compiled in the browser and the deployed Content Security Policy (`script-src 'self'`, no 'unsafe-eval') holds;
   `src/data/validate.ts` only calls them. Each domain's validators are a module of their own: Domain 1's in the main
-  chunk, Domain 2's (about 800 kB) imported on first use by the query functions and the rows worker, so Domain 1's
-  pages never load them; the workers are ES modules so they can. Domain 1's kinds keep their names (`summary`), Domain
-  2's are keyed behind the domain (`d2/summary`, `D2SummaryV1`). The gate is `$schema`, and a kind or major version
+  chunk, Domain 2's (about 800 kB) and Domain 5's imported on first use by the query functions and the rows worker,
+  so Domain 1's pages never load them; the workers are ES modules so they can. Domain 1's kinds keep their names
+  (`summary`), the others are keyed behind the domain (`d2/summary`, `D2SummaryV1`; `d5/summary`, `D5SummaryV1`). The gate is `$schema`, and a kind or major version
   this build does not know renders the unsupported-schema state. `pnpm generate:types` runs
   `scripts/generate-types.mjs` (json-schema-to-typescript 16.0.0, the types) and `scripts/generate-validators.mjs`
   (the validators) into `src/data/schema/generated/`, checked in; CI fails if they are stale.
@@ -108,7 +109,11 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   arm × tier tables on Domain 2's suite pages hold every per-arm metric with its fraction and interval.
   From UI-D2c, Domain 2's question pages (variable tracking, instruction persistence, long context, cost) reuse the
   arm plot and the small multiples (the latter also over a conversation's turn count, still on a log scale) with
-  shares from the summaries' typed tallies, each with its table; no new chart.
+  shares from the summaries' typed tallies, each with its table; no new chart. From UI-D5, Domain 5's pages reuse
+  both again: its twenty-five arms in the same three groups under its own words (upper bounds become baselines and
+  conventional defences, `src/features/shared/vocabulary.ts`), rates with the harness's intervals, the small
+  multiples over its tiers (attack families, document length, position, turns) and the controlled pairs as tables;
+  no new chart.
 - Locale, currencies, timezone, and date-range semantics: the browser's locale for numbers (grouped thousands, one
   decimal for ms, s and bytes, two for exponents); UTC for every time, written `2026-10-08 13:34:53 UTC`, with the
   ISO form in `<time dateTime>`; no currencies; no date ranges (runs are picked by id). All through
@@ -134,8 +139,10 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   than scrolling inside the frame. The shedding viewer shows one panel at a time below 1024 px (the URL's `view`
   picks it), the curve beside the items or the lanes above. The Playwright smoke test opens the home page, the
   Domain 1 overview, the S2 suite page, coverage, the shedding viewer in two views, the sweeps list, performance,
-  and Domain 2's overview, a run page, a suite page with its rows loaded and its four question pages at 375 px, and the home page, both
-  overviews, a run page, the viewer and performance at 320 px, and fails if the page scrolls sideways or anything
+  Domain 2's overview, a run page, a suite page with its rows loaded and its four question pages, and Domain 5's
+  overview, runs list, a run page, a suite page and its seven question pages at 375 px, and the home page (loaded,
+  and while Domains 2 and 5's runs indexes are held), both overviews, a run page, the viewer and performance at
+  320 px, and fails if the page scrolls sideways or anything
   outside a table region reaches past the screen's edge. The automated runs are Chromium only.
 - Accessibility checks and manual test coverage: a skip link, one `main` (the generated `SidebarInset`), named
   navigation regions, every table in a labelled, focusable scroll region (`TableRegion`: the generated Table's own
@@ -152,8 +159,8 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   the frame's counters as text and its value text on the slider, no play button under reduced motion and the last
   frame first. The item strip and each scaling panel are `img`s named by a sentence that carries their values,
   with a table of every item or fit. The Playwright smoke test runs axe (WCAG 2.0, 2.1 and 2.2 A and AA) on every
-  route: home, About, the glossary, a missing page, both domains' overviews, runs lists, run pages and a suite page
-  each, the explorer, coverage, the findings list and a finding, a pruned run, compare, a not-started domain, the
+  route: home, About, the glossary, a missing page, the three domains' overviews, runs lists, run pages and a suite
+  page each, Domain 2's and Domain 5's question pages, the explorer, coverage, the findings list and a finding, a pruned run, compare, a not-started domain, the
   sweeps list, the viewer in each view, S7's suite page with its grid, and performance; and on eleven pages of
   every kind again in the dark theme. It plays a sweep to its last frame and steps it from the keyboard, scrolls a
   coverage matrix from the keyboard, opens the run picker and chooses a run with the keyboard alone, checks the
@@ -163,10 +170,11 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
 - Performance budgets and measurement method (set and measured at UI-P6):
   - Bundle, gzipped, checked by `pnpm budgets` (`scripts/check-budgets.mjs`) over a production build, in CI after
     the build: the initial load's JavaScript (the entry and the modules it preloads: React, the router, the shell,
-    Domain 1's validators) 400 kB, measured 377 kB (380 kB at UI-D2c); its stylesheet 20 kB, measured 15 kB; each lazy page or shared
-    chunk 40 kB (the largest, the shared chunk with GSAP, 28 kB); each domain's validators 100 kB (83 kB); each
-    worker 120 kB (94 kB). The overviews, the walk, the viewer, performance and Domain 2's question pages (2 to 3 kB
-    each, with an 8 kB chunk they share with the overview) load on first visit, so the dashboard pages carry
+    Domain 1's validators) 400 kB, measured 377 kB (380 kB at UI-D2c, 394 kB at UI-D5, with Domain 5's run and
+    suite pages lazy); its stylesheet 20 kB, measured 15 kB; each lazy page or shared
+    chunk 40 kB (the largest, the shared chunk with GSAP, 28 kB); each domain's validators 100 kB (Domain 2's 83 kB, Domain 5's 56 kB); each
+    worker 120 kB (94 kB). The overviews, the walk, the viewer, performance and Domain 2's and Domain 5's question
+    pages (2 to 3 kB each, with an 8 kB chunk they share with the overview) load on first visit, so the dashboard pages carry
     neither D3 nor GSAP.
   - Rendering and interaction, checked by `pnpm test:perf` (Playwright over the production build and the results
     beside this repository; the checks that need the real S7 run skip without it), each time taken in the page
@@ -249,6 +257,21 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
     them take their metric from a paper Domain 2 does not run (RULER, LongBench v2): the label names the metric
     only, and the page's first section names the viability document's row, links the paper, says Domain 2 runs
     neither, and says how it measures the metric instead.
+  - Domain 5's overview and question pages (`/d5/structure`, `/d5/attacks`, `/d5/utility`, `/d5/adaptive`,
+    `/d5/external`, `/d5/pasted`, `/d5/persistence`) read Domain 2's composite, shared
+    (`src/features/shared/model/composite.ts`, `shared/evidence/`), which now prefers, per suite, a finished run
+    outside a CI profile at the recorded size, then any outside a profile, then the newest. The size comes from the
+    runs index (`size`, the plan's ask 17, every domain since the pin at `18d02ae`), so a pilot run made after the
+    recorded one never takes a panel; a run whose index entry has no size counts as not recorded.
+  - The harness files S5's rates under suite "S2" (the plan's ask 22): Domain 5's metrics are filed by their id's
+    prefix (`suiteOfMetric`), one function. Its paired comparisons name their arms `b vs a` (ask 21), read by
+    `pairOf`, and its "points" are differences of fractions where Domain 2's are out of a hundred; the domain's
+    vocabulary formats each. Every Domain 5 interval is labelled with what the suite resamples (task instances, SEP
+    cases and LLMail-Inject's teams, conversations), since the bootstrap block records Domain 2's method name for
+    every domain (ask 23).
+  - Domain 5's rows are not browsed: its suite pages list each row file with its rows and a download, and the typed
+    summaries stand in for them. The extraction page (S6's extractors and the state they write) and the attack
+    breakdowns by family and carrier wait for the harness to type them (ask 20); the panels say so.
   - S7's `scale` block and the perf summary's `policy` and `series` are typed since the pin at `73c4757` (the
     plan's section 14, ask 18) and read: the sweeps list, the threshold searches, the timeouts and the cells the
     generator cannot build come from the summary without opening a sweep file, and a fit's points are the cells
@@ -285,7 +308,8 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   - The URL's run ids are validated with Zod; a malformed id falls back to the index's choice without a notice, a
     well-formed id the index does not list gets one.
   - No `docs/adr/` entry yet; none of the above changes DESIGN.md's rules.
-- Adoption/migration plan: greenfield; the plan's section 15. Every phase, UI-P0 to UI-P6 and UI-D2 (with UI-D2c's question pages), is built; the
+- Adoption/migration plan: greenfield; the plan's section 15. Every phase, UI-P0 to UI-P6, UI-D2 (with UI-D2c's question pages) and
+  UI-D5, is built; the
   site serves at its host with cert-manager's certificate (`deploy/README.md`).
 
 ## Definition of done (DESIGN.md 14), as checked at UI-P6

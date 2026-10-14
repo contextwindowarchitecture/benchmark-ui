@@ -15,12 +15,14 @@ checked out beside this repository as `../benchmark`.
 | `docs/plans/ui-plan.md` | The working plan: readers, the as-built data contract, pages, the shedding viewer, deployment, phases, decisions. Git-ignored: read and update it, never commit it |
 | `docs/design/project-profile.md` | The project profile DESIGN.md section 15 asks for: the versions, the preset, the budgets, the test commands and the exceptions |
 | `vendor/cwa-bench/` | Each domain's schemas, fixture runs and write-up, and the viability document, copied at the commit `vendor/cwa-bench.lock.json` pins by `scripts/vendor-benchmark.mjs` |
-| `src/data/schema/generated/` | Types and validators generated from the vendored schemas by `scripts/generate-types.mjs` and `generate-validators.mjs` (Domain 2's under `d2/`, loaded on first use); regenerate, never edit |
+| `src/data/schema/generated/` | Types and validators generated from the vendored schemas by `scripts/generate-types.mjs` and `generate-validators.mjs` (Domain 2's under `d2/`, Domain 5's under `d5/`, each loaded on first use); regenerate, never edit |
 | `src/data/` | The data layer: `config.ts` (the runtime `/config.json`), `source.ts` (the `ResultsSource`, one per domain), `validate.ts` (the schema gate over both producers), `kinds.ts` (a kind in a domain), `queries.ts` (TanStack Query; the route's domain picks the source), `row-store.ts`, `row-kinds.ts`, `rows.worker.ts` and `use-rows.ts` (rows filtered and paged, in the worker above the row budget), `use-blobs.ts` (blobs by digest through the index) |
 | `src/components/` | `ui/` (generated shadcn primitives, kept as generated), `layout/` (the shell, which sets the results domain from the path), `dashboard/` (page contract, states, badges), `charts/` (the shedding curve, the item strip, the scaling plots, the arm plot and the corpus-size small multiples: D3 geometry, React SVG) |
-| `src/content/` | The reviewed words of the narrative pages (what CWA is, the claims, the limits, the defects, the planes' and stages' words, Domain 2's arms, families, suites and question pages in `d2/`, the glossary), each file citing the benchmark commit the vendor lock pins; a test fails when the pin moves until the content is re-read |
+| `src/content/` | The reviewed words of the narrative pages (what CWA is, the claims, the limits, the defects, the planes' and stages' words, Domain 2's arms, families, suites and question pages in `d2/`, Domain 5's arms, families, suites, question pages and trust notes in `d5/`, the glossary), each file citing the benchmark commit the vendor lock pins; a test fails when the pin moves until the content is re-read |
 | `src/features/d1/` | Domain 1: `model/` (pure selectors, the row kinds, the composite, the curve, a sweep's frames, S7's scale block, the performance fits, the comparison) and `components/` (the runs list and the run frame both domains share, the run page, the suite page and its `suite-panels/`, coverage, the findings pages, the answer explorer, `sweeps/` with the sweeps list and the shedding viewer, `perf/`, `overview/` with the Domain 1 overview, `diagrams/`, the pipeline walk, compare) |
-| `src/features/d2/` | Domain 2: `model/` (metrics by arm and tier, the per-suite composite, the row kinds, the overview's and the question pages' selectors) and `components/` (the run page, the suite page with its arm × tier tables and rows, `evidence/` with the composite's run reading both the overview and the question pages share, `overview/` with the Domain 2 overview, `questions/` with the pages for the viability document's metrics: variable tracking (RULER), instruction persistence, long context (LongBench v2) and cost) |
+| `src/features/shared/` | What Domains 2 and 5 share: `model/composite.ts` (each suite's run: recorded size, outside a CI profile, newest), `evidence/` (the composite's reading of the runs, its notices and suite panels, the sources table, the question page frame) and `vocabulary.ts` (each domain's arm groups, tiers, suites and interval words, by the route's domain) |
+| `src/features/d2/` | Domain 2: `model/` (metrics by arm and tier, the row kinds, the overview's and the question pages' selectors) and `components/` (the run page, the suite page with its arm × tier tables and rows, `evidence/` with Domain 2's use of the shared evidence, `overview/` with the Domain 2 overview, `questions/` with the pages for the viability document's metrics: variable tracking (RULER), instruction persistence, long context (LongBench v2) and cost) |
+| `src/features/d5/` | Domain 5: `model/` (metrics by arm, tier and pair, its tiers, the suite's selectors, the overview's) and `components/` (the run page, the suite page with its gate, budget, goldens, metric tables and row files, `panels.tsx`, `overview/` with the Domain 5 overview and its trust notes, `questions/` with the pages for structural isolation, attacks, utility, the adaptive attacker, external attacks, pasted material and persistence) |
 | `src/lib/motion.ts` | The one place GSAP is registered; only lazily loaded modules (the overview, the walk, the shedding viewer) import it |
 | `dev/` | The Vite plugin that serves a results tree and `config.json` in `vite dev` and `vite preview` |
 | `e2e/` | The Playwright smoke test over `vite preview` and the fixtures |
@@ -31,7 +33,8 @@ and the run page), UI-P1 (the deployment; the site serves at benchmark.contextwi
 pages, the rows worker), UI-P3 (coverage, findings, the answer explorer), UI-P4 (S7: the scale grid, the sweeps list,
 the shedding viewer and the performance page), UI-P5 (the narrative layer: home, About, the Domain 1 overview, the
 domain pages, the diagrams, the pipeline walk, compare), UI-D2 (Domain 2: its overview, runs, run and suite pages,
-over the same shell and data layer; UI-D2c added its question pages) and UI-P6 (the budgets set and measured, the accessibility and visual passes).
+over the same shell and data layer; UI-D2c added its question pages), UI-D5 (Domain 5: its overview, question pages,
+runs, run and suite pages, over Domain 2's composite and charts, shared) and UI-P6 (the budgets set and measured, the accessibility and visual passes).
 The profile's last section checks DESIGN.md 14 and names what was not run.
 
 ## Working on it
@@ -78,7 +81,7 @@ pnpm vendor ../benchmark && pnpm generate:types # move the pin: one commit with 
 - Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
   `<type>(<scope>): <summary>`, imperative mood, summary under about 72 characters, a body that explains why.
   - Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`.
-  - Scopes, as the change fits: `shell`, `data`, `d1`, `d2`, `charts`, `viewer`, `vendor`, `deploy`, `ci`, `deps`,
+  - Scopes, as the change fits: `shell`, `data`, `d1`, `d2`, `d5`, `charts`, `viewer`, `vendor`, `deploy`, `ci`, `deps`,
     `design`.
   - Breaking changes (a URL or configuration change existing links or deployments depend on): `!` after the scope,
     plus a `BREAKING CHANGE:` footer.

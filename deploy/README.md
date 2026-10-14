@@ -23,7 +23,7 @@ podman run --rm -p 8080:8080 -v ../benchmark/domain1/results:/data/results:ro,Z 
 
 The same image, the same configuration, with the results directory bind-mounted where the cluster mounts the volume.
 `http://localhost:8080/results/d1/index.json` must answer, and the site must render from it. The mount holds one
-directory per domain (`d1`, `d2`); to see Domain 2 locally, mount a directory that holds both.
+directory per domain (`d1`, `d2`, `d5`); to see Domains 2 and 5 locally, mount a directory that holds them all.
 
 The smoke test and the performance budgets run against the container as they do against `vite preview`: mount the
 fixture runs for the smoke test and the real results for the budgets, and point Playwright at the container.
@@ -32,11 +32,13 @@ fixture runs for the smoke test and the real results for the budgets, and point 
 podman run -d --name bui-fixtures -p 8081:8080 \
   -v "$PWD/vendor/cwa-bench/domain1/fixtures/runs:/data/results/d1:ro,Z" \
   -v "$PWD/vendor/cwa-bench/domain2/fixtures/runs:/data/results/d2:ro,Z" \
+  -v "$PWD/vendor/cwa-bench/domain5/fixtures/runs:/data/results/d5:ro,Z" \
   quay.io/contextwindowarchitecture/benchmark-ui:dev
 PLAYWRIGHT_BASE_URL=http://localhost:8081 pnpm test:e2e
 podman run -d --name bui-real -p 8082:8080 \
   -v "$(cd ../benchmark/domain1/results/d1 && pwd):/data/results/d1:ro,Z" \
   -v "$(cd ../benchmark/domain2/results/d2 && pwd):/data/results/d2:ro,Z" \
+  -v "$(cd ../benchmark/domain5/results/d5 && pwd):/data/results/d5:ro,Z" \
   quay.io/contextwindowarchitecture/benchmark-ui:dev
 PLAYWRIGHT_BASE_URL=http://localhost:8082 pnpm test:perf
 podman rm -f bui-fixtures bui-real
@@ -125,27 +127,39 @@ The claim's storage class reclaims with `Delete`: deleting the `benchmark-result
 run on it, and the next `oc apply` creates an empty one. After that, publish the runs `keep.txt` names again, each
 domain on its own.
 
-Each domain is published on its own, with its own results root and index; the site reads `results/d1/` and
-`results/d2/`. Domain 2's reported runs are made on the GPU host, so copy the run directories and `index.json` from
-its `domain2/results/d2/` to a local directory first, then publish every run its index lists that the site should
-show (an index names runs the volume may not hold, and those show as pruned):
+Each domain is published on its own, with its own results root and index; the site reads `results/d1/`,
+`results/d2/` and `results/d5/`. Domains 2 and 5's reported runs are made on the GPU host, so copy the run
+directories and `index.json` from its `domain2/results/d2/` or `domain5/results/d5/` to a local directory first, then
+publish every run its index lists that the site should show (an index names runs the volume may not hold, and those
+show as pruned):
 
 ```sh
 deploy/publish.sh <local copy of domain2/results> d2 20261012T052348Z-4a0ea5d 20261012T042632Z-4a0ea5d
+deploy/publish.sh <local copy of domain5/results> d5 20261013T224806Z-5fc59ba
 ```
 
-The Domain 2 overview reads each suite from the newest finished run outside a CI profile that has it, and a CI
-profile's run only for a suite no such run has. So the recorded run, and the S6 run the write-up reports beside it,
-must be on the volume for the overview to show the write-up's results, and the S6 run must be older than the
-recorded run, so the overview takes only S6 from it. The overview chooses from the index and reads past a run the
-volume no longer holds, saying which run stands in for it; still, when a reported run is left off the volume on
-purpose (a pilot of every suite made after the recorded run would otherwise be the one passed over on every visit),
-rebuild the index over the local copy that holds only the runs to publish, with the harness's own writer, and
-publish that index, so the site lists what it holds:
+The Domain 2 and Domain 5 overviews and question pages read each suite from the newest finished run outside a CI
+profile at the recorded size that has it, then the newest outside a profile, and a CI profile's run only for a suite
+no such run has. The size is each run's `size` in the runs index, so a pilot made after the recorded run never takes
+a panel, but only from an index the harness wrote since it gained the field: rebuild an older index before
+publishing it, with the harness's own command, which fills the field from each run's manifest or, for an older run,
+its own record of it:
 
 ```sh
-cd ../benchmark/domain2 && uv run python -c "from pathlib import Path; from cwabench.rundir import update_runs_index; \
-  from cwabench2 import output; update_runs_index(Path('results/d2'), domain=output.D2)"
+cd ../benchmark/domain2 && uv run cwabench --domain 2 index
+cd ../benchmark/domain5 && uv run cwabench --domain 5 index
+```
+
+So the recorded run, and the S6 run Domain 2's write-up reports beside it, must be on the volume for the overview to
+show the write-up's results, and the S6 run must be older than the recorded run, so the overview takes only S6 from
+it. The overview reads past a run the volume no longer holds, saying which run stands in for it; still, when a
+reported run is left off the volume on purpose, rebuild the index over the local copy that holds only the runs to
+publish, with the harness's own writer (the command reads its results directory from the configuration, so call it
+directly), and publish that index, so the site lists what it holds:
+
+```sh
+cd ../benchmark/domain5 && uv run python -c "from pathlib import Path; from cwabench.rundir import rebuild_runs_index; \
+  from cwabench5 import output; rebuild_runs_index(Path('<local copy of domain5/results>/d5'), output.D5)"
 ```
 
 Add the runs the write-up cites to `keep.txt`.
