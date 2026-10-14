@@ -1,5 +1,6 @@
 // A fetch over the vendored fixture runs, for tests: `${root}/d1/<path>` reads
-// vendor/cwa-bench/domain1/fixtures/runs/<path> from disk and `${root}/d2/<path>` Domain 2's,
+// vendor/cwa-bench/domain1/fixtures/runs/<path> from disk, `${root}/d2/<path>` Domain 2's and
+// `${root}/d5/<path>` Domain 5's,
 // 404s when it is not there, and streams JSONL files so the line parser is exercised the way a
 // browser exercises it.
 
@@ -18,6 +19,11 @@ export const D2_FIXTURES_DIR = resolve(
   "../../vendor/cwa-bench/domain2/fixtures/runs",
 )
 
+export const D5_FIXTURES_DIR = resolve(
+  import.meta.dirname,
+  "../../vendor/cwa-bench/domain5/fixtures/runs",
+)
+
 export const FIXTURE_ROOT = "/results"
 
 export const FIXTURE_RUNS = {
@@ -31,12 +37,19 @@ export const D2_FIXTURE_RUNS = {
   nightly: "20261012T135118Z-f2fee09",
 } as const
 
+/** Domain 5's fixture: the recorded run of every suite, its rows trimmed by `cwabench fixture`. */
+export const D5_FIXTURE_RUNS = {
+  recorded: "20261013T224806Z-5fc59ba",
+} as const
+
 export type FixtureFetchOptions = {
   root?: string
   /** Domain 1's runs directory; the vendored fixtures by default. */
   dir?: string
   /** Domain 2's runs directory; the vendored fixture by default. */
   d2Dir?: string
+  /** Domain 5's runs directory; the vendored fixture by default. */
+  d5Dir?: string
   /** Paths (relative to the results root) to answer with a given status, for failure states. */
   overrides?: Record<string, { status: number; body?: string; contentType?: string }>
   /** Called with every request, for assertions on what a page fetched. */
@@ -48,6 +61,7 @@ export function fixtureFetch(options: FixtureFetchOptions = {}): typeof fetch {
   const dirs = [
     { prefix: `${root}/d1/`, dir: options.dir ?? FIXTURES_DIR },
     { prefix: `${root}/d2/`, dir: options.d2Dir ?? D2_FIXTURES_DIR },
+    { prefix: `${root}/d5/`, dir: options.d5Dir ?? D5_FIXTURES_DIR },
   ]
   return async (input, init) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url

@@ -133,7 +133,7 @@ export const LONG_CONTEXT: QuestionWords = {
     text: [
       "The whole corpus degrades as it grows, and truncation loses the answer.",
       "The first CWA arms trailed retrieval although every chunk an answer needed was in their payloads. The cause was order: the specification renders a placement's items in id order, and these arms gave each chunk its corpus id, so their evidence read in document order. cwa-ranked, the same evidence with each id led by the retriever's rank, matched retrieval.",
-      "So under CWA the order evidence reads in is the application's to choose, through the ids it gives. Letting a route render in the order the slot already ranks by would remove the trap: a question for the specification, not yet raised there.",
+      "So under CWA the order evidence reads in is the application's to choose, through the ids it gives. Letting a route render in the order the slot already ranks by would remove the trap; that change is proposed to the specification as CEP-0002, render a slot in its rank order, and is open for discussion.",
     ],
     citation: { file: DOMAIN_2_WRITE_UP, section: "Long context (S4)" },
   },

@@ -1,0 +1,517 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cwa-bench-d5:suite-summary:v1",
+  "title": "Suite summary",
+  "description": "One suite's status, per-adapter tallies and metrics.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "cwa-bench-d5/suite-summary/v1"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{7}(-[0-9]+)?$"
+    },
+    "suite": {
+      "type": "string",
+      "pattern": "^S[0-9]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "partial",
+        "fail",
+        "error"
+      ]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^R-[1-9][0-9]*$"
+      }
+    },
+    "corpora": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "count"
+        ],
+        "additionalProperties": false
+      },
+      "description": "The task families the suite read and how many instances of each"
+    },
+    "adapters": {
+      "type": "array",
+      "description": "The adapters the suite ran, from S1 on; empty when it ran none",
+      "items": {
+        "type": "object",
+        "properties": {
+          "adapter": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "unavailable"
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "adapter",
+          "status",
+          "error"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^S[0-9]+$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "arm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The arm the metric measures (domain-5-plan.md, 7), or null for all"
+          },
+          "family": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The task family, or null for all"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The budget or long-context tier, or null for all"
+          },
+          "unit": {
+            "enum": [
+              "rate",
+              "count",
+              "tokens",
+              "ms",
+              "points"
+            ]
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numerator": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "denominator": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "info",
+              "na"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "interval": {
+            "description": "An interval for the value, when one is computed (S2: a cluster bootstrap over conversations)",
+            "anyOf": [
+              {
+                "$ref": "#/$defs/interval"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "suite",
+          "arm",
+          "family",
+          "tier",
+          "unit",
+          "value",
+          "numerator",
+          "denominator",
+          "target",
+          "status",
+          "description"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "files": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "string",
+          "minLength": 1
+        },
+        "findings": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "results",
+        "findings"
+      ],
+      "additionalProperties": false
+    },
+    "self_check": {
+      "description": "S0: passed and total per check",
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "grader",
+          "attack-grader",
+          "language",
+          "schema",
+          "determinism",
+          "structure",
+          "replay",
+          "probe",
+          "plant",
+          "attack-plant",
+          "structure-oracle",
+          "presence",
+          "external-lock",
+          "external-probe",
+          "external-plant"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "passed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "passed",
+          "total"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "gate": {
+      "description": "S1: the cells and CWA arms that passed the gate (the first 200 failures listed)",
+      "type": "object",
+      "properties": {
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "passed",
+        "total",
+        "failed"
+      ],
+      "additionalProperties": false
+    },
+    "goldens": {
+      "description": "S7: the adopted goldens compared with, and the drift found",
+      "type": "object",
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contract_commit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidates": {
+          "type": "string",
+          "minLength": 1
+        },
+        "drift": {
+          "type": "object",
+          "properties": {
+            "match": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "spec_change": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "regression": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "new": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "removed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "match",
+            "spec_change",
+            "regression",
+            "new",
+            "removed"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "path",
+        "contract_commit",
+        "candidates",
+        "drift"
+      ],
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "description": "S2: the model, its mode, the server that answered, and the call counts"
+    },
+    "by_arm": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "arm": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "arm"
+        ]
+      },
+      "description": "S2: per arm, attack verdicts on the main grid counted by attack family, carrier, position and task family"
+    },
+    "budget": {
+      "type": "object",
+      "description": "S4's budget: queries per arm, the share of each search, and the checkpoints (cwabench5/suites/s4_adaptive.py)",
+      "properties": {
+        "per_arm": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "random": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loop": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "required": [
+        "per_arm",
+        "random",
+        "loop",
+        "checkpoints"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "$schema",
+    "run_id",
+    "suite",
+    "title",
+    "status",
+    "started_at",
+    "finished_at",
+    "requirements",
+    "corpora",
+    "adapters",
+    "metrics",
+    "files"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "interval": {
+      "type": "object",
+      "description": "A percentile interval for a rate or a difference: a seeded cluster bootstrap over conversations or corpora (domain-5-plan.md, 9)",
+      "properties": {
+        "low": {
+          "type": "number"
+        },
+        "high": {
+          "type": "number"
+        },
+        "level": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resamples": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "low",
+        "high",
+        "level",
+        "method",
+        "resamples"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

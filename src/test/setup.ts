@@ -4,9 +4,10 @@ import { afterEach, vi } from "vitest"
 
 import { loadValidators } from "@/data/validate"
 
-// Domain 2's validators load on first use in the app; tests that parse its documents directly
-// (the model tests, fixtureRows) find them loaded.
+// Later domains' validators load on first use in the app; tests that parse their documents
+// directly (the model tests, fixtureRows) find them loaded.
 await loadValidators("d2")
+await loadValidators("d5")
 
 afterEach(() => {
   cleanup()

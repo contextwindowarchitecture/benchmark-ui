@@ -28,7 +28,7 @@ const EXPECTED_REPOSITORY = "contextwindowarchitecture/benchmark"
 // types are generated from, the fixture runs the tests run against, and the write-up; and the
 // viability document. Each source is a git pathspec plus a filter over the paths git lists under
 // it (git's tree listing takes no globs).
-const DOMAINS = ["domain1", "domain2"]
+const DOMAINS = ["domain1", "domain2", "domain5"]
 const SOURCES = [
   ...DOMAINS.flatMap((domain) => [
     {

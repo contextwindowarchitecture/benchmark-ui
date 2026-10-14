@@ -21,6 +21,10 @@ export interface RunsIndexV1 {
     adapters: string[]
     ci_profile?: string | null
     /**
+     * The run's size, from its manifest or, for a run made before manifests recorded it, from the run's own record of it: recorded for a run at the size its domain reports, pilot for a smaller one; null where the domain has no sizes or the run does not say.
+     */
+    size?: ("pilot" | "recorded") | null
+    /**
      * The contract commit and each adapter's commit this run was made from, by role; null where the manifest has none (an unavailable adapter).
      */
     commits?: {

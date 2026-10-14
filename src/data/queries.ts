@@ -76,11 +76,12 @@ async function parseAs<K extends SchemaKind>(json: unknown, kind: K): Promise<Pa
 }
 
 /** The kind of a domain's runs index. */
-export type RunsIndexKind = "runs-index" | "d2/runs-index"
+export type RunsIndexKind = "runs-index" | "d2/runs-index" | "d5/runs-index"
 
 const RUNS_INDEX_KIND = {
   d1: "runs-index",
   d2: "d2/runs-index",
+  d5: "d5/runs-index",
 } as const satisfies Record<ResultsDomain, RunsIndexKind>
 
 /** The query for a domain's runs index, shared by useRunsIndex and useDomainRunsIndex. */

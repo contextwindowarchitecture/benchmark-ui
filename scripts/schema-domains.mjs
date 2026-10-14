@@ -2,7 +2,7 @@
 // where each domain's vendored schemas are, its producer's name, the prefix its type names carry
 // (Domain 1 has none, since its kinds were named before a second domain existed), and any Ajv
 // option a domain's schemas need beside the strict defaults (`ajv`; none today: every schema of
-// both domains compiles under Ajv's full strict mode).
+// every domain compiles under Ajv's full strict mode).
 
 export const SCHEMA_DOMAINS = [
   {
@@ -16,5 +16,11 @@ export const SCHEMA_DOMAINS = [
     producer: "cwa-bench-d2",
     schemas: "vendor/cwa-bench/domain2/schemas",
     prefix: "D2",
+  },
+  {
+    id: "d5",
+    producer: "cwa-bench-d5",
+    schemas: "vendor/cwa-bench/domain5/schemas",
+    prefix: "D5",
   },
 ]

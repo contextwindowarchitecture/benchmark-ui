@@ -210,7 +210,7 @@ describe("the content files", () => {
     expect(QUESTIONS.length).toBeGreaterThan(0)
     expect(new Set(QUESTIONS.map((words) => words.id)).size).toBe(QUESTIONS.length)
     // Names, not values: a suite, a domain, a requirement, the paper's own version.
-    const identifiers = /\b(?:Domain |S|R-)\d+\b|\bLongBench v2\b/g
+    const identifiers = /\b(?:Domain |S|R-|CEP-)\d+\b|\bLongBench v2\b/g
     for (const words of QUESTIONS) {
       for (const file of [words.viability.citation.file, words.writeUp.citation.file]) {
         await expect(

@@ -81,6 +81,10 @@ export interface D2ManifestV1 {
   } | null
   host_suspended_seconds: number
   /**
+   * The run's size: recorded for a run at the size its domain reports, pilot for a smaller one; absent or null where the domain has no sizes.
+   */
+  size?: ("pilot" | "recorded") | null
+  /**
    * Set when the run is one of a CI profile's (cwabench ci): the profile, and where the repositories came from
    */
   ci?: {

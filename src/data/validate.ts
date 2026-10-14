@@ -67,6 +67,7 @@ const loading: { [D in SchemaDomain]?: Promise<void> } = {}
 /** Where each later domain's validators come from: a module of their own, split from the rest. */
 const LOADERS: { [D in Exclude<SchemaDomain, "d1">]: () => Promise<ValidatorTable> } = {
   d2: () => import("./schema/generated/d2/validators-by-kind").then((module) => module.validators),
+  d5: () => import("./schema/generated/d5/validators-by-kind").then((module) => module.validators),
 }
 
 /**

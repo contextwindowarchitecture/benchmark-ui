@@ -56,6 +56,34 @@ import type { D2SummaryV1 } from "./d2/summary.v1"
 import type { D2TimelineV1 } from "./d2/timeline.v1"
 import type { D2TurnRowV1 } from "./d2/turn-row.v1"
 import type { D2UpstreamV1 } from "./d2/upstream.v1"
+import type { D5AttackIndexV1 } from "./d5/attack-index.v1"
+import type { D5BaselineRowV1 } from "./d5/baseline-row.v1"
+import type { D5BlobV1 } from "./d5/blob.v1"
+import type { D5CallRowV1 } from "./d5/call-row.v1"
+import type { D5ChainRowV1 } from "./d5/chain-row.v1"
+import type { D5CiReportV1 } from "./d5/ci-report.v1"
+import type { D5ClaimRowV1 } from "./d5/claim-row.v1"
+import type { D5ContractV1 } from "./d5/contract.v1"
+import type { D5DriftRowV1 } from "./d5/drift-row.v1"
+import type { D5ExternalIndexV1 } from "./d5/external-index.v1"
+import type { D5ExternalLockV1 } from "./d5/external-lock.v1"
+import type { D5ExternalRowV1 } from "./d5/external-row.v1"
+import type { D5FindingV1 } from "./d5/finding.v1"
+import type { D5GateRowV1 } from "./d5/gate-row.v1"
+import type { D5GoldensV1 } from "./d5/goldens.v1"
+import type { D5ManifestV1 } from "./d5/manifest.v1"
+import type { D5ProbeRowV1 } from "./d5/probe-row.v1"
+import type { D5RunIndexV1 } from "./d5/run-index.v1"
+import type { D5RunsIndexV1 } from "./d5/runs-index.v1"
+import type { D5SearchRowV1 } from "./d5/search-row.v1"
+import type { D5SelfCheckV1 } from "./d5/self-check.v1"
+import type { D5StoreRowV1 } from "./d5/store-row.v1"
+import type { D5SuiteSummaryV1 } from "./d5/suite-summary.v1"
+import type { D5SummaryV1 } from "./d5/summary.v1"
+import type { D5TaskIndexV1 } from "./d5/task-index.v1"
+import type { D5TaskV1 } from "./d5/task.v1"
+import type { D5TokenRowV1 } from "./d5/token-row.v1"
+import type { D5UpstreamV1 } from "./d5/upstream.v1"
 
 export type { BlobV1 } from "./blob.v1"
 export type { CiReportV1 } from "./ci-report.v1"
@@ -113,6 +141,34 @@ export type { D2SummaryV1 } from "./d2/summary.v1"
 export type { D2TimelineV1 } from "./d2/timeline.v1"
 export type { D2TurnRowV1 } from "./d2/turn-row.v1"
 export type { D2UpstreamV1 } from "./d2/upstream.v1"
+export type { D5AttackIndexV1 } from "./d5/attack-index.v1"
+export type { D5BaselineRowV1 } from "./d5/baseline-row.v1"
+export type { D5BlobV1 } from "./d5/blob.v1"
+export type { D5CallRowV1 } from "./d5/call-row.v1"
+export type { D5ChainRowV1 } from "./d5/chain-row.v1"
+export type { D5CiReportV1 } from "./d5/ci-report.v1"
+export type { D5ClaimRowV1 } from "./d5/claim-row.v1"
+export type { D5ContractV1 } from "./d5/contract.v1"
+export type { D5DriftRowV1 } from "./d5/drift-row.v1"
+export type { D5ExternalIndexV1 } from "./d5/external-index.v1"
+export type { D5ExternalLockV1 } from "./d5/external-lock.v1"
+export type { D5ExternalRowV1 } from "./d5/external-row.v1"
+export type { D5FindingV1 } from "./d5/finding.v1"
+export type { D5GateRowV1 } from "./d5/gate-row.v1"
+export type { D5GoldensV1 } from "./d5/goldens.v1"
+export type { D5ManifestV1 } from "./d5/manifest.v1"
+export type { D5ProbeRowV1 } from "./d5/probe-row.v1"
+export type { D5RunIndexV1 } from "./d5/run-index.v1"
+export type { D5RunsIndexV1 } from "./d5/runs-index.v1"
+export type { D5SearchRowV1 } from "./d5/search-row.v1"
+export type { D5SelfCheckV1 } from "./d5/self-check.v1"
+export type { D5StoreRowV1 } from "./d5/store-row.v1"
+export type { D5SuiteSummaryV1 } from "./d5/suite-summary.v1"
+export type { D5SummaryV1 } from "./d5/summary.v1"
+export type { D5TaskIndexV1 } from "./d5/task-index.v1"
+export type { D5TaskV1 } from "./d5/task.v1"
+export type { D5TokenRowV1 } from "./d5/token-row.v1"
+export type { D5UpstreamV1 } from "./d5/upstream.v1"
 
 /**
  * Every schema kind this viewer reads: the domain whose producer writes it, the kind as its
@@ -325,6 +381,124 @@ export const schemaKinds = {
   "d2/timeline": { domain: "d2", kind: "timeline", version: 1, id: "urn:cwa-bench-d2:timeline:v1" },
   "d2/turn-row": { domain: "d2", kind: "turn-row", version: 1, id: "urn:cwa-bench-d2:turn-row:v1" },
   "d2/upstream": { domain: "d2", kind: "upstream", version: 1, id: "urn:cwa-bench-d2:upstream:v1" },
+  "d5/attack-index": {
+    domain: "d5",
+    kind: "attack-index",
+    version: 1,
+    id: "urn:cwa-bench-d5:attack-index:v1",
+  },
+  "d5/baseline-row": {
+    domain: "d5",
+    kind: "baseline-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:baseline-row:v1",
+  },
+  "d5/blob": { domain: "d5", kind: "blob", version: 1, id: "urn:cwa-bench-d5:blob:v1" },
+  "d5/call-row": { domain: "d5", kind: "call-row", version: 1, id: "urn:cwa-bench-d5:call-row:v1" },
+  "d5/chain-row": {
+    domain: "d5",
+    kind: "chain-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:chain-row:v1",
+  },
+  "d5/ci-report": {
+    domain: "d5",
+    kind: "ci-report",
+    version: 1,
+    id: "urn:cwa-bench-d5:ci-report:v1",
+  },
+  "d5/claim-row": {
+    domain: "d5",
+    kind: "claim-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:claim-row:v1",
+  },
+  "d5/contract": { domain: "d5", kind: "contract", version: 1, id: "urn:cwa-bench-d5:contract:v1" },
+  "d5/drift-row": {
+    domain: "d5",
+    kind: "drift-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:drift-row:v1",
+  },
+  "d5/external-index": {
+    domain: "d5",
+    kind: "external-index",
+    version: 1,
+    id: "urn:cwa-bench-d5:external-index:v1",
+  },
+  "d5/external-lock": {
+    domain: "d5",
+    kind: "external-lock",
+    version: 1,
+    id: "urn:cwa-bench-d5:external-lock:v1",
+  },
+  "d5/external-row": {
+    domain: "d5",
+    kind: "external-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:external-row:v1",
+  },
+  "d5/finding": { domain: "d5", kind: "finding", version: 1, id: "urn:cwa-bench-d5:finding:v1" },
+  "d5/gate-row": { domain: "d5", kind: "gate-row", version: 1, id: "urn:cwa-bench-d5:gate-row:v1" },
+  "d5/goldens": { domain: "d5", kind: "goldens", version: 1, id: "urn:cwa-bench-d5:goldens:v1" },
+  "d5/manifest": { domain: "d5", kind: "manifest", version: 1, id: "urn:cwa-bench-d5:manifest:v1" },
+  "d5/probe-row": {
+    domain: "d5",
+    kind: "probe-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:probe-row:v1",
+  },
+  "d5/run-index": {
+    domain: "d5",
+    kind: "run-index",
+    version: 1,
+    id: "urn:cwa-bench-d5:run-index:v1",
+  },
+  "d5/runs-index": {
+    domain: "d5",
+    kind: "runs-index",
+    version: 1,
+    id: "urn:cwa-bench-d5:runs-index:v1",
+  },
+  "d5/search-row": {
+    domain: "d5",
+    kind: "search-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:search-row:v1",
+  },
+  "d5/self-check": {
+    domain: "d5",
+    kind: "self-check",
+    version: 1,
+    id: "urn:cwa-bench-d5:self-check:v1",
+  },
+  "d5/store-row": {
+    domain: "d5",
+    kind: "store-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:store-row:v1",
+  },
+  "d5/suite-summary": {
+    domain: "d5",
+    kind: "suite-summary",
+    version: 1,
+    id: "urn:cwa-bench-d5:suite-summary:v1",
+  },
+  "d5/summary": { domain: "d5", kind: "summary", version: 1, id: "urn:cwa-bench-d5:summary:v1" },
+  "d5/task-index": {
+    domain: "d5",
+    kind: "task-index",
+    version: 1,
+    id: "urn:cwa-bench-d5:task-index:v1",
+  },
+  "d5/task": { domain: "d5", kind: "task", version: 1, id: "urn:cwa-bench-d5:task:v1" },
+  "d5/token-row": {
+    domain: "d5",
+    kind: "token-row",
+    version: 1,
+    id: "urn:cwa-bench-d5:token-row:v1",
+  },
+  "d5/upstream": { domain: "d5", kind: "upstream", version: 1, id: "urn:cwa-bench-d5:upstream:v1" },
 } as const
 
 export type SchemaKind = keyof typeof schemaKinds
@@ -333,6 +507,7 @@ export type SchemaKind = keyof typeof schemaKinds
 export const schemaDomains = {
   d1: { producer: "cwa-bench-d1" },
   d2: { producer: "cwa-bench-d2" },
+  d5: { producer: "cwa-bench-d5" },
 } as const
 
 export type SchemaDomain = keyof typeof schemaDomains
@@ -400,6 +575,34 @@ export type DocumentByKind = {
   "d2/timeline": D2TimelineV1
   "d2/turn-row": D2TurnRowV1
   "d2/upstream": D2UpstreamV1
+  "d5/attack-index": D5AttackIndexV1
+  "d5/baseline-row": D5BaselineRowV1
+  "d5/blob": D5BlobV1
+  "d5/call-row": D5CallRowV1
+  "d5/chain-row": D5ChainRowV1
+  "d5/ci-report": D5CiReportV1
+  "d5/claim-row": D5ClaimRowV1
+  "d5/contract": D5ContractV1
+  "d5/drift-row": D5DriftRowV1
+  "d5/external-index": D5ExternalIndexV1
+  "d5/external-lock": D5ExternalLockV1
+  "d5/external-row": D5ExternalRowV1
+  "d5/finding": D5FindingV1
+  "d5/gate-row": D5GateRowV1
+  "d5/goldens": D5GoldensV1
+  "d5/manifest": D5ManifestV1
+  "d5/probe-row": D5ProbeRowV1
+  "d5/run-index": D5RunIndexV1
+  "d5/runs-index": D5RunsIndexV1
+  "d5/search-row": D5SearchRowV1
+  "d5/self-check": D5SelfCheckV1
+  "d5/store-row": D5StoreRowV1
+  "d5/suite-summary": D5SuiteSummaryV1
+  "d5/summary": D5SummaryV1
+  "d5/task-index": D5TaskIndexV1
+  "d5/task": D5TaskV1
+  "d5/token-row": D5TokenRowV1
+  "d5/upstream": D5UpstreamV1
 }
 
 export type Document = DocumentByKind[SchemaKind]

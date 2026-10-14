@@ -1,7 +1,7 @@
 // Serves each domain's results tree under /results/<domain>/ in `vite dev` and `vite preview`
-// (ui-plan.md 5.1): the benchmark checkout's domain1/results/d1 and domain2/results/d2 when they
-// are there beside this repository, else the vendored fixture runs; VITE_RESULTS_DIR overrides
-// Domain 1's and VITE_D2_RESULTS_DIR Domain 2's. Directory listing stays off, .json is
+// (ui-plan.md 5.1): the benchmark checkout's domain<n>/results/d<n> when it is there beside this
+// repository, else the vendored fixture runs; VITE_RESULTS_DIR overrides Domain 1's,
+// VITE_D2_RESULTS_DIR Domain 2's and VITE_D5_RESULTS_DIR Domain 5's. Directory listing stays off, .json is
 // application/json and .jsonl is application/x-ndjson, as the deployed server will serve them.
 // The app never relies on the symlinks a results directory may hold (latest, nightly): aliases
 // come from the runs index (DESIGN.md 6.4).
@@ -27,6 +27,13 @@ export const RESULT_DOMAINS = [
     checkout: "../benchmark/domain2/results/d2",
     fixtures: "vendor/cwa-bench/domain2/fixtures/runs",
     env: "VITE_D2_RESULTS_DIR",
+  },
+  {
+    id: "d5",
+    mount: "/results/d5",
+    checkout: "../benchmark/domain5/results/d5",
+    fixtures: "vendor/cwa-bench/domain5/fixtures/runs",
+    env: "VITE_D5_RESULTS_DIR",
   },
 ] as const
 

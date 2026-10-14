@@ -1,7 +1,7 @@
 // What each domain with results has on the site (ui-plan.md 6.1, 6.2; the UI-D2 plan): its routes'
 // base, its name, and the pages it has, so a page both domains share links only to pages that
-// exist. Domain 2 has no findings pages or compare page: its findings so far are none, and its
-// drift report is the harness's own.
+// exist. Domains 2 and 5 have no findings pages or compare page: their findings so far are none,
+// and their drift reports are the harness's own.
 
 import { useResultsDomain } from "@/data/queries"
 import type { ResultsDomain } from "@/data/source"
@@ -18,7 +18,7 @@ export type DomainPages = {
   findingPages: boolean
   /** Whether the domain has a compare page (`<base>/compare`). */
   compare: boolean
-  /** The rows a suite page offers are per adapter (Domain 1) or per arm (Domain 2). */
+  /** The rows a suite page offers are per adapter (Domain 1) or per arm (Domains 2 and 5). */
   rowsBy: "adapter" | "arm"
 }
 
@@ -36,6 +36,15 @@ export const DOMAIN_PAGES: Record<ResultsDomain, DomainPages> = {
     id: "d2",
     label: "Domain 2",
     base: "/d2",
+    goldenSuite: "S7",
+    findingPages: false,
+    compare: false,
+    rowsBy: "arm",
+  },
+  d5: {
+    id: "d5",
+    label: "Domain 5",
+    base: "/d5",
     goldenSuite: "S7",
     findingPages: false,
     compare: false,
