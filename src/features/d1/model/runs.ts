@@ -4,8 +4,8 @@
 
 import type { DocumentIn } from "@/data/kinds"
 
-/** Either domain's runs index: every producer writes it in the same shape. */
-type RunsIndexV1 = DocumentIn<"runs-index">
+/** Any domain's runs index: every producer writes it in the same shape. */
+export type RunsIndexV1 = DocumentIn<"runs-index">
 
 export type RunEntry = RunsIndexV1["runs"][number]
 

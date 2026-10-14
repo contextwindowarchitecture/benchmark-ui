@@ -117,6 +117,35 @@ describe("the composite", () => {
     expect(view.pinned?.run_id).toBe("20261011T200000Z-bbbbbbb")
   })
 
+  it("prefers a recorded run to a newer pilot, and either to a newer CI run, as each index gives size", () => {
+    const sized: D2RunsIndexV1 = {
+      ...index,
+      runs: [
+        { ...run("20261014T142634Z-aaaaaaa", ["S0", "S2"], "nightly"), size: "pilot" },
+        { ...run("20261014T135142Z-bbbbbbb", ["S0", "S2", "S6"], null), size: "pilot" },
+        { ...run("20261013T224806Z-ccccccc", ["S0", "S2"], null), size: "recorded" },
+        { ...run("20261012T000000Z-ddddddd", ["S0", "S5"], null), size: null },
+      ],
+    }
+    const view = composite(sized)
+    expect(sourceOf(view, "S2")?.run_id).toBe("20261013T224806Z-ccccccc")
+    expect(sourceOf(view, "S0")?.run_id).toBe("20261013T224806Z-ccccccc")
+    // Only a pilot has S6, and only a run of unknown size has S5: each is read from it.
+    expect(sourceOf(view, "S6")?.run_id).toBe("20261014T135142Z-bbbbbbb")
+    expect(sourceOf(view, "S5")?.run_id).toBe("20261012T000000Z-ddddddd")
+    // A pin still wins.
+    expect(sourceOf(composite(sized, "20261014T135142Z-bbbbbbb"), "S2")?.run_id).toBe(
+      "20261014T135142Z-bbbbbbb",
+    )
+    // Pruned, the recorded run gives way to the newest pilot outside a CI profile.
+    const pruned = composite(sized, undefined, new Set(["20261013T224806Z-ccccccc"]))
+    expect(pruned.suites.find((source) => source.suite === "S2")?.run.run_id).toBe(
+      "20261014T135142Z-bbbbbbb",
+    )
+    // Without sizes (an index written before the field), the rule is the newest outside a profile.
+    expect(sourceOf(composite(index), "S4")?.run_id).toBe("20261011T200000Z-bbbbbbb")
+  })
+
   it("is empty for an index with no finished run", () => {
     expect(composite({ ...index, runs: [] }).suites).toEqual([])
   })

@@ -1,14 +1,22 @@
-// Which run each of Domain 2's suites is read from (the UI-D2 plan): reported results come from
-// runs made outside any CI profile (the GPU host's `run`), while a CI profile's run is a replayed
-// regression check, and the write-up itself combines runs (S6 at pilot size beside the rest at
-// recorded size). So each suite is read from the newest finished run outside a CI profile that has
-// it, else the newest finished run that has it; `?run=` pins every suite that run has. A run the
-// index lists but the volume no longer holds (pruned, 6.4) is passed over once the page has seen
-// it is gone, and the source says which run it stands in for. The composite is a view, not a
-// record: nothing is written, and every panel names its run.
+// Which run each suite of a domain is read from (the UI-D2 plan; UI-D5): reported results come
+// from runs made outside any CI profile (the GPU host's `run`) at the size the write-up reports,
+// while a CI profile's run is a replayed regression check and a pilot is a smaller run, and a
+// write-up may combine runs (Domain 2's S6 at pilot size beside the rest at recorded size). So each
+// suite is read from the newest finished run outside a CI profile at recorded size that has it,
+// else the newest finished run outside a CI profile, else the newest finished run; a run whose
+// index entry gives no size ranks with the pilots (benchmark ask 17: the runs index gives each
+// run's size, for every domain). `?run=` pins every suite that run has. A run the index lists but
+// the volume no longer holds (pruned, 6.4) is passed over once the page has seen it is gone, and
+// the source says which run it stands in for. The composite is a view, not a record: nothing is
+// written, and every panel names its run. Each domain's pages run it over that domain's own index.
 
-import type { D2RunsIndexV1 } from "@/data/schema/generated"
-import { compareSuites, isFinished, runById, type RunEntry } from "@/features/d1/model/runs"
+import {
+  compareSuites,
+  isFinished,
+  runById,
+  type RunEntry,
+  type RunsIndexV1,
+} from "@/features/d1/model/runs"
 
 export type SuiteSource = {
   suite: string
@@ -37,7 +45,7 @@ export type Composite = {
  * volume: the rule skips them and records, per suite, the run it would have read.
  */
 export function composite(
-  index: D2RunsIndexV1,
+  index: RunsIndexV1,
   pin?: string,
   pruned: ReadonlySet<string> = new Set(),
 ): Composite {
@@ -45,7 +53,11 @@ export function composite(
   const finished = index.runs.filter(isFinished)
   const suiteIds = [...new Set(finished.flatMap((run) => run.suites))].sort(compareSuites)
   const choose = (candidates: RunEntry[]) =>
-    candidates.find((candidate) => candidate.ci_profile === null) ?? candidates[0]
+    candidates.find(
+      (candidate) => candidate.ci_profile === null && candidate.size === "recorded",
+    ) ??
+    candidates.find((candidate) => candidate.ci_profile === null) ??
+    candidates[0]
   const suites = suiteIds.flatMap((suite): SuiteSource[] => {
     const has = finished.filter((run) => run.suites.includes(suite))
     const wanted = pinned && pinned.suites.includes(suite) ? pinned : choose(has)

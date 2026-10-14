@@ -71,12 +71,14 @@ export function useEvidence(
     // once with the grown set, and the composite reads past the run.
     setPruned(new Set([...pruned, ...gone]))
   }
+  // The scripts' size: the runs index gives it (benchmark ask 17); for an index written before
+  // the field, one of the run's script indexes, which the run sets for every family.
+  const unsized = view.runs.filter((run) => !run.size).map((run) => run.run_id)
   const indexes = useDocumentsOfRuns(
-    runIds.map((runId) => ({ runId, path: "index.json" })),
+    unsized.map((runId) => ({ runId, path: "index.json" })),
     "d2/run-index",
   )
-  // The scripts' size, from one of the run's script indexes: the run sets it for every family.
-  const sizePaths = runIds.map((runId, i) => {
+  const sizePaths = unsized.map((runId, i) => {
     const files = indexes[i]?.data?.ok ? indexes[i].data.document.files : []
     const file = files.find((f) => f.kind === "conversation-index" || f.kind === "lq-index")
     return file ? { runId, path: file.path } : null
@@ -89,7 +91,9 @@ export function useEvidence(
     sizePaths.flatMap((entry) => (entry && entry.path.includes("/lq/") ? [entry] : [])),
     "d2/lq-index",
   )
-  const sizes = new Map<string, string>()
+  const sizes = new Map<string, string>(
+    view.runs.flatMap((run) => (run.size ? [[run.run_id, run.size] as const] : [])),
+  )
   for (const query of [...conversationIndexes, ...lqIndexes]) {
     if (query.data?.ok) sizes.set(query.data.document.run_id, query.data.document.size)
   }
