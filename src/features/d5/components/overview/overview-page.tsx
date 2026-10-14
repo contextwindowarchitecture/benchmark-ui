@@ -23,14 +23,11 @@ import { useDomainRunsIndex } from "@/data/queries"
 import { regionOfDocument } from "@/data/region"
 import type { D5RunsIndexV1 } from "@/data/schema/generated"
 import { ArmLegend } from "@/features/d2/components/arm-label"
-import { GroupedArmTable } from "@/features/d2/components/grouped-arm-table"
-import { MetricValue } from "@/features/d2/components/metric-value"
 import { ChecksGrid } from "@/features/d2/components/overview/trust-section"
 import { MetricPlot } from "@/features/d2/components/questions/share-plot"
 import { percentTick } from "@/features/d2/components/evidence/arm-groups"
-import { metricText } from "@/features/d2/model/metric-text"
 import { pairedMetrics } from "@/features/d5/model/metrics"
-import { adaptiveRows, armRows, forgedRows, structureChecks } from "@/features/d5/model/overview"
+import { armRows, structureChecks } from "@/features/d5/model/overview"
 import { d5OverviewParams } from "@/features/d5/model/url"
 import {
   NoRunsNotice,
@@ -42,11 +39,11 @@ import {
   UnreadableNotice,
 } from "@/features/shared/evidence/evidence-states"
 import { SourcesTable } from "@/features/shared/evidence/sources-table"
-import { useArmVocabulary } from "@/features/shared/vocabulary"
 import { formatPercent } from "@/lib/format"
 import { useUrlState } from "@/lib/url-state"
 
 import { PairedMetricsTable } from "../metric-tables"
+import { AdaptivePanel, ForgedPanel } from "../panels"
 import { useEvidence, type SuiteEvidence } from "../use-evidence"
 import { D5TrustNotes } from "./trust-section"
 
@@ -322,91 +319,6 @@ function Overview({ index, pin }: { index: D5RunsIndexV1; pin: string | undefine
           </li>
         </ul>
       </PageSection>
-    </div>
-  )
-}
-
-/** Per conventional arm: payloads whose structure a tag attack forged, and raw turn markers. */
-function ForgedPanel({ entry }: { entry: SuiteEvidence }) {
-  const vocabulary = useArmVocabulary()
-  const rows = forgedRows(entry.metrics)
-  if (rows.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground" data-state="empty">
-        S1 read no baseline for forged structure in this run.
-      </p>
-    )
-  }
-  const byArm = new Map(rows.map((row) => [row.arm, row]))
-  return (
-    <div className="space-y-2">
-      <GroupedArmTable
-        label="Forged structure in the conventional payloads"
-        caption="Per conventional arm: the payloads whose own boundary a tag attack forged, and the payloads that hand the model a marker attack's chat-template markers as raw text. The CWA arms escape both, so none appears here."
-        arms={rows.map((row) => ({ id: row.arm, group: vocabulary.groupOf(row.arm) }))}
-        columns={[
-          { key: "forged", label: "Boundary forged by a tag attack" },
-          { key: "markers", label: "Raw turn markers sent" },
-        ]}
-        cell={(arm, column) => {
-          const metric = column === "forged" ? byArm.get(arm)?.forged : byArm.get(arm)?.markers
-          return metric
-            ? { node: <MetricValue metric={metric} />, text: metricText(metric, vocabulary.points) }
-            : null
-        }}
-      />
-      <p className="text-xs text-muted-foreground">
-        A dash is an arm with no boundary of its own to forge. Whether the served tokenizer reads a
-        forged marker as a real one is S1's special-token check, on its suite page.
-      </p>
-      <SourceNote source={entry.source} />
-    </div>
-  )
-}
-
-/** Per arm: the adaptive attacker's held-out success at its full budget, beside the static rate. */
-function AdaptivePanel({ entry }: { entry: SuiteEvidence }) {
-  const vocabulary = useArmVocabulary()
-  const { budget, rows } = adaptiveRows(entry.metrics)
-  if (!budget || rows.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground" data-state="empty">
-        S4 measured no adaptive attack in this run.
-      </p>
-    )
-  }
-  const byArm = new Map(rows.map((row) => [row.arm, row]))
-  const budgetWords = vocabulary.tierLabel(budget, "s4.asr_by_budget")
-  return (
-    <div className="space-y-2">
-      <MetricPlot
-        rows={armRows(entry.metrics, "s4.asr_by_budget", budget)}
-        title={`Adaptive attack success per arm after ${budgetWords}`}
-        summary={`Each arm's held-out success of the best attack an adaptive attacker found within ${budgetWords}, with its interval over task instances. Every arm falls to an attacker that adapts; the static rate for the same goal is in the table.`}
-        legend="adaptive attacks executed (S4)"
-        header="Adaptive"
-        mark="dot"
-        domain={[0, 1]}
-        format={rate}
-        formatTick={percentTick}
-      />
-      <GroupedArmTable
-        label={`Static and adaptive attack success after ${budgetWords}`}
-        caption="Each arm's static success for the hijack goal (S2's templates) beside the adaptive attacker's held-out success."
-        arms={rows.map((row) => ({ id: row.arm, group: vocabulary.groupOf(row.arm) }))}
-        columns={[
-          { key: "static", label: "Static" },
-          { key: "adaptive", label: "Adaptive" },
-        ]}
-        cell={(arm, column) => {
-          const row = byArm.get(arm)
-          const metric = column === "static" ? row?.static : row?.adaptive
-          return metric
-            ? { node: <MetricValue metric={metric} />, text: metricText(metric, vocabulary.points) }
-            : null
-        }}
-      />
-      <SourceNote source={entry.source} />
     </div>
   )
 }

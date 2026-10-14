@@ -108,3 +108,11 @@ export function compareD5Tiers(metricId: string): (a: string, b: string) => numb
     return sa !== null && sb !== null ? sa - sb : 0
   }
 }
+
+/** A sized tier as an axis tick: "4k", "1,000", "5–8". */
+export function d5TierTick(tier: string, metricId: string): string {
+  const kind = TIER_KINDS[metricId]
+  if (kind === "queries" && /^[0-9]+$/.test(tier)) return formatCount(Number(tier))
+  if (kind === "band") return tier.replace("-", "–")
+  return tier
+}

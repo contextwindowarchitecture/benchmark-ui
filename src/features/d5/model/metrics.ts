@@ -56,11 +56,25 @@ export type ArmMetricTable = {
   cell(arm: string, id: string): D5Metric | undefined
 }
 
-/** A suite's per-arm metrics that carry no tier, laid out by arm and metric id. */
-export function armMetricTable(metrics: readonly D5Metric[], suite: string): ArmMetricTable | null {
-  const chosen = metrics.filter(
-    (m) => m.suite === suite && m.arm !== null && m.tier === null && !isPaired(m),
-  )
+/**
+ * A suite's per-arm metrics that carry no tier, laid out by arm and metric id; `only` keeps those
+ * ids only, in that order.
+ */
+export function armMetricTable(
+  metrics: readonly D5Metric[],
+  suite: string,
+  only?: readonly string[],
+): ArmMetricTable | null {
+  const chosen = metrics
+    .filter(
+      (m) =>
+        m.suite === suite &&
+        m.arm !== null &&
+        m.tier === null &&
+        !isPaired(m) &&
+        (!only || only.includes(m.id)),
+    )
+    .sort((a, b) => (only ? only.indexOf(a.id) - only.indexOf(b.id) : 0))
   if (chosen.length === 0) return null
   const ids: ArmMetricTable["ids"] = []
   for (const metric of chosen) {

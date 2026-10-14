@@ -30,6 +30,13 @@ import {
   D2OverviewPage,
   D2TrackingPage,
   D5OverviewPage,
+  D5StructurePage,
+  D5AttacksPage,
+  D5UtilityPage,
+  D5AdaptivePage,
+  D5ExternalPage,
+  D5PastedPage,
+  D5PersistencePage,
   OverviewPage,
   PerfPage,
   ViewerPage,
@@ -344,6 +351,84 @@ export const routes: RouteObject[] = [
                   </Suspense>
                 ),
                 handle: handle({ title: () => "Domain 5 overview" }),
+              },
+              {
+                path: "structure",
+                element: (
+                  <Suspense fallback={<PageFallback title="Structural Isolation" width="wide" />}>
+                    <D5StructurePage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Structural Isolation",
+                  crumb: () => ({ label: "Structural Isolation" }),
+                }),
+              },
+              {
+                path: "attacks",
+                element: (
+                  <Suspense fallback={<PageFallback title="Attacks" width="wide" />}>
+                    <D5AttacksPage />
+                  </Suspense>
+                ),
+                handle: handle({ title: () => "Attacks", crumb: () => ({ label: "Attacks" }) }),
+              },
+              {
+                path: "utility",
+                element: (
+                  <Suspense fallback={<PageFallback title="Utility" width="wide" />}>
+                    <D5UtilityPage />
+                  </Suspense>
+                ),
+                handle: handle({ title: () => "Utility", crumb: () => ({ label: "Utility" }) }),
+              },
+              {
+                path: "adaptive",
+                element: (
+                  <Suspense fallback={<PageFallback title="Adaptive Attacker" width="wide" />}>
+                    <D5AdaptivePage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Adaptive Attacker",
+                  crumb: () => ({ label: "Adaptive Attacker" }),
+                }),
+              },
+              {
+                path: "external",
+                element: (
+                  <Suspense fallback={<PageFallback title="External Sets" width="wide" />}>
+                    <D5ExternalPage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "External Sets",
+                  crumb: () => ({ label: "External Sets" }),
+                }),
+              },
+              {
+                path: "pasted",
+                element: (
+                  <Suspense fallback={<PageFallback title="Pasted Material" width="wide" />}>
+                    <D5PastedPage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Pasted Material",
+                  crumb: () => ({ label: "Pasted Material" }),
+                }),
+              },
+              {
+                path: "persistence",
+                element: (
+                  <Suspense fallback={<PageFallback title="Persistence" width="wide" />}>
+                    <D5PersistencePage />
+                  </Suspense>
+                ),
+                handle: handle({
+                  title: () => "Persistence",
+                  crumb: () => ({ label: "Persistence" }),
+                }),
               },
               {
                 path: "runs",

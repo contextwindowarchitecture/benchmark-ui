@@ -3,10 +3,12 @@
 // computed that the harness did not measure: a panel takes the producer's values, intervals and
 // judgments.
 
-import type { ArmOrder } from "@/features/shared/vocabulary"
+import type { TierSeries } from "@/components/charts/tier-lines-geometry"
 import type { ArmRowWithMetrics } from "@/features/d2/model/overview"
+import type { ArmOrder } from "@/features/shared/vocabulary"
 
 import { D5_ARM_ORDER, isPaired, type D5Metric } from "./metrics"
+import { d5TierSize } from "./tiers"
 
 /**
  * One row per arm of a metric at one tier (null for the metrics Domain 5 writes with no tier),
@@ -121,4 +123,38 @@ export function forgedRows(
     forged: metrics.find((m) => m.id === "s1.forged" && m.arm === arm && m.tier === "tag"),
     markers: metrics.find((m) => m.id === "s1.raw_markers" && m.arm === arm && m.tier === "marker"),
   }))
+}
+
+/**
+ * A metric over its sized tiers (lengths, budgets, bands), one series per arm in the write-up's
+ * order, for small multiples; a tier without a size, or an arm without the metric there, is a gap.
+ */
+export function tierSeries(
+  metrics: readonly D5Metric[],
+  id: string,
+): {
+  series: TierSeries[]
+  tiers: string[]
+  cell(arm: string, tier: string): D5Metric | undefined
+} {
+  const chosen = metrics.filter(
+    (m) => m.id === id && m.arm !== null && m.tier !== null && !isPaired(m),
+  )
+  const tiers = [...new Set(chosen.map((m) => m.tier as string))]
+    .filter((tier) => d5TierSize(tier, id) !== null)
+    .sort((a, b) => (d5TierSize(a, id) ?? 0) - (d5TierSize(b, id) ?? 0))
+  const cells = new Map(chosen.map((m) => [`${m.arm}\u0000${m.tier}`, m]))
+  const arms = [...new Set(chosen.map((m) => m.arm as string))].sort(D5_ARM_ORDER.compare)
+  return {
+    tiers,
+    series: arms.map((arm) => ({
+      id: arm,
+      points: tiers.map((tier) => ({
+        tier,
+        size: d5TierSize(tier, id) ?? 0,
+        value: cells.get(`${arm}\u0000${tier}`)?.value ?? null,
+      })),
+    })),
+    cell: (arm, tier) => cells.get(`${arm}\u0000${tier}`),
+  }
 }
