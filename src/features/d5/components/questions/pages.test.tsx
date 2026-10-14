@@ -33,7 +33,7 @@ describe("Domain 5's question pages", () => {
     ).toBeInTheDocument()
   })
 
-  it("Attacks links BIPIA, plots success per arm, the pairs and success by length", async () => {
+  it("Attacks links BIPIA, plots success per arm, the pairs and success by length, and names what waits", async () => {
     renderApp("/d5/attacks")
     const viability = await section("viability")
     expect(viability.getByRole("link", { name: /^Benchmarking and Defending/ })).toHaveAttribute(
@@ -51,6 +51,7 @@ describe("Domain 5's question pages", () => {
       evidence.getByRole("region", { name: "Attacks executed by content length" }),
     ).toBeInTheDocument()
     expect(evidence.getAllByRole("link", { name: run }).length).toBeGreaterThan(0)
+    expect(evidence.getByText(/in a block the harness does not type yet/)).toBeInTheDocument()
   })
 
   it("Utility plots clean and benign-imperative accuracy", async () => {

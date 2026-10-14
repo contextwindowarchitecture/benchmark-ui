@@ -81,6 +81,13 @@ export const ATTACKS: QuestionWords = {
   },
 }
 
+/**
+ * What the attacks page does not show yet: S2's summary counts the verdicts by attack family,
+ * carrier, position and task family in its `by_arm` block, which the schema leaves open.
+ */
+export const ATTACKS_WAITING =
+  "The verdicts by attack family, carrier, position and task family, and the system prompt extraction family's, are counted in S2's summary in a block the harness does not type yet, so this page does not read them. They appear here once it does; until then they are in S2's summary and rows."
+
 export const UTILITY: QuestionWords = {
   id: "utility",
   title: "Utility",

@@ -10,6 +10,7 @@ import { TierPicker } from "@/features/shared/evidence/question-page"
 import {
   ADAPTIVE,
   ATTACKS,
+  ATTACKS_WAITING,
   EXTERNAL,
   PASTED,
   PERSISTENCE,
@@ -222,6 +223,9 @@ export function AttacksPage() {
               />
             )}
           </Section>
+          <p className="max-w-prose text-sm text-muted-foreground" data-note="waiting">
+            {ATTACKS_WAITING}
+          </p>
         </>
       )}
     </QuestionPage>
