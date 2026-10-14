@@ -44,6 +44,20 @@ describe("the arm plot", () => {
     expect(layout.x(1)).toBe(600 - layout.margin.right)
   })
 
+  it("sets the reference's label on the side of the rule with more room", () => {
+    const at = (value: number) =>
+      armPlotLayout({
+        rows: [{ id: "x", group: "a", value: 0.5 }],
+        groups,
+        domain: [0, 1],
+        width: 375,
+        mark: "dot",
+        reference: { value, label: "truncate-pinned" },
+      })?.referenceAnchor
+    expect(at(0.2)).toBe("start")
+    expect(at(0.9)).toBe("end")
+  })
+
   it("clamps an interval to a fixed domain and drops non-finite values", () => {
     const layout = armPlotLayout({
       rows: [{ id: "x", group: "a", value: 1, low: 0.9, high: 1.2, backdrop: Number.NaN }],

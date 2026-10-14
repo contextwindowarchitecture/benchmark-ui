@@ -53,6 +53,8 @@ export type ArmPlotLayout = {
   groups: { id: string; label: string; y: number }[]
   rows: LaidRow[]
   referenceX: number | null
+  /** The side of the rule its label sits on: whichever has more room before the frame's edge. */
+  referenceAnchor: "start" | "end"
 }
 
 const finite = (value: number | null | undefined): value is number =>
@@ -112,6 +114,8 @@ export function armPlotLayout(input: ArmPlotInput): ArmPlotLayout | null {
     }
   }
   const innerWidth = width - margin.left - margin.right
+  const referenceX =
+    input.reference && finite(input.reference.value) ? clamp(input.reference.value) : null
   return {
     width,
     height: y + margin.bottom,
@@ -120,7 +124,8 @@ export function armPlotLayout(input: ArmPlotInput): ArmPlotLayout | null {
     ticks: x.ticks(Math.max(2, Math.min(6, Math.floor(innerWidth / 70)))),
     groups,
     rows,
-    referenceX:
-      input.reference && finite(input.reference.value) ? clamp(input.reference.value) : null,
+    referenceX,
+    referenceAnchor:
+      referenceX !== null && width - referenceX < referenceX - margin.left ? "end" : "start",
   }
 }

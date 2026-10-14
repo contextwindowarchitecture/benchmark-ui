@@ -207,8 +207,9 @@ export function ArmPlot({
               })}
               {layout.referenceX !== null && reference ? (
                 <text
-                  x={layout.referenceX + 4}
+                  x={layout.referenceX + (layout.referenceAnchor === "end" ? -4 : 4)}
                   y={layout.height - layout.margin.bottom - 4}
+                  textAnchor={layout.referenceAnchor}
                   className="fill-muted-foreground text-[11px]"
                 >
                   {reference.label}
