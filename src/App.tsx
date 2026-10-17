@@ -8,6 +8,8 @@ import { TooltipProvider } from "./components/ui/tooltip"
 import { type AppConfig, CONFIG_URL, errorMessage, loadConfig } from "./data/config"
 import { createQueryClient, ResultsSourcesContext, type ResultsSources } from "./data/queries"
 import { createResultsSource, type ResultsDomain, type ResultsSource } from "./data/source"
+import type { Sponsor } from "./content"
+import { SponsorsContext } from "./lib/sponsors-context"
 import { ThemeProvider } from "./lib/theme"
 
 type ConfigState =
@@ -15,17 +17,22 @@ type ConfigState =
   | { status: "error"; message: string }
   | { status: "ready"; config: AppConfig }
 
-/** Every provider a page needs, given the runtime configuration; tests supply their own source. */
+/**
+ * Every provider a page needs, given the runtime configuration; tests supply their own source,
+ * and a sponsors list in place of the content file's.
+ */
 export function AppProviders({
   config,
   children,
   fetchFn,
   queryClient: givenClient,
+  sponsors,
 }: {
   config: AppConfig
   children: ReactNode
   fetchFn?: typeof fetch
   queryClient?: QueryClient
+  sponsors?: readonly Sponsor[]
 }) {
   const sources = useMemo<ResultsSources>(() => {
     const built = new Map<ResultsDomain, ResultsSource>()
@@ -41,7 +48,7 @@ export function AppProviders({
     }
   }, [config.resultsRoot, fetchFn])
   const queryClient = useMemo(() => givenClient ?? createQueryClient(), [givenClient])
-  return (
+  const providers = (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <ResultsSourcesContext.Provider value={sources}>
@@ -49,6 +56,11 @@ export function AppProviders({
         </ResultsSourcesContext.Provider>
       </QueryClientProvider>
     </ThemeProvider>
+  )
+  return sponsors ? (
+    <SponsorsContext.Provider value={sponsors}>{providers}</SponsorsContext.Provider>
+  ) : (
+    providers
   )
 }
 

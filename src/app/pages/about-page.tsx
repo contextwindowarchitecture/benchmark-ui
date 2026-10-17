@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react"
 
 import { DashboardPage, PageSection } from "@/components/dashboard/dashboard-page"
 import { TableRegion } from "@/components/dashboard/table-region"
+import { SponsorLink, sponsorLabelClass } from "@/components/layout/sponsors"
 import {
   Table,
   TableBody,
@@ -14,9 +15,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ABOUT, CONTENT_SOURCE, DOMAINS, sourceUrl, VIABILITY_DOCUMENT } from "@/content"
+import {
+  ABOUT,
+  CONTENT_SOURCE,
+  DOMAINS,
+  orderedSponsors,
+  sourceUrl,
+  SPONSORS_DISCLOSURE,
+  TIER_WORDS,
+  VIABILITY_DOCUMENT,
+  type Sponsor,
+} from "@/content"
 import { buildInfo } from "@/lib/build-info"
 import { ORGANISATION } from "@/lib/sites"
+import { useSponsors } from "@/lib/sponsors-context"
 
 const REPOSITORIES = [
   { name: "The specification", url: `${ORGANISATION}/contextwindowarchitecture` },
@@ -45,6 +57,7 @@ function Out({ href, children }: { href: string; children: React.ReactNode }) {
 }
 
 export function AboutPage() {
+  const sponsors = useSponsors()
   return (
     <DashboardPage
       variant="narrative"
@@ -98,6 +111,8 @@ export function AboutPage() {
         </ul>
       </PageSection>
 
+      {sponsors.length > 0 ? <SponsorsSection sponsors={sponsors} /> : null}
+
       <PageSection
         id="viewer"
         title="This viewer"
@@ -147,5 +162,40 @@ export function AboutPage() {
         </p>
       </PageSection>
     </DashboardPage>
+  )
+}
+
+/**
+ * Each sponsor's logo, name and role, then the disclosure: they do not influence the harness, the
+ * schemas or the results, all public at the benchmark commit this site is pinned to.
+ */
+function SponsorsSection({ sponsors }: { sponsors: readonly Sponsor[] }) {
+  return (
+    <PageSection id="sponsors" title="Sponsors and partners">
+      <ul className="space-y-4 text-sm" data-sponsors="about">
+        {orderedSponsors(sponsors).map((sponsor) => (
+          <li
+            key={sponsor.slug}
+            data-sponsor={sponsor.slug}
+            className="flex flex-wrap items-center gap-x-6 gap-y-2"
+          >
+            <SponsorLink sponsor={sponsor} logoClassName="h-6 w-40" />
+            <div className="min-w-0 flex-1 basis-64">
+              <p className="flex flex-wrap items-baseline gap-x-3">
+                <span className="font-medium">{sponsor.name}</span>
+                <span className={sponsorLabelClass}>{TIER_WORDS[sponsor.tier]}</span>
+              </p>
+              <p className="text-muted-foreground">{sponsor.role}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
+        {SPONSORS_DISCLOSURE.join(" ")}{" "}
+        <Out href={`https://github.com/${CONTENT_SOURCE.repository}/tree/${CONTENT_SOURCE.commit}`}>
+          The repository at that commit
+        </Out>
+      </p>
+    </PageSection>
   )
 }

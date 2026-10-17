@@ -6,10 +6,20 @@ import { createMemoryRouter, RouterProvider } from "react-router"
 
 import { AppProviders } from "@/App"
 import { routes } from "@/app/routes"
+import type { Sponsor } from "@/content"
 
 import { FIXTURE_ROOT, fixtureFetch, type FixtureFetchOptions } from "./fixture-fetch"
 
-export function renderApp(path: string, fetchOptions: FixtureFetchOptions = {}) {
+export type RenderAppOptions = {
+  /** The sponsors the placements show; the content file's (empty) list by default. */
+  sponsors?: readonly Sponsor[]
+}
+
+export function renderApp(
+  path: string,
+  fetchOptions: FixtureFetchOptions = {},
+  { sponsors }: RenderAppOptions = {},
+) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
   const fetchFn = fixtureFetch(fetchOptions)
   // No retries in tests: a failed load is a state to assert on, not something to wait out.
@@ -19,6 +29,7 @@ export function renderApp(path: string, fetchOptions: FixtureFetchOptions = {}) 
       config={{ resultsRoot: FIXTURE_ROOT }}
       fetchFn={fetchFn}
       queryClient={queryClient}
+      sponsors={sponsors}
     >
       <RouterProvider router={router} />
     </AppProviders>,

@@ -10,10 +10,18 @@ import { Link } from "react-router"
 import { DashboardPage, PageSection } from "@/components/dashboard/dashboard-page"
 import { DataRegion } from "@/components/dashboard/data-region"
 import { StatusBadge } from "@/components/dashboard/status-badge"
+import { SupportedBy } from "@/components/layout/sponsors"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { DOMAINS, HOW_TO_READ, sourceUrl, WHAT_CWA_IS, type DomainContent } from "@/content"
+import {
+  DOMAINS,
+  HOW_TO_READ,
+  presentingSponsors,
+  sourceUrl,
+  WHAT_CWA_IS,
+  type DomainContent,
+} from "@/content"
 import {
   ResultsDomainContext,
   useDomainRunsIndex,
@@ -29,9 +37,13 @@ import { suitesPassing } from "@/features/d1/model/overview"
 import { newestPresentRun, resolveAlias } from "@/features/d1/model/runs"
 import { DOMAIN_PAGES } from "@/lib/domains"
 import { formatCount, formatUtc, isoUtc } from "@/lib/format"
+import { useSponsors } from "@/lib/sponsors-context"
 
 export function HomePage() {
   const index = useRunsIndex()
+  // The presenting sponsors, right of the title at wide widths and under the lede on a phone;
+  // nothing, not even the slot, without one.
+  const presenting = presentingSponsors(useSponsors())
   const region = regionOfDocument(index, "d1/index.json", "the runs index")
   const document = index.data?.ok ? index.data.document : undefined
   const latest = document ? resolveAlias(document, "latest") : undefined
@@ -49,6 +61,11 @@ export function HomePage() {
       kicker="Viability results"
       title="CWA benchmark"
       description="The viability benchmark of the Context Window Architecture: what each domain establishes, with every number behind it."
+      actions={
+        presenting.length > 0 ? (
+          <SupportedBy placement="hero" sponsors={presenting} logoClassName="h-6" />
+        ) : undefined
+      }
     >
       <PageSection id="what" title="What CWA is">
         <div className="max-w-prose space-y-3 text-base leading-relaxed">

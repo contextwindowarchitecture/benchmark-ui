@@ -24,3 +24,16 @@ export {
   VIABILITY_DOCUMENT,
 } from "./source"
 export type { Citation } from "./source"
+export {
+  orderedSponsors,
+  presentingSponsors,
+  SIDEBAR_SPONSORS,
+  sponsorPath,
+  sponsorRedirect,
+  SPONSORS,
+  SPONSORS_CITATION,
+  SPONSORS_DISCLOSURE,
+  TIER_WORDS,
+  UTM_SOURCE,
+} from "./sponsors"
+export type { Sponsor, SponsorTier } from "./sponsors"

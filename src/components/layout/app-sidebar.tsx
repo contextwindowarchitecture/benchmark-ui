@@ -16,6 +16,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { presentingSponsors, SIDEBAR_SPONSORS } from "@/content"
 import { useResultsDomain, useRunsIndex } from "@/data/queries"
 import { resolveAlias } from "@/features/d1/model/runs"
 import logoDark from "@/assets/brand/logo-dark.png"
@@ -23,6 +24,9 @@ import logoLight from "@/assets/brand/logo-light.png"
 import markDark from "@/assets/brand/mark-dark.png"
 import markLight from "@/assets/brand/mark-light.png"
 import { CWA_SITE } from "@/lib/sites"
+import { useSponsors } from "@/lib/sponsors-context"
+
+import { SupportedBy } from "./sponsors"
 
 /** The left navigation: the benchmark's domains, each with its pages (ui-plan.md 6.1). */
 export function AppSidebar() {
@@ -31,6 +35,8 @@ export function AppSidebar() {
   const { isMobile, setOpenMobile } = useSidebar()
   const index = useRunsIndex()
   const domain = useResultsDomain()
+  // The presenting sponsor (two at most) above the logo, hidden with it when the sidebar is icons.
+  const presenting = presentingSponsors(useSponsors()).slice(0, SIDEBAR_SPONSORS)
   // Domain 1's run-scoped pages (coverage, findings) take the run in the URL when the page is one
   // of Domain 1's; another domain's run is not theirs.
   const currentRunId =
@@ -102,6 +108,16 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          {presenting.length > 0 ? (
+            <SidebarMenuItem>
+              <SupportedBy
+                placement="sidebar"
+                sponsors={presenting}
+                logoClassName="h-6"
+                className="px-2 pt-1 pb-2 group-data-[collapsible=icon]:hidden"
+              />
+            </SidebarMenuItem>
+          ) : null}
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild

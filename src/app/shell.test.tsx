@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { buildInfo } from "@/lib/build-info"
 import { D2_FIXTURE_RUNS, FIXTURE_RUNS } from "@/test/fixture-fetch"
 import { renderApp } from "@/test/render-app"
+import { SPONSORS_FIXTURE } from "@/test/sponsors-fixture"
 
 describe("the shell", () => {
   it("opens a page with its sidebar group as the kicker", async () => {
@@ -54,6 +55,28 @@ describe("the shell", () => {
       expect(link).toHaveAttribute("href", "https://contextwindowarchitecture.io")
     const footer = screen.getByRole("navigation", { name: "Footer" }).closest("footer")
     expect(footer).toHaveTextContent(`ui ${buildInfo.uiCommit}`)
+  })
+
+  it("shows the presenting sponsor above the sidebar's logo, hidden with it when the sidebar is icons", async () => {
+    renderApp("/", {}, { sponsors: SPONSORS_FIXTURE })
+    const sidebar = document.querySelector('[data-slot="sidebar"][data-state]') as HTMLElement
+    expect(sidebar).toHaveAttribute("data-state", "expanded")
+    const block = sidebar.querySelector('[data-sponsors="sidebar"]') as HTMLElement
+    expect(block).toHaveTextContent("Supported by")
+    const links = within(block).getAllByRole("link")
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveAttribute("href", "/go/placeholder-compute")
+    expect(links[0]).toHaveAttribute("aria-label", "Placeholder Compute")
+    // The partner stays out of the sidebar, and the block sits above the logo's link.
+    expect(within(sidebar).queryByRole("link", { name: "Placeholder Models" })).toBeNull()
+    const logo = within(sidebar).getByRole("link", { name: /contextwindowarchitecture\.io/ })
+    expect(block.compareDocumentPosition(logo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Collapsed to icons, the block hides the way the logo does: the same class, off the same state.
+    expect(block).toHaveClass("group-data-[collapsible=icon]:hidden")
+    expect(logo.querySelector(".group-data-\\[collapsible\\=icon\\]\\:hidden")).not.toBeNull()
+    await userEvent.click(screen.getAllByRole("button", { name: "Toggle Sidebar" })[0]!)
+    expect(sidebar).toHaveAttribute("data-state", "collapsed")
+    expect(sidebar).toHaveAttribute("data-collapsible", "icon")
   })
 
   it("marks the active item and sets the document title with the run id", async () => {
