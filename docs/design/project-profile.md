@@ -22,7 +22,8 @@ plan (`docs/plans/ui-plan.md`, local) it answers to.
   (`style: "radix-nova"` in `components.json`), base color neutral, CSS variables, `tw-animate-css`, Lucide icons.
   One preset, no mixing. Generated primitives in `src/components/ui/` are kept as generated: ESLint exempts them
   from the two rules they trip, Prettier ignores them. Components generated at UI-P0: sidebar, breadcrumb,
-  dropdown-menu, select, sheet, tooltip, button, badge, card, table, alert, input, separator, skeleton.
+  dropdown-menu, select, sheet, tooltip, button, badge, card, table, alert, input, separator, skeleton. Added since:
+  dialog, for the Sponsors page's cards (on the same `radix-ui` package the sheet uses, so no new dependency).
 - Tailwind major version and theme source: Tailwind 4.3.3 through `@tailwindcss/vite`; the generated stylesheet is
   `src/styles/globals.css` and `src/styles/tokens.css` extends it (DESIGN.md 5): success, warning, info and
   failure pairs (failure is the status hue for fail, error and regressed; the generated destructive, tuned for
