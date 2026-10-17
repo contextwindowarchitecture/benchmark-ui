@@ -7,7 +7,7 @@ design is section 12 of the working plan; this directory holds the pieces.
 | Piece | What |
 | --- | --- |
 | `Containerfile` | A Node stage builds the app; the UBI nginx image serves it on 8080 as any UID with GID 0. Results are never in the image. |
-| `base/nginx/` | The server configuration: the app with a single-page fallback, `/results/` from the volume with immutable caching for runs and none for a domain's index, `/config.json`, `/healthz`, compression, security headers. |
+| `base/nginx/` | The server configuration: the app with a single-page fallback, `/results/` from the volume with immutable caching for runs and none for a domain's index, `/config.json`, `/healthz`, compression, security headers, and the sponsors' `/go/<slug>` redirects (`sponsors.inc`, below). |
 | `base/` | Kustomize: the UI Deployment (rolling update, no unavailable replica, probes, restricted security context), Service, Route (edge TLS, HTTP redirected), the results PVC (ReadWriteMany, unless the overlay says otherwise), the `config.json` ConfigMap, the nginx ConfigMap, and the publisher Deployment (scaled to zero, mounts the volume read-write). |
 | `overlays/prod/` | The namespace `cwa-benchmark`, the host, the image tag, the replicas, and the results claim's access mode and storage class: the production cluster has one node and one storage class (LVM Storage, ReadWriteOnce only), so the overlay runs one replica on a ReadWriteOnce claim. |
 | `overlays/prod/issuer.yaml`, `certificate.yaml`, `router-secret-reader.yaml` | Let's Encrypt through the cluster's cert-manager: the ACME issuer, the host's certificate into the secret `benchmark-ui-tls`, and the router's read access to that secret, which the Route names. |
@@ -163,3 +163,30 @@ cd ../benchmark/domain5 && uv run python -c "from pathlib import Path; from cwab
 ```
 
 Add the runs the write-up cites to `keep.txt`.
+
+## Sponsor click-throughs
+
+A sponsor's logo on the site links to `/go/<slug>`, not to the sponsor. nginx answers it with a 302 to the sponsor's
+URL with `utm_source=benchmark.contextwindowarchitecture.io` added, marked `no-store` so every click reaches the
+server, and the access log line is the count: the page carries no analytics and no tracker, and the policy in
+`headers.inc` still allows no third-party origin. The locations are in `deploy/base/nginx/sponsors.inc`, one per
+sponsor in `src/content/sponsors.ts`; `src/content/sponsors.test.ts` renders that file's expected text from the list
+and fails when the two drift, printing the text to paste. A slug that is not listed falls through to the app, which
+shows its not-found page, so an unknown `/go/` path is a 200 in the log and is never counted.
+
+Adding a sponsor is one commit: the entry and its two logos in the UI, and the location here. The logos are in the
+image, so it is a new image and a rollout as above; the nginx ConfigMap is generated from `base/nginx/`, so the
+apply rolls the pods onto the new file as well. Locally, `curl -sI http://localhost:8080/go/<slug>` against the
+container shows the 302 and its `Location`.
+
+The count comes from the UI pods' access log, which the UBI image writes to the pod's standard output in nginx's
+`main` format (the request's path is the seventh field, the status the ninth):
+
+```sh
+oc -n cwa-benchmark logs deployment/benchmark-ui --since=168h \
+  | awk '$7 ~ "^/go/" && $9 == 302 { print $7 }' | sort | uniq -c | sort -rn
+```
+
+That log is the only record. It starts over when the pod is replaced (a rollout, a restart) and `oc logs` returns
+what the node still holds, so the count is a window, not a total, unless the logs are collected: the cluster's
+logging stack, or a periodic dump of the command above into a file the maintainer keeps.

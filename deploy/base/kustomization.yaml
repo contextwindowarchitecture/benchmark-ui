@@ -23,3 +23,4 @@ configMapGenerator:
     files:
       - nginx/benchmark-ui.conf
       - nginx/headers.inc
+      - nginx/sponsors.inc

@@ -24,6 +24,29 @@ import {
 
 const root = resolve(import.meta.dirname, "../..")
 
+/**
+ * The server's redirects, as deploy/base/nginx/sponsors.inc must read: one location per sponsor,
+ * a 302 to the sponsor's URL with utm_source added, never cached, so a click is a line in the
+ * access log (deploy/README.md).
+ */
+function renderRedirects(sponsors: readonly Sponsor[]): string {
+  const header = `# The sponsors' click-throughs (deploy/README.md, "Sponsor click-throughs"): one location per sponsor in
+# src/content/sponsors.ts, a 302 to the sponsor's URL with utm_source added, so each click is a line in the access
+# log and the page carries no tracker. Included by benchmark-ui.conf. src/content/sponsors.test.ts renders this
+# file's expected text from the list and fails when the two drift: paste what it prints.
+`
+  const locations = orderedSponsors(sponsors).map(
+    (sponsor) => `
+location = ${sponsorPath(sponsor)} {
+    include /opt/app-root/etc/nginx.default.d/headers.inc;
+    add_header Cache-Control "no-store" always;
+    return 302 "${sponsorRedirect(sponsor)}";
+}
+`,
+  )
+  return header + locations.join("")
+}
+
 /** A names-only pattern: a domain's number is a name, any other digit a value. */
 const identifiers = /\bDomains? \d+(?: and \d+)?\b/g
 
@@ -39,6 +62,8 @@ describe("the sponsors", () => {
       for (const sponsor of sponsors) {
         expect(sponsor.slug).toMatch(/^[a-z][a-z0-9-]*$/)
         expect(sponsor.url).toMatch(/^https:\/\/\S+$/)
+        // The URL is quoted in an nginx return, where $ expands and " and \ end or escape it.
+        expect(sponsor.url).not.toMatch(/[$"\\]/)
         expect(sponsor.name.trim()).toBe(sponsor.name)
         expect(sponsor.role.endsWith("."), sponsor.role).toBe(true)
         expect(sponsor.role.replace(identifiers, ""), sponsor.role).not.toMatch(/\d/)
@@ -106,6 +131,29 @@ describe("the sponsors", () => {
     }
     expect(SPONSORS_DISCLOSURE.join(" ")).toMatch(
       /do not influence the harness, the schemas or the results/,
+    )
+  })
+
+  it("have each their redirect in the server's configuration, deploy/base/nginx/sponsors.inc", async () => {
+    const file = resolve(root, "deploy/base/nginx/sponsors.inc")
+    const expected = renderRedirects(SPONSORS)
+    await expect(readFile(file, "utf8"), `${file} should read:\n\n${expected}`).resolves.toBe(
+      expected,
+    )
+    // The fixture's, as a maintainer would paste them: presenting first, the URL with utm_source.
+    const fixture = renderRedirects(SPONSORS_FIXTURE)
+    expect(fixture).toContain(`
+location = /go/placeholder-compute {
+    include /opt/app-root/etc/nginx.default.d/headers.inc;
+    add_header Cache-Control "no-store" always;
+    return 302 "https://example.com/compute?utm_source=${UTM_SOURCE}";
+}
+`)
+    expect(fixture).toContain(
+      `return 302 "https://example.com/models?ref=cwa&utm_source=${UTM_SOURCE}";`,
+    )
+    expect(fixture.indexOf("placeholder-compute")).toBeLessThan(
+      fixture.indexOf("placeholder-models"),
     )
   })
 })
