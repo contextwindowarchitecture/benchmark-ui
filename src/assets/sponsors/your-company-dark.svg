@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="96" viewBox="0 0 560 96">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="96" height="96">
+      <rect width="96" height="96" fill="#fff"/>
+      <circle cx="48" cy="48" r="20" fill="none" stroke="#000" stroke-width="11"/>
+    </mask>
+  </defs>
+  <rect width="96" height="96" rx="24" fill="url(#g)" mask="url(#cut)"/>
+  <text x="118" y="54" textLength="330" lengthAdjust="spacingAndGlyphs" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="50" font-weight="700" letter-spacing="-1" fill="#f3f4f6">Your Company</text>
+  <text x="120" y="84" textLength="300" lengthAdjust="spacingAndGlyphs" font-family="ui-monospace, Menlo, monospace" font-size="18" font-weight="500" letter-spacing="3" fill="#a5b4fc">BECOME A SPONSOR</text>
+</svg>
