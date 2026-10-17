@@ -57,7 +57,7 @@ describe("the shell", () => {
     expect(footer).toHaveTextContent(`ui ${buildInfo.uiCommit}`)
   })
 
-  it("shows the presenting sponsor above the sidebar's logo, hidden with it when the sidebar is icons", async () => {
+  it("shows the headline sponsor above the sidebar's logo, hidden with it when the sidebar is icons", async () => {
     renderApp("/", {}, { sponsors: SPONSORS_FIXTURE })
     const sidebar = document.querySelector('[data-slot="sidebar"][data-state]') as HTMLElement
     expect(sidebar).toHaveAttribute("data-state", "expanded")

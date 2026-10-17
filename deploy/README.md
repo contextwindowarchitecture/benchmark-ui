@@ -166,7 +166,8 @@ Add the runs the write-up cites to `keep.txt`.
 
 ## Sponsor click-throughs
 
-A sponsor's logo on the site links to `/go/<slug>`, not to the sponsor. nginx answers it with a 302 to the sponsor's
+A sponsor's logo on the site, and the link in its card's dialog on the Sponsors page, go to `/go/<slug>`, not to the
+sponsor. nginx answers it with a 302 to the sponsor's
 URL with `utm_source=benchmark.contextwindowarchitecture.io` added, marked `no-store` so every click reaches the
 server, and the access log line is the count: the page carries no analytics and no tracker, and the policy in
 `headers.inc` still allows no third-party origin. The locations are in `deploy/base/nginx/sponsors.inc`, one per

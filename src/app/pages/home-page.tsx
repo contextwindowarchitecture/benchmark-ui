@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   DOMAINS,
   HOW_TO_READ,
-  presentingSponsors,
+  headlineSponsors,
   sourceUrl,
   WHAT_CWA_IS,
   type DomainContent,
@@ -41,9 +41,9 @@ import { useSponsors } from "@/lib/sponsors-context"
 
 export function HomePage() {
   const index = useRunsIndex()
-  // The presenting sponsors, right of the title at wide widths and under the lede on a phone;
+  // The headline sponsors, right of the title at wide widths and under the lede on a phone;
   // nothing, not even the slot, without one.
-  const presenting = presentingSponsors(useSponsors())
+  const headline = headlineSponsors(useSponsors())
   const region = regionOfDocument(index, "d1/index.json", "the runs index")
   const document = index.data?.ok ? index.data.document : undefined
   const latest = document ? resolveAlias(document, "latest") : undefined
@@ -62,8 +62,8 @@ export function HomePage() {
       title="CWA benchmark"
       description="The viability benchmark of the Context Window Architecture: what each domain establishes, with every number behind it."
       actions={
-        presenting.length > 0 ? (
-          <SupportedBy placement="hero" sponsors={presenting} logoClassName="h-6" />
+        headline.length > 0 ? (
+          <SupportedBy placement="hero" sponsors={headline} logoClassName="h-6" />
         ) : undefined
       }
     >

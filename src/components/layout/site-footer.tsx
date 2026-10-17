@@ -1,5 +1,6 @@
 import { Link } from "react-router"
 
+import { headlineSponsors } from "@/content"
 import { buildInfo } from "@/lib/build-info"
 import { CWA_SITE, ORGANISATION } from "@/lib/sites"
 import { useSponsors } from "@/lib/sponsors-context"
@@ -8,17 +9,19 @@ import { SponsorRow } from "./sponsors"
 
 /**
  * The website's footer: a hairline above, mono 12px muted. Left, what this build reads and was
- * built from; right, the sponsors' logos when there are any, then the way back to CWA.
+ * built from; right, the headline sponsors' logos when there are any, the link to the Sponsors page
+ * when there is any sponsor, then the way back to CWA.
  */
 export function SiteFooter() {
   const sponsors = useSponsors()
+  const headline = headlineSponsors(sponsors)
   const nav = (
     <nav aria-label="Footer" className="flex flex-wrap gap-5">
       <Link to="/about" className="hover:text-foreground">
         About
       </Link>
       {sponsors.length > 0 ? (
-        <Link to="/about#sponsors" className="hover:text-foreground">
+        <Link to="/sponsors" className="hover:text-foreground">
           Sponsors
         </Link>
       ) : null}
@@ -38,9 +41,9 @@ export function SiteFooter() {
           <span title={buildInfo.benchmarkCommit}>{buildInfo.benchmarkCommit.slice(0, 7)}</span> ·
           ui {buildInfo.uiCommit}
         </p>
-        {sponsors.length > 0 ? (
+        {headline.length > 0 ? (
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <SponsorRow sponsors={sponsors} />
+            <SponsorRow sponsors={headline} />
             {nav}
           </div>
         ) : (

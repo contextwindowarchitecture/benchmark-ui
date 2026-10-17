@@ -43,6 +43,7 @@ import {
 } from "./pages/lazy-pages"
 import { NotFoundPage } from "./pages/not-found-page"
 import { RouteErrorPage } from "./pages/route-error-page"
+import { SponsorsPage } from "./pages/sponsors-page"
 import type { RouteHandle } from "./route-meta"
 
 const handle = (h: RouteHandle): RouteHandle => h
@@ -76,6 +77,11 @@ export const routes: RouteObject[] = [
             path: "glossary",
             element: <GlossaryPage />,
             handle: handle({ title: () => "Glossary", crumb: () => ({ label: "Glossary" }) }),
+          },
+          {
+            path: "sponsors",
+            element: <SponsorsPage />,
+            handle: handle({ title: () => "Sponsors", crumb: () => ({ label: "Sponsors" }) }),
           },
           {
             path: "d1",

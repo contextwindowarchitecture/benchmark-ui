@@ -5,20 +5,26 @@ import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
 import {
+  HEADLINE_LIMIT,
+  headlineSponsors,
   orderedSponsors,
-  presentingSponsors,
   SPONSORS,
   SPONSORS_CITATION,
   SPONSORS_DISCLOSURE,
+  SPONSORS_PAGE,
+  SPONSORSHIP_REQUEST,
   sponsorPath,
   sponsorRedirect,
+  TIER_HEADINGS,
   TIER_WORDS,
+  TIERS,
   UTM_SOURCE,
   type Sponsor,
 } from "./index"
 import {
+  PLACEHOLDER_HEADLINE,
   PLACEHOLDER_PARTNER,
-  PLACEHOLDER_PRESENTING,
+  PLACEHOLDER_SPONSOR,
   SPONSORS_FIXTURE,
 } from "@/test/sponsors-fixture"
 
@@ -55,7 +61,7 @@ describe("the sponsors", () => {
     ["the content file's list", SPONSORS],
     ["the fixture", SPONSORS_FIXTURE],
   ])(
-    "hold a URL-safe slug, an https URL, a role in one sentence and a logo per theme, in %s",
+    "hold a URL-safe slug, an https URL, a role in one sentence, its detail and a logo per theme, in %s",
     async (_name, sponsors) => {
       expect(new Set(sponsors.map((sponsor) => sponsor.slug)).size).toBe(sponsors.length)
       expect(new Set(sponsors.map((sponsor) => sponsor.name)).size).toBe(sponsors.length)
@@ -67,7 +73,17 @@ describe("the sponsors", () => {
         expect(sponsor.name.trim()).toBe(sponsor.name)
         expect(sponsor.role.endsWith("."), sponsor.role).toBe(true)
         expect(sponsor.role.replace(identifiers, ""), sponsor.role).not.toMatch(/\d/)
-        expect(Object.keys(TIER_WORDS)).toContain(sponsor.tier)
+        // The dialog's paragraphs are words too: sentences, no value but a domain's name.
+        expect(sponsor.details.length, sponsor.slug).toBeGreaterThan(0)
+        for (const paragraph of sponsor.details) {
+          expect(paragraph.endsWith("."), paragraph).toBe(true)
+          expect(paragraph.replace(identifiers, ""), paragraph).not.toMatch(/\d/)
+        }
+        if (sponsor.linkText !== undefined) {
+          expect(sponsor.linkText.trim()).toBe(sponsor.linkText)
+          expect(sponsor.linkText).not.toBe("")
+        }
+        expect(TIERS).toContain(sponsor.tier)
         // Two files under src/assets/sponsors/, one per theme, each with the size recorded.
         expect(sponsor.logo.light).not.toBe(sponsor.logo.dark)
         for (const [theme, url] of Object.entries({
@@ -86,30 +102,66 @@ describe("the sponsors", () => {
     },
   )
 
-  it("ship a fixture of one presenting sponsor and one partner, out of the app's own graph", () => {
-    expect(SPONSORS_FIXTURE.map((sponsor) => sponsor.tier)).toEqual(["partner", "presenting"])
-    expect(PLACEHOLDER_PRESENTING.name).toMatch(/^Placeholder /)
-    expect(PLACEHOLDER_PARTNER.name).toMatch(/^Placeholder /)
+  it("hold no more headline sponsors than the hero, the sidebar and the footer have room for", () => {
+    expect(HEADLINE_LIMIT).toBe(3)
+    const headline = SPONSORS.filter((sponsor) => sponsor.tier === "headline")
+    expect(headline.length).toBeLessThanOrEqual(HEADLINE_LIMIT)
   })
 
-  it("order presenting first, then alphabetical, without touching the list; the hero takes the presenting", () => {
+  it("ship a fixture of one sponsor in each tier, out of the app's own graph", () => {
+    expect(SPONSORS_FIXTURE.map((sponsor) => sponsor.tier)).toEqual([
+      "partner",
+      "sponsor",
+      "headline",
+    ])
+    for (const sponsor of SPONSORS_FIXTURE) expect(sponsor.name).toMatch(/^Placeholder /)
+  })
+
+  it("order by tier, then alphabetical, without touching the list; the chrome takes the headline", () => {
     expect(orderedSponsors(SPONSORS_FIXTURE).map((sponsor) => sponsor.slug)).toEqual([
       "placeholder-compute",
+      "placeholder-hosting",
       "placeholder-models",
     ])
     expect(SPONSORS_FIXTURE[0]).toBe(PLACEHOLDER_PARTNER)
-    expect(presentingSponsors(SPONSORS_FIXTURE)).toEqual([PLACEHOLDER_PRESENTING])
-    expect(presentingSponsors([])).toEqual([])
-    const b = { ...PLACEHOLDER_PRESENTING, slug: "b", name: "Beta" }
-    const a = { ...PLACEHOLDER_PRESENTING, slug: "a", name: "alpha" }
+    expect(headlineSponsors(SPONSORS_FIXTURE)).toEqual([PLACEHOLDER_HEADLINE])
+    expect(headlineSponsors([])).toEqual([])
+    const b = { ...PLACEHOLDER_HEADLINE, slug: "b", name: "Beta" }
+    const a = { ...PLACEHOLDER_HEADLINE, slug: "a", name: "alpha" }
+    const m = { ...PLACEHOLDER_SPONSOR, slug: "m", name: "Aardvark" }
     const z = { ...PLACEHOLDER_PARTNER, slug: "z", name: "Aardvark" }
-    expect(orderedSponsors([z, b, a]).map((sponsor) => sponsor.slug)).toEqual(["a", "b", "z"])
+    expect(orderedSponsors([z, m, b, a]).map((sponsor) => sponsor.slug)).toEqual([
+      "a",
+      "b",
+      "m",
+      "z",
+    ])
+    // A fourth headline sponsor does not crowd the chrome: the first three, alphabetical, show.
+    const d = { ...PLACEHOLDER_HEADLINE, slug: "d", name: "Delta" }
+    const c = { ...PLACEHOLDER_HEADLINE, slug: "c", name: "Gamma" }
+    expect(headlineSponsors([d, c, b, a]).map((sponsor) => sponsor.slug)).toEqual(["a", "b", "d"])
+  })
+
+  it("label and head every tier, and keep the Sponsors page's words free of values", () => {
+    expect(Object.keys(TIER_WORDS).sort()).toEqual([...TIERS].sort())
+    expect(Object.keys(TIER_HEADINGS).sort()).toEqual([...TIERS].sort())
+    for (const sentence of [
+      SPONSORS_PAGE.description,
+      SPONSORS_PAGE.empty,
+      ...SPONSORS_PAGE.become,
+    ]) {
+      expect(sentence.endsWith("."), sentence).toBe(true)
+      expect(sentence).not.toMatch(/\d/)
+    }
+    expect(SPONSORSHIP_REQUEST).toBe(
+      "https://github.com/contextwindowarchitecture/benchmark/blob/main/docs/sponsorship-request.md",
+    )
   })
 
   it("link through the site's redirect, which adds utm_source to the sponsor's own URL", () => {
-    expect(sponsorPath(PLACEHOLDER_PRESENTING)).toBe("/go/placeholder-compute")
+    expect(sponsorPath(PLACEHOLDER_HEADLINE)).toBe("/go/placeholder-compute")
     expect(UTM_SOURCE).toBe("benchmark.contextwindowarchitecture.io")
-    expect(sponsorRedirect(PLACEHOLDER_PRESENTING)).toBe(
+    expect(sponsorRedirect(PLACEHOLDER_HEADLINE)).toBe(
       `https://example.com/compute?utm_source=${UTM_SOURCE}`,
     )
     // A URL that has a query keeps it; one with a fragment keeps that after the query.
@@ -140,7 +192,7 @@ describe("the sponsors", () => {
     await expect(readFile(file, "utf8"), `${file} should read:\n\n${expected}`).resolves.toBe(
       expected,
     )
-    // The fixture's, as a maintainer would paste them: presenting first, the URL with utm_source.
+    // The fixture's, as a maintainer would paste them: by tier, the URL with utm_source.
     const fixture = renderRedirects(SPONSORS_FIXTURE)
     expect(fixture).toContain(`
 location = /go/placeholder-compute {
@@ -153,6 +205,9 @@ location = /go/placeholder-compute {
       `return 302 "https://example.com/models?ref=cwa&utm_source=${UTM_SOURCE}";`,
     )
     expect(fixture.indexOf("placeholder-compute")).toBeLessThan(
+      fixture.indexOf("placeholder-hosting"),
+    )
+    expect(fixture.indexOf("placeholder-hosting")).toBeLessThan(
       fixture.indexOf("placeholder-models"),
     )
   })

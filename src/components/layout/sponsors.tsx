@@ -1,12 +1,13 @@
 // The sponsor placements (AGENTS.md; the plan's chrome decisions): a logo is never beside a number
-// and never in the sticky header. The hero and the sidebar show the presenting sponsors under a
-// "Supported by" label; the footer shows every sponsor in a row. Each reads the one list in
-// src/content/sponsors.ts through the sponsors context, and renders nothing for an empty list.
+// and never in the sticky header. The hero and the sidebar show the headline sponsors under a
+// "Supported by" label, and the footer shows them in a row; every sponsor has a card on the
+// Sponsors page. Each reads the one list in src/content/sponsors.ts through the sponsors context,
+// and renders nothing for an empty list.
 
 import { cn } from "cn"
 import { useId, type CSSProperties } from "react"
 
-import { orderedSponsors, sponsorPath, type Sponsor } from "@/content"
+import { sponsorPath, type Sponsor } from "@/content"
 
 /** The website's muted label (its STYLE.md 4), as tokens.css gives card titles and column heads. */
 export const sponsorLabelClass =
@@ -74,7 +75,7 @@ export function SponsorLink({
   )
 }
 
-/** "Supported by" over the presenting sponsors' logos: the hero's slot and the sidebar's. */
+/** "Supported by" over the headline sponsors' logos: the hero's slot and the sidebar's. */
 export function SupportedBy({
   sponsors,
   placement,
@@ -104,7 +105,7 @@ export function SupportedBy({
   )
 }
 
-/** Every sponsor's logo in a row at the footer's scale: presenting first, then the partners. */
+/** The headline sponsors' logos in a row at the footer's scale; the rest are on the Sponsors page. */
 export function SponsorRow({ sponsors }: { sponsors: readonly Sponsor[] }) {
   if (sponsors.length === 0) return null
   return (
@@ -113,11 +114,48 @@ export function SponsorRow({ sponsors }: { sponsors: readonly Sponsor[] }) {
       data-sponsors="footer"
       className="flex flex-wrap items-center gap-x-4 gap-y-2"
     >
-      {orderedSponsors(sponsors).map((sponsor) => (
+      {sponsors.map((sponsor) => (
         <li key={sponsor.slug} className="flex">
           <SponsorLink sponsor={sponsor} logoClassName="h-4" />
         </li>
       ))}
     </ul>
+  )
+}
+
+/**
+ * A sponsor's logo in its own colours, one image per theme: the Sponsors page's card and dialog,
+ * where the logo is the subject rather than the chrome's. The name is beside it in words, so the
+ * images are decorative unless `alt` says otherwise.
+ */
+export function SponsorLogo({
+  sponsor,
+  className,
+  alt = "",
+}: {
+  sponsor: Sponsor
+  /** The logo's box: its height. */
+  className: string
+  alt?: string
+}) {
+  const { logo } = sponsor
+  const image = "block h-full w-auto max-w-full object-contain object-left"
+  return (
+    <span className={cn("flex", className)} data-sponsor-logo={sponsor.slug}>
+      <img
+        src={logo.light}
+        alt={alt}
+        width={logo.width}
+        height={logo.height}
+        className={cn(image, "dark:hidden")}
+      />
+      <img
+        src={logo.dark}
+        alt={alt}
+        width={logo.width}
+        height={logo.height}
+        className={cn(image, "hidden dark:block")}
+      />
+    </span>
   )
 }

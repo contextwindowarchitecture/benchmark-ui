@@ -25,15 +25,19 @@ export {
 } from "./source"
 export type { Citation } from "./source"
 export {
+  HEADLINE_LIMIT,
+  headlineSponsors,
   orderedSponsors,
-  presentingSponsors,
-  SIDEBAR_SPONSORS,
   sponsorPath,
   sponsorRedirect,
   SPONSORS,
   SPONSORS_CITATION,
   SPONSORS_DISCLOSURE,
+  SPONSORS_PAGE,
+  SPONSORSHIP_REQUEST,
+  TIER_HEADINGS,
   TIER_WORDS,
+  TIERS,
   UTM_SOURCE,
 } from "./sponsors"
 export type { Sponsor, SponsorTier } from "./sponsors"
