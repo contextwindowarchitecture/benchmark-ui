@@ -1,5 +1,5 @@
 // The sponsor placements over a fixture list (a partner listed before a presenting sponsor), and
-// over the content file's list, which is empty until there is a sponsor.
+// over an empty list.
 
 import { screen, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
@@ -94,7 +94,7 @@ describe("the sponsor placements", () => {
   })
 
   it("render nothing for an empty list: no label, no row, no Sponsors link, no About section", async () => {
-    renderApp("/")
+    renderApp("/", {}, { sponsors: [] })
     await screen.findByRole("heading", { level: 1, name: "CWA benchmark" })
     expect(screen.queryByText("Supported by")).toBeNull()
     expect(screen.queryByRole("list", { name: "Sponsors" })).toBeNull()
@@ -103,7 +103,7 @@ describe("the sponsor placements", () => {
     // The footer's nav stands alone, as it did, with its three links.
     const nav = screen.getByRole("navigation", { name: "Footer" })
     expect(within(nav).getAllByRole("link")).toHaveLength(3)
-    renderApp("/about")
+    renderApp("/about", {}, { sponsors: [] })
     await screen.findByRole("heading", { level: 1, name: "About" })
     expect(document.getElementById("sponsors")).toBeNull()
     expect(screen.queryByText(/do not influence the harness/)).toBeNull()

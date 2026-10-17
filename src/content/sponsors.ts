@@ -10,6 +10,9 @@
 // tall), an entry below, and its redirect in deploy/base/nginx/sponsors.inc, whose expected text
 // src/content/sponsors.test.ts holds.
 
+import yourCompanyDark from "@/assets/sponsors/your-company-dark.png"
+import yourCompanyLight from "@/assets/sponsors/your-company-light.png"
+
 import { DOMAIN_1_WRITE_UP, type Citation } from "./source"
 
 /**
@@ -31,8 +34,20 @@ export type Sponsor = {
   logo: { light: string; dark: string; width: number; height: number }
 }
 
-/** The sponsors and partners. Empty until there is one. */
-export const SPONSORS: readonly Sponsor[] = []
+/**
+ * The sponsors and partners. Until there is one, an open presenting slot: it shows readers what a
+ * sponsor's credit looks like and links to the benchmark's sponsorship request.
+ */
+export const SPONSORS: readonly Sponsor[] = [
+  {
+    tier: "presenting",
+    name: "Your Company",
+    url: "https://github.com/contextwindowarchitecture/benchmark/blob/main/docs/sponsorship-request.md",
+    slug: "become-a-sponsor",
+    role: "An open slot, shown as a sponsor's credit would be: the sponsorship request says what sponsors fund.",
+    logo: { light: yourCompanyLight, dark: yourCompanyDark, width: 456, height: 96 },
+  },
+]
 
 /** At most this many presenting sponsors show in the sidebar's footer. */
 export const SIDEBAR_SPONSORS = 2

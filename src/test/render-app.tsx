@@ -11,7 +11,7 @@ import type { Sponsor } from "@/content"
 import { FIXTURE_ROOT, fixtureFetch, type FixtureFetchOptions } from "./fixture-fetch"
 
 export type RenderAppOptions = {
-  /** The sponsors the placements show; the content file's (empty) list by default. */
+  /** The sponsors the placements show; the content file's list by default. */
   sponsors?: readonly Sponsor[]
 }
 
